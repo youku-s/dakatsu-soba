@@ -2,6 +2,10 @@ module Models exposing (..)
 
 type alias Model =
     {
+        cid: String,
+        isPrivate: Bool,
+        passhash: Maybe String,
+        tags: List String,
         activeTab: ActiveTab,
         profile: Profile,
         favors: List Favor,
@@ -52,7 +56,6 @@ type alias Karma =
 type alias Profile =
     {
         name: String,
-        tags: List String,
         race: String,
         age: String,
         place: Place,

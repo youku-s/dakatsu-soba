@@ -10,10 +10,13 @@ init : ( Model, Cmd Msg )
 init =
     (
         {
+            cid = "",
+            isPrivate = False,
+            passhash = Just "dummy",
+            tags = [],
             activeTab = ProfileTab,
             profile = {
                 name = "",
-                tags = [],
                 race = "",
                 age = "",
                 place = Purgatory,
