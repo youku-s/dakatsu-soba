@@ -2,11 +2,19 @@ module Models exposing (..)
 
 type alias Model =
     {
+        activeTab: ActiveTab,
         profile: Profile,
         favors: List Favor,
         classes: Classes,
-        tabs: List Tab
+        tabs: List Tab,
+        appendMode: AppendMode
     }
+
+type AppendMode =
+    AppendSkill | AppendPart
+
+type ActiveTab =
+    ProfileTab | FavorsTab | ClassesTab | OtherTab Tab
 
 type alias Favor =
     {
@@ -77,12 +85,22 @@ type alias ClassDetail =
         number: Int
     }
 
+type alias Point =
+    {
+        name: String,
+        busou: Maybe Int,
+        heni: Maybe Int,
+        kaizou: Maybe Int,
+        favor: Maybe Int
+    }
+
 type alias Classes =
     {
         positions: List String,
         subPositions: List String,
         highTechs: List HighTechDetail,
-        classes: List ClassDetail
+        classes: List ClassDetail,
+        points: List Point
     }
 
 type alias Tab =

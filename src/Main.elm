@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Html exposing (Html, div, text, program)
 import Messages exposing (Msg)
-import Models exposing (Model, Place(..))
+import Models exposing (Model, ActiveTab(..), AppendMode(..), Place(..))
 import Update exposing (update)
 import View exposing (view)
 
@@ -10,6 +10,7 @@ init : ( Model, Cmd Msg )
 init =
     (
         {
+            activeTab = ProfileTab,
             profile = {
                 name = "",
                 tags = [],
@@ -46,10 +47,12 @@ init =
                 positions = [],
                 subPositions = [],
                 highTechs = [],
-                classes = []
+                classes = [],
+                points = []
             },
             favors = [],
-            tabs = []
+            tabs = [],
+            appendMode = AppendSkill
         },
         Cmd.none
     )
