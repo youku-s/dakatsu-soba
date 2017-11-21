@@ -7,4 +7,4 @@ import Models exposing (Model)
 view : Model -> Html Msg
 view model =
     div []
-        [ text model ]
+        [ text "残念だがまだ何もないんだ" ]
