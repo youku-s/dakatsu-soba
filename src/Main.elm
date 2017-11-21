@@ -54,7 +54,18 @@ init =
                 points = []
             },
             favors = [],
-            tabs = [],
+            tabs = [
+                {
+                    title = "スキル",
+                    isEditing = False,
+                    items = []
+                },
+                {
+                    title = "パーツ",
+                    isEditing = True,
+                    items = []
+                }
+            ],
             appendMode = AppendSkill
         },
         Cmd.none

@@ -1,4 +1,8 @@
 module Messages exposing (..)
 
-type Msg
-    = NoOp
+import Models exposing (..)
+
+type Msg =
+    NoOp |
+    AddMemory |
+    RemoveMemory Memory

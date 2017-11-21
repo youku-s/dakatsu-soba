@@ -6,5 +6,6 @@ import Models exposing (Model)
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp ->
-            ( model, Cmd.none )
+        NoOp -> ( model, Cmd.none )
+        AddMemory ->( model, Cmd.none )
+        RemoveMemory memory -> ( model, Cmd.none )
