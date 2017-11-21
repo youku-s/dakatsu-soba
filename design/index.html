@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="./js/jquery-3.2.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <style>
+        .tabcontorl {
+            padding: 0;
+            margin: 0;
+            vertical-align: top;
+            font-size:0;
+        }
+        .tabctl:not(.active) {
+            display: inline-block;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            padding: 5px;
+            border: 1px solid #000000;
+            border-bottom: none;
+            background-color: #CCCCCC;
+            margin-bottom: 0px;
+            padding-bottom: 5px;
+            font-size: 14px;
+        }
+        .tabctl.active {
+            display: inline-block;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            padding: 5px;
+            border: 1px solid #000000;
+            border-bottom: none;
+            background-color: #FFFFFF;
+            margin-bottom: -1px;
+            padding-bottom: 6px;
+            font-size: 14px;
+        }
+        .tabctl > span {
+            display: inline-block;
+        }
+        .tabbody {
+            background-color: #FFFFFF;
+            padding: 5px;
+            border: 1px solid #000000;
+        }
+        .left {
+            display: inline-block;
+            border: solid 1px #000000;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            padding: 5px;
+            width: 200px;
+        }
+        .right {
+            vertical-align: top;
+            display: inline-block;
+            width: 1200px;
+        }
+        th {
+            background-color: #CCCCCC;
+        }
+        .number {
+            width: 40px;
+        }
+        .appendable:not(.show-input) > span.tab-name {
+        	display: inline-block;
+        }
+        .appendable:not(.show-input) > span.tab-name-input {
+        	display: none;
+        }
+        .appendable.show-input > span.tab-name {
+        	display: none;
+        }
+        .appendable.show-input > span.tab-name-input {
+        	display: inline-block;
+        }
+        .appendable span {
+            margin-left: 2px;
+            margin-right: 2px;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/ECAC4AD0-852D-C347-93A6-6DA3F888AC71/main.js" charset="UTF-8"></script></head>
+<body>
+    <div>
+        <div class="left">
+            <div>なんか</div>
+            <div>Text出力とか</div>
+            <div>保存とか</div>
+            <div>なんか</div>
+            <div>なんか</div>
+            <div>なんか</div>
+            <div>なんか</div>
+        </div>
+        <div class="right">
+            <ul class="tabcontorl">
+                <li class="tabctl active" data-target="personal"><span class="ion-locked"></span><span class="tab-name">パーソナル</span></li>
+                <li class="tabctl" data-target="other"><span class="ion-locked"></span><span class="tab-name">クラス類</span></li>
+                <li class="tabctl appendable" data-target="skills1"><span class="tab-name-edit ion-edit"></span><span class="tab-name">スキル</span><span class="tab-name-input"><input type="text" value="スキル"></span><span class="tab-delete ion-close-round"></span></li>
+                <li class="tabctl appendable" data-target="parts1"><span class="tab-name-edit ion-edit"></span><span class="tab-name">パーツ</span><span class="tab-name-input"><input type="text" value="パーツ"></span><span class="tab-delete ion-close-round"></span></li>
+                <li class="tabctl new-tab">
+                    <span class="ion-locked"></span>
+                    <select class="new-tab-type"><option value="skill">スキル</option><option value="part">パーツ</option></select>
+                    <span class="add-tab ion-plus-round"></span>
+                </li>
+                <li id="skill-tab-template" class="tabctl appendable hidden"><span class="tab-name-edit ion-edit"></span><span class="tab-name">スキル</span><span class="tab-name-input"><input type="text" value="スキル"></span><span class="tab-delete ion-close-round"></span></li>
+                <li id="part-tab-template" class="tabctl appendable hidden"><span class="tab-name-edit ion-edit"></span><span class="tab-name">パーツ</span><span class="tab-name-input"><input type="text" value="パーツ"></span><span class="tab-delete ion-close-round"></span></li>
+            </ul>
+            <div class="tabbody">
+                <div id="personal">
+                    <span class="tab-title">パーソナル</span>
+                    <table class="pc_making">
+                        <tbody>
+                            <tr>
+                                <th colspan="2">キャラクター名</th>
+                                <td colspan="4"><input name="pc_name" class="str" id="pc_name" size="55" type="text" value="ロゼット・アルカネット"></td>
+                            </tr>
+                            <tr>
+                                <th colspan="2">タグ</th>
+                                <td colspan="4"><input name="pc_tags" class="str" id="pc_tags" size="55" type="text" value="よーく"></td>
+                            </tr>
+                            <tr>
+                                <th>種族</th>
+                                <td><input name="shuzoku" class="str" id="shuzoku" size="16" type="text" value=""></td>
+                                <th>享年</th>
+                                <td><input name="age" class="str" id="age" size="16" type="text" value="16"></td>
+                                <th>初期配置</th>
+                                <td><input name="V_sex" id="V_sex" type="hidden" value=""><select name="SL_sex">
+                                <option value="0">煉獄</option>
+                                <option value="1">花園</option>
+                                <option value="2">楽園</option>
+                                </select>
+                                <input name="sex" id="sex" type="hidden" value="煉獄"></td>
+                            </tr>
+                            <tr>
+                                <th>身長</th>
+                                <td><input name="pc_height" class="str" id="pc_height" size="16" type="text" value="157"></td>
+                                <th>体重</th>
+                                <td><input name="pc_weight" class="str" id="pc_weight" size="16" type="text" value="42"></td>
+                                <th>暗示</th>
+                                <td><input name="pc_carma" class="str" id="pc_carma" size="16" type="text" value="破局"></td>
+                            </tr>
+                            <tr>
+                                <th>髪の色</th>
+                                <td><input name="color_hair" class="str" id="color_hair" size="16" type="text" value=""></td>
+                                <th>瞳の色</th>
+                                <td><input name="color_eye" class="str" id="color_eye" size="16" type="text" value=""></td>
+                                <th>肌の色</th>
+                                <td><input name="color_skin" class="str" id="color_skin" size="16" type="text" value=""></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    記憶のカケラ
+                    <table class="pc_making" id="Table_kakera">
+                        <tbody>
+                            <tr class="nodrag nodrop"><th>名前</th><th>詳細</th></tr>
+                            <tr style="cursor: move;"><th><input type="text" name="kakera_name[]" size="20" class="str" value="幸福の時"></th><td><input type="text" name="kakera_memo[]" size="50" class="str" value="ああ、幸せ。こんなに幸せでいいのかな。終わるのがこわいくらいの幸せ。夢じゃないかと思うくらいの幸せ。そう。あなたの中にある夢のような記憶。けれどそれは、「あった」のだ。"></td></tr>
+                            <tr style="cursor: move;"><th><input type="text" name="kakera_name[]" size="20" class="str" value="裏切り"></th><td><input type="text" name="kakera_memo[]" size="50" class="str" value="信じていたのに。あなたの心は無残にも踏みにじられた。その悔しさと喪失感が今もある。あるいは、あなたの死にも、それは関わっているのかもしれない。誰がどうして、あなたを裏切ったのか。それを思い出さなくては。"></td></tr>
+                        </tbody>
+                    </table>
+                    未練
+                    <table class="pc_making" id="Table_roice">
+                    <tbody><tr class="nodrag nodrop">
+                    <th>対象</th>
+                    <th>種類</th>
+                    <th>狂気度</th>
+                    <th>発狂</th>
+                    <th>発狂効果</th>
+                    <th>備考など</th>
+                    </tr>
+                    <tr style="cursor: move;">
+                    <td><input name="roice_name[]" class="str" id="roice_name[]" size="20" type="text" value="たからもの"></td>
+                    <td>への<select name="sl_roice" id="sl_roice_pos">
+                    <option value="0"></option>
+                    <option value="1">嫌悪</option>
+                    <option value="2">独占</option>
+                    <option value="3" selected="">依存</option>
+                    <option value="4">執着</option>
+                    <option value="5">恋心</option>
+                    <option value="6">対抗</option>
+                    <option value="7">友情</option>
+                    <option value="8">保護</option>
+                    <option value="9">憧憬</option>
+                    <option value="10">信頼</option>
+                    <option value="11">恐怖</option>
+                    <option value="12">隷属</option>
+                    <option value="13">不安</option>
+                    <option value="14">憐憫</option>
+                    <option value="15">愛憎</option>
+                    <option value="16">悔恨</option>
+                    <option value="17">軽蔑</option>
+                    <option value="18">憤怒</option>
+                    <option value="19">怨念</option>
+                    <option value="20">憎悪</option>
+                    <option value="21">忌避</option>
+                    <option value="22">嫉妬</option>
+                    <option value="23">依存</option>
+                    <option value="24">憐憫</option>
+                    <option value="25">感謝</option>
+                    <option value="26">悔恨</option>
+                    <option value="27">期待</option>
+                    <option value="28">保護</option>
+                    <option value="29">尊敬</option>
+                    <option value="30">信頼</option>
+                    </select><input name="roice_pos[]" id="roice_pos[]" size="16" type="hidden" value="依存">
+                    <input name="roice_id[]" id="roice_id[]" type="hidden" value="3">
+                    </td>
+                    <td><select name="roice_dmg">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected="">3</option>
+                        <option value="4">発狂</option>
+                    </select><input name="roice_damage[]" id="roice_damage[]" type="hidden" value="3"></td>
+                    <td><input name="roice_neg[]" id="roice_neg[]" size="9" type="text" class="str" value="幼児退行"></td>
+                    <td><input name="roice_break[]" id="roice_break[]" size="34" class="str" type="text" value="最大行動値減少(-2)"></td>
+                    <td><input name="roice_memo[]" id="roice_memo[]" size="25" class="str" type="text" value="パーツとして所持。破壊で狂気点+1"></td>
+                    </tr>
+                    <tr style="cursor: move;">
+                    <td><input name="roice_name[]" class="str" id="roice_name[]" size="20" type="text" value="デス"></td>
+                    <td nowrap="">への<select name="sl_roice" id="sl_roice_pos">
+                    <option value="0"></option>
+                    <option value="1">嫌悪</option>
+                    <option value="2">独占</option>
+                    <option value="3">依存</option>
+                    <option value="4">執着</option>
+                    <option value="5">恋心</option>
+                    <option value="6">対抗</option>
+                    <option value="7">友情</option>
+                    <option value="8">保護</option>
+                    <option value="9">憧憬</option>
+                    <option value="10">信頼</option>
+                    <option value="11">恐怖</option>
+                    <option value="12">隷属</option>
+                    <option value="13">不安</option>
+                    <option value="14">憐憫</option>
+                    <option value="15">愛憎</option>
+                    <option value="16">悔恨</option>
+                    <option value="17">軽蔑</option>
+                    <option value="18">憤怒</option>
+                    <option value="19">怨念</option>
+                    <option value="20">憎悪</option>
+                    <option value="21">忌避</option>
+                    <option value="22">嫉妬</option>
+                    <option value="23">依存</option>
+                    <option value="24">憐憫</option>
+                    <option value="25">感謝</option>
+                    <option value="26">悔恨</option>
+                    <option value="27">期待</option>
+                    <option value="28">保護</option>
+                    <option value="29">尊敬</option>
+                    <option value="30">信頼</option>
+                    </select><input name="roice_pos[]" id="roice_pos[]" size="16" type="hidden" value="保護">
+                    <input name="roice_id[]" id="roice_id[]" type="hidden" value="8">
+                    </td>
+                    <td><select name="roice_dmg">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected="">3</option>
+                        <option value="4">発狂</option>
+                    </select><input name="roice_damage[]" id="roice_damage[]" type="hidden" value="1"></td>
+                    <td><input name="roice_neg[]" id="roice_neg[]" size="9" type="text" class="str" value="常時密着"></td>
+                    <td><input name="roice_break[]" id="roice_break[]" size="34" class="str" type="text" value="自身か対象以外は移動マニューバの対象にできない。また、対象が違うエリアにいるなら移動以外の効果持ちのマニューバは宣言できない"></td>
+                    <td><input name="roice_memo[]" id="roice_memo[]" size="25" class="str" type="text" value=""></td>
+                    </tr>
+                    <tr style="cursor: move;">
+                    <td><input name="roice_name[]" class="str" id="roice_name[]" size="20" type="text" value="ラシア"></td>
+                    <td>への<select name="sl_roice" id="sl_roice_pos">
+                    <option value="0"></option>
+                    <option value="1">嫌悪</option>
+                    <option value="2">独占</option>
+                    <option value="3">依存</option>
+                    <option value="4">執着</option>
+                    <option value="5">恋心</option>
+                    <option value="6">対抗</option>
+                    <option value="7">友情</option>
+                    <option value="8">保護</option>
+                    <option value="9">憧憬</option>
+                    <option value="10">信頼</option>
+                    <option value="11">恐怖</option>
+                    <option value="12">隷属</option>
+                    <option value="13">不安</option>
+                    <option value="14">憐憫</option>
+                    <option value="15">愛憎</option>
+                    <option value="16">悔恨</option>
+                    <option value="17">軽蔑</option>
+                    <option value="18">憤怒</option>
+                    <option value="19">怨念</option>
+                    <option value="20">憎悪</option>
+                    <option value="21">忌避</option>
+                    <option value="22">嫉妬</option>
+                    <option value="23">依存</option>
+                    <option value="24">憐憫</option>
+                    <option value="25">感謝</option>
+                    <option value="26">悔恨</option>
+                    <option value="27">期待</option>
+                    <option value="28">保護</option>
+                    <option value="29">尊敬</option>
+                    <option value="30">信頼</option>
+                    </select><input name="roice_pos[]" id="roice_pos[]" size="16" type="hidden" value="信頼">
+                    <input name="roice_id[]" id="roice_id[]" type="hidden" value="10">
+                    </td>
+                    <td><select name="roice_dmg">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected="">3</option>
+                        <option value="4">発狂</option>
+                    </select><input name="roice_damage[]" id="roice_damage[]" type="hidden" value="2"></td>
+                    <td><input name="roice_neg[]" id="roice_neg[]" size="9" type="text" class="str" value="疑心暗鬼"></td>
+                    <td><input name="roice_break[]" id="roice_break[]" size="34" class="str" type="text" value="あなた以外の全ての姉妹の最大行動値に-1"></td>
+                    <td><input name="roice_memo[]" id="roice_memo[]" size="25" class="str" type="text" value=""></td>
+                    </tr><tr style="cursor: move;">
+                    <td><input name="roice_name[]" class="str" id="roice_name[]" size="20" type="text" value="オフィーリア"></td>
+                    <td>への<select name="sl_roice" id="sl_roice_pos">
+                    <option value="0"></option>
+                    <option value="1">嫌悪</option>
+                    <option value="2">独占</option>
+                    <option value="3">依存</option>
+                    <option value="4">執着</option>
+                    <option value="5">恋心</option>
+                    <option value="6">対抗</option>
+                    <option value="7">友情</option>
+                    <option value="8">保護</option>
+                    <option value="9">憧憬</option>
+                    <option value="10">信頼</option>
+                    <option value="11">恐怖</option>
+                    <option value="12">隷属</option>
+                    <option value="13">不安</option>
+                    <option value="14">憐憫</option>
+                    <option value="15">愛憎</option>
+                    <option value="16">悔恨</option>
+                    <option value="17">軽蔑</option>
+                    <option value="18">憤怒</option>
+                    <option value="19">怨念</option>
+                    <option value="20">憎悪</option>
+                    <option value="21">忌避</option>
+                    <option value="22">嫉妬</option>
+                    <option value="23">依存</option>
+                    <option value="24">憐憫</option>
+                    <option value="25">感謝</option>
+                    <option value="26">悔恨</option>
+                    <option value="27">期待</option>
+                    <option value="28">保護</option>
+                    <option value="29">尊敬</option>
+                    <option value="30">信頼</option>
+                    </select><input name="roice_pos[]" id="roice_pos[]" size="16" type="hidden" value="依存">
+                    <input name="roice_id[]" id="roice_id[]" type="hidden" value="3">
+                    </td>
+                    <td><select name="roice_dmg">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected="">3</option>
+                        <option value="4">発狂</option>
+                    </select><input name="roice_damage[]" id="roice_damage[]" type="hidden" value="0"></td>
+                    <td><input name="roice_neg[]" id="roice_neg[]" size="9" type="text" class="str" value="幼児退行"></td>
+                    <td><input name="roice_break[]" id="roice_break[]" size="34" class="str" type="text" value="最大行動値減少(-2)"></td>
+                    <td><input name="roice_memo[]" id="roice_memo[]" size="25" class="str" type="text" value=""></td>
+                    </tr><tr style="cursor: move;">
+                    <td><input name="roice_name[]" class="str" id="roice_name[]" size="20" type="text" value="リト"></td>
+                    <td>への<select name="sl_roice" id="sl_roice_pos">
+                    <option value="0"></option>
+                    <option value="1">嫌悪</option>
+                    <option value="2">独占</option>
+                    <option value="3">依存</option>
+                    <option value="4">執着</option>
+                    <option value="5">恋心</option>
+                    <option value="6">対抗</option>
+                    <option value="7">友情</option>
+                    <option value="8">保護</option>
+                    <option value="9">憧憬</option>
+                    <option value="10">信頼</option>
+                    <option value="11">恐怖</option>
+                    <option value="12">隷属</option>
+                    <option value="13">不安</option>
+                    <option value="14">憐憫</option>
+                    <option value="15">愛憎</option>
+                    <option value="16">悔恨</option>
+                    <option value="17">軽蔑</option>
+                    <option value="18">憤怒</option>
+                    <option value="19">怨念</option>
+                    <option value="20">憎悪</option>
+                    <option value="21">忌避</option>
+                    <option value="22">嫉妬</option>
+                    <option value="23">依存</option>
+                    <option value="24">憐憫</option>
+                    <option value="25">感謝</option>
+                    <option value="26">悔恨</option>
+                    <option value="27">期待</option>
+                    <option value="28">保護</option>
+                    <option value="29">尊敬</option>
+                    <option value="30">信頼</option>
+                    </select><input name="roice_pos[]" id="roice_pos[]" size="16" type="hidden" value="友情">
+                    <input name="roice_id[]" id="roice_id[]" type="hidden" value="7">
+                    </td>
+                    <td><select name="roice_dmg">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected="">3</option>
+                        <option value="4">発狂</option>
+                    </select><input name="roice_damage[]" id="roice_damage[]" type="hidden" value="2"></td>
+                    <td><input name="roice_neg[]" id="roice_neg[]" size="9" type="text" class="str" value="共鳴依存"></td>
+                    <td><input name="roice_break[]" id="roice_break[]" size="34" class="str" type="text" value="セッション終了時、対象の方が損傷しているパーツの数が多い場合、対象の損傷数と同じになるようパーツを選び損傷させなければならない"></td>
+                    <td><input name="roice_memo[]" id="roice_memo[]" size="25" class="str" type="text" value=""></td>
+                    </tr><tr style="cursor: move;">
+                    <td><input name="roice_name[]" class="str" id="roice_name[]" size="20" type="text" value="イバラキ"></td>
+                    <td>への<select name="sl_roice" id="sl_roice_pos">
+                    <option value="0"></option>
+                    <option value="1">嫌悪</option>
+                    <option value="2">独占</option>
+                    <option value="3">依存</option>
+                    <option value="4">執着</option>
+                    <option value="5">恋心</option>
+                    <option value="6">対抗</option>
+                    <option value="7">友情</option>
+                    <option value="8">保護</option>
+                    <option value="9">憧憬</option>
+                    <option value="10">信頼</option>
+                    <option value="11">恐怖</option>
+                    <option value="12">隷属</option>
+                    <option value="13">不安</option>
+                    <option value="14">憐憫</option>
+                    <option value="15">愛憎</option>
+                    <option value="16">悔恨</option>
+                    <option value="17">軽蔑</option>
+                    <option value="18">憤怒</option>
+                    <option value="19">怨念</option>
+                    <option value="20">憎悪</option>
+                    <option value="21">忌避</option>
+                    <option value="22">嫉妬</option>
+                    <option value="23">依存</option>
+                    <option value="24">憐憫</option>
+                    <option value="25">感謝</option>
+                    <option value="26">悔恨</option>
+                    <option value="27">期待</option>
+                    <option value="28">保護</option>
+                    <option value="29">尊敬</option>
+                    <option value="30">信頼</option>
+                    </select><input name="roice_pos[]" id="roice_pos[]" size="16" type="hidden" value="憧憬">
+                    <input name="roice_id[]" id="roice_id[]" type="hidden" value="9">
+                    </td>
+                    <td><select name="roice_dmg">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected="">3</option>
+                        <option value="4">発狂</option>
+                    </select><input name="roice_damage[]" id="roice_damage[]" type="hidden" value="2"></td>
+                    <td><input name="roice_neg[]" id="roice_neg[]" size="9" type="text" class="str" value="贋作妄想"></td>
+                    <td><input name="roice_break[]" id="roice_break[]" size="34" class="str" type="text" value="自身か対象以外は移動マニューバの対象にできない。また、対象が同じエリアにいるなら移動以外の効果持ちのマニューバは宣言できない"></td>
+                    <td><input name="roice_memo[]" id="roice_memo[]" size="25" class="str" type="text" value=""></td>
+                    </tr>
+                    </tbody></table>
+                </div>
+                <div id="other" class="hidden">
+                    <span class="tab-title">ポジション</span>                        
+                    <table class="positions">
+                        <tbody>
+                            <tr>
+                                <th>ポジション</th>
+                                <th>サブポジション</th>
+                                <th>ハイテック</th>
+                            </tr>
+                            <tr>
+                                <td style="vertical-align: top;">
+                                    <div>
+                                        <input type="text" size="20" />
+                                    </div>
+                                    <div>
+                                        <input type="text" size="20" />
+                                    </div>
+                                </td>        
+                                <td style="vertical-align: top;">
+                                    <input type="text" size="20" />
+                                </td>
+                                <td style="vertical-align: top;">
+                                    <input type="text" size="20" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    クラス
+                    <table class="classes">
+                        <tbody>
+                            <tr>
+                                <th>種別</th>
+                                <th>取得元</th>
+                                <th>クラス名</th>
+                                <th>個数</th>
+                            </tr
+                            <tr>
+                                <td>
+                                    <select class="from">
+                                        <option value="0" selected="selected"></option>
+                                        <option value="5">メインクラス</option>
+                                        <option value="6">サブクラス</option>
+                                        <option value="7">2次クラス</option>
+                                        <option value="9">3次クラス</option>
+                                        <option value="10">3.5次クラス</option>
+                                        <option value="11">HS</option>
+                                        <option value="13">その他</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" size="10" />
+                                </td>
+                                <td>
+                                    <input type="text" size="30" />
+                                </td>
+                                <td>
+                                    <input class="number" type="number" min="0" />
+                                </td>            
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>                        
+                <div id="skills1" class="hidden">
+                	<span class="tab-title">スキル</span>
+                    <table class="skill-table">
+                        <tbody>
+                            <tr class="maneuva-header">
+                                <th>No.</th>
+                                <th nowrap="nowrap">損傷</th>
+                                <th nowrap="nowrap">使用</th>
+                                <th>悪意</th>
+                                <th>種別</th>
+                                <th>マニューバ</th>
+                                <th>タイミング</th>
+                                <th>コスト</th>
+                                <th>射程</th>
+                                <th>効果</th>
+                                <th colspan="2">取得先</th>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td>
+                                    <select class="from">
+                                        <option value="none" selected="selected"></option>
+                                        <option value="position">ポジション</option>
+                                        <option value="sub-position">サブポジション</option>
+                                        <option value="high-position">ハイポジション</option>
+                                        <option value="high-tech">ハイテック</option>
+                                        <option value="main">メインクラス</option>
+                                        <option value="sub">サブクラス</option>
+                                        <option value="second">2次クラス</option>
+                                        <option value="cug">CUG</option>
+                                        <option value="third">3次クラス</option>
+                                        <option value="third-point-five">3.5次クラス</option>
+                                        <option value="high-soliety">HS</option>
+                                        <option value="senario">シナリオ</option>
+                                        <option value="others">その他</option>
+                                    </select>
+                                </td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td>
+                                    <select class="from">
+                                        <option value="none" selected="selected"></option>
+                                        <option value="position">ポジション</option>
+                                        <option value="sub-position">サブポジション</option>
+                                        <option value="high-position">ハイポジション</option>
+                                        <option value="high-tech">ハイテック</option>
+                                        <option value="main">メインクラス</option>
+                                        <option value="sub">サブクラス</option>
+                                        <option value="second">2次クラス</option>
+                                        <option value="cug">CUG</option>
+                                        <option value="third">3次クラス</option>
+                                        <option value="third-point-five">3.5次クラス</option>
+                                        <option value="high-soliety">HS</option>
+                                        <option value="senario">シナリオ</option>
+                                        <option value="others">その他</option>
+                                    </select>
+                                </td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td>
+                                    <select class="from">
+                                        <option value="none" selected="selected"></option>
+                                        <option value="position">ポジション</option>
+                                        <option value="sub-position">サブポジション</option>
+                                        <option value="high-position">ハイポジション</option>
+                                        <option value="high-tech">ハイテック</option>
+                                        <option value="main">メインクラス</option>
+                                        <option value="sub">サブクラス</option>
+                                        <option value="second">2次クラス</option>
+                                        <option value="cug">CUG</option>
+                                        <option value="third">3次クラス</option>
+                                        <option value="third-point-five">3.5次クラス</option>
+                                        <option value="high-soliety">HS</option>
+                                        <option value="senario">シナリオ</option>
+                                        <option value="others">その他</option>
+                                    </select>
+                                </td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td>
+                                    <select class="from">
+                                        <option value="none" selected="selected"></option>
+                                        <option value="position">ポジション</option>
+                                        <option value="sub-position">サブポジション</option>
+                                        <option value="high-position">ハイポジション</option>
+                                        <option value="high-tech">ハイテック</option>
+                                        <option value="main">メインクラス</option>
+                                        <option value="sub">サブクラス</option>
+                                        <option value="second">2次クラス</option>
+                                        <option value="cug">CUG</option>
+                                        <option value="third">3次クラス</option>
+                                        <option value="third-point-five">3.5次クラス</option>
+                                        <option value="high-soliety">HS</option>
+                                        <option value="senario">シナリオ</option>
+                                        <option value="others">その他</option>
+                                    </select>
+                                </td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td>
+                                    <select class="from">
+                                        <option value="none" selected="selected"></option>
+                                        <option value="position">ポジション</option>
+                                        <option value="sub-position">サブポジション</option>
+                                        <option value="high-position">ハイポジション</option>
+                                        <option value="high-tech">ハイテック</option>
+                                        <option value="main">メインクラス</option>
+                                        <option value="sub">サブクラス</option>
+                                        <option value="second">2次クラス</option>
+                                        <option value="cug">CUG</option>
+                                        <option value="third">3次クラス</option>
+                                        <option value="third-point-five">3.5次クラス</option>
+                                        <option value="high-soliety">HS</option>
+                                        <option value="senario">シナリオ</option>
+                                        <option value="others">その他</option>
+                                    </select>
+                                </td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="parts1" class="hidden">
+                	<span class="tab-title">パーツ</span>
+                    <table class="parts-table">
+                        <tbody>
+                            <tr class="maneuva-header">
+                                <th>No.</th>
+                                <th nowrap="nowrap">損傷</th>
+                                <th nowrap="nowrap">使用</th>
+                                <th>悪意</th>
+                                <th>種別</th>
+                                <th>マニューバ</th>
+                                <th>タイミング</th>
+                                <th>コスト</th>
+                                <th>射程</th>
+                                <th>効果</th>
+                                <th>取得先</th>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="skills-template" class="hidden">
+                	<span class="tab-title">スキル</span>
+                    <table class="skill-table">
+                        <tbody>
+                            <tr class="maneuva-header">
+                                <th>No.</th>
+                                <th nowrap="nowrap">損傷</th>
+                                <th nowrap="nowrap">使用</th>
+                                <th>悪意</th>
+                                <th>種別</th>
+                                <th>マニューバ</th>
+                                <th>タイミング</th>
+                                <th>コスト</th>
+                                <th>射程</th>
+                                <th>効果</th>
+                                <th colspan="2">取得先</th>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td>
+                                    <select class="from">
+                                        <option value="none" selected="selected"></option>
+                                        <option value="position">ポジション</option>
+                                        <option value="sub-position">サブポジション</option>
+                                        <option value="high-position">ハイポジション</option>
+                                        <option value="high-tech">ハイテック</option>
+                                        <option value="main">メインクラス</option>
+                                        <option value="sub">サブクラス</option>
+                                        <option value="second">2次クラス</option>
+                                        <option value="cug">CUG</option>
+                                        <option value="third">3次クラス</option>
+                                        <option value="third-point-five">3.5次クラス</option>
+                                        <option value="high-soliety">HS</option>
+                                        <option value="senario">シナリオ</option>
+                                        <option value="others">その他</option>
+                                    </select>
+                                </td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td>
+                                    <select class="from">
+                                        <option value="none" selected="selected"></option>
+                                        <option value="position">ポジション</option>
+                                        <option value="sub-position">サブポジション</option>
+                                        <option value="high-position">ハイポジション</option>
+                                        <option value="high-tech">ハイテック</option>
+                                        <option value="main">メインクラス</option>
+                                        <option value="sub">サブクラス</option>
+                                        <option value="second">2次クラス</option>
+                                        <option value="cug">CUG</option>
+                                        <option value="third">3次クラス</option>
+                                        <option value="third-point-five">3.5次クラス</option>
+                                        <option value="high-soliety">HS</option>
+                                        <option value="senario">シナリオ</option>
+                                        <option value="others">その他</option>
+                                    </select>
+                                </td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td>
+                                    <select class="from">
+                                        <option value="none" selected="selected"></option>
+                                        <option value="position">ポジション</option>
+                                        <option value="sub-position">サブポジション</option>
+                                        <option value="high-position">ハイポジション</option>
+                                        <option value="high-tech">ハイテック</option>
+                                        <option value="main">メインクラス</option>
+                                        <option value="sub">サブクラス</option>
+                                        <option value="second">2次クラス</option>
+                                        <option value="cug">CUG</option>
+                                        <option value="third">3次クラス</option>
+                                        <option value="third-point-five">3.5次クラス</option>
+                                        <option value="high-soliety">HS</option>
+                                        <option value="senario">シナリオ</option>
+                                        <option value="others">その他</option>
+                                    </select>
+                                </td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td>
+                                    <select class="from">
+                                        <option value="none" selected="selected"></option>
+                                        <option value="position">ポジション</option>
+                                        <option value="sub-position">サブポジション</option>
+                                        <option value="high-position">ハイポジション</option>
+                                        <option value="high-tech">ハイテック</option>
+                                        <option value="main">メインクラス</option>
+                                        <option value="sub">サブクラス</option>
+                                        <option value="second">2次クラス</option>
+                                        <option value="cug">CUG</option>
+                                        <option value="third">3次クラス</option>
+                                        <option value="third-point-five">3.5次クラス</option>
+                                        <option value="high-soliety">HS</option>
+                                        <option value="senario">シナリオ</option>
+                                        <option value="others">その他</option>
+                                    </select>
+                                </td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td>
+                                    <select class="from">
+                                        <option value="none" selected="selected"></option>
+                                        <option value="position">ポジション</option>
+                                        <option value="sub-position">サブポジション</option>
+                                        <option value="high-position">ハイポジション</option>
+                                        <option value="high-tech">ハイテック</option>
+                                        <option value="main">メインクラス</option>
+                                        <option value="sub">サブクラス</option>
+                                        <option value="second">2次クラス</option>
+                                        <option value="cug">CUG</option>
+                                        <option value="third">3次クラス</option>
+                                        <option value="third-point-five">3.5次クラス</option>
+                                        <option value="high-soliety">HS</option>
+                                        <option value="senario">シナリオ</option>
+                                        <option value="others">その他</option>
+                                    </select>
+                                </td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="parts-template" class="hidden">
+                	<span class="tab-title">パーツ</span>
+                    <table class="parts-table">
+                        <tbody>
+                            <tr class="maneuva-header">
+                                <th>No.</th>
+                                <th nowrap="nowrap">損傷</th>
+                                <th nowrap="nowrap">使用</th>
+                                <th>悪意</th>
+                                <th>種別</th>
+                                <th>マニューバ</th>
+                                <th>タイミング</th>
+                                <th>コスト</th>
+                                <th>射程</th>
+                                <th>効果</th>
+                                <th>取得先</th>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                            <tr>
+                                <td class="numbering"></td>
+                                <th nowrap="nowrap"><input type="checkbox" class="lost"></th>
+                                <th nowrap="nowrap"><input type="checkbox" class="used"></th>
+                                <th><input class="number" type="number" min="0" size="2"></th>
+                                <td>
+                                    <select class="category">
+                                        <option value="0"></option>
+                                        <option value="1">通常技</option>
+                                        <option value="2">必殺技</option>
+                                        <option value="3">行動値増加</option>
+                                        <option value="4">補助</option>
+                                        <option value="5">妨害</option>
+                                        <option value="6">防御/生贄</option>
+                                        <option value="7">移動</option>
+                                    </select>
+                                </td>
+                                <td><input class="name" size="14" type="text"></td>
+                                <td>
+                                    <select class="timing">
+                                        <option value="auto_always">オート(常時)</option>
+                                        <option value="auto_declaration">オート(宣言)</option>
+                                        <option value="auto_others">オート(その他)</option>
+                                        <option value="action">アクション</option>
+                                        <option value="judge">ジャッジ</option>
+                                        <option value="damage">ダメージ</option>
+                                        <option value="rapid">ラピッド</option>
+                                    </select>
+                                </td>
+                                <td><input class="cost" size="3" type="text"></td>
+                                <td><input class="range" size="4" type="text"></td>
+                                <td><input class="description" size="40" type="text"></td>
+                                <td><input class="from-name" size="10" type="text"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var generateUuid = function() {
+            // https://github.com/GoogleChrome/chrome-platform-analytics/blob/master/src/internal/identifier.js
+            // const FORMAT: string = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
+            let chars = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".split("");
+            for (let i = 0, len = chars.length; i < len; i++) {
+                switch (chars[i]) {
+                    case "x":
+                        chars[i] = Math.floor(Math.random() * 16).toString(16);
+                        break;
+                    case "y":
+                        chars[i] = (Math.floor(Math.random() * 4) + 8).toString(16);
+                        break;
+                }
+            }
+            return chars.join("");
+        };
+
+        var changeTab = function(ctl) {
+            var tabcontorls = document.querySelectorAll('.tabcontorl > li:not(.new-tab)');
+            tabcontorls.forEach(function(tabc){
+                tabc.classList.remove('active');
+            });
+            document.querySelectorAll('div.tabbody > div').forEach(function(tab) {
+                tab.classList.add('hidden');
+            });
+            ctl.classList.add('active');
+            document.querySelectorAll('.appendable:not(.active)').forEach(function(tabctl) {
+                tabctl.classList.remove('show-input');
+            });
+            var nextTab = document.querySelector('#' + ctl.dataset.target);
+            nextTab.classList.remove('hidden');
+            var numberings = nextTab.querySelectorAll('td.numbering');
+            if (numberings != null) {
+                for (var i = 0; i < numberings.length; i ++) {
+                    numberings[i].innerHTML = i + 1;
+                }
+            }
+        };
+        var tabcontorls = document.querySelectorAll('.tabcontorl > li:not(.new-tab)');
+        tabcontorls.forEach(function(ctl) {
+            ctl.addEventListener('click', function(evt) {
+                if (ctl.classList.contains('active')) {
+                    return;
+                }
+                changeTab(ctl);
+                evt.stopPropagation();
+            });
+        });
+        document.querySelectorAll('span.tab-name-input > input').forEach(function(edit) {
+			edit.addEventListener('input', function(event) {
+                var targetTab = document.querySelector('#' + event.target.parentNode.parentNode.dataset.target);
+                targetTab.querySelector('span.tab-title').innerHTML = event.target.value;
+                event.target.parentNode.parentNode.querySelector('span.tab-name').innerHTML = event.target.value;
+        	});
+        });
+        document.querySelectorAll('span.tab-delete').forEach(function(edit) {
+			edit.addEventListener('click', function(event) {
+                if (!confirm('対象のタブを削除しても良いですか？復元はできません。')) {
+                    return;
+                }
+                document.querySelectorAll('.appendable').forEach(function(tabctl) {
+                    tabctl.classList.remove('show-input');
+                });
+                var targetTab = document.querySelector('#' + edit.parentNode.dataset.target);
+                targetTab.parentNode.removeChild(targetTab);
+                edit.parentNode.parentNode.removeChild(edit.parentNode);
+                event.stopPropagation();
+                changeTab(document.querySelector('.tabcontorl > li:not(.new-tab)'));
+        	});
+        });
+        document.querySelectorAll('span.tab-name-edit').forEach(function(edit) {
+			edit.addEventListener('click', function(event) {
+                event.target.parentNode.classList.add('selected');
+                document.querySelectorAll('.appendable:not(.selected)').forEach(function(tabctl) {
+                    tabctl.classList.remove('show-input');
+                });
+	        	event.target.parentNode.classList.toggle('show-input');
+                event.target.parentNode.classList.remove('selected');
+        	});
+        });
+        document.querySelector('span.add-tab').addEventListener('click', function(evt) {
+        	var type = document.querySelector('select.new-tab-type').value;
+            if (type == 'skill') {
+                var newSkillNode = document.querySelector('#skills-template').cloneNode(true);
+                var newSkillTabNode = document.querySelector('#skill-tab-template').cloneNode(true);
+                newSkillNode.classList.remove('hidden');
+                newSkillTabNode.classList.remove('hidden');
+                var id = 'ID' + generateUuid();
+                newSkillNode.id = id;
+                newSkillTabNode.dataset.target = id;
+                document.querySelector('.tabbody').appendChild(newSkillNode);
+                document.querySelector('.tabcontorl').insertBefore(newSkillTabNode, document.querySelector('.new-tab'));
+                evt.stopPropagation();
+                changeTab(newSkillTabNode);
+            } else if (type == 'part') {
+                var newPartNode = document.querySelector('#parts-template').cloneNode(true);
+                var newPartTabNode = document.querySelector('#part-tab-template').cloneNode(true);
+                newPartNode.classList.remove('hidden');
+                newPartTabNode.classList.remove('hidden');
+                var id = 'ID' + generateUuid();
+                newPartNode.id = id;
+                newPartTabNode.dataset.target = id;
+                document.querySelector('.tabbody').appendChild(newPartNode);
+                document.querySelector('.tabcontorl').insertBefore(newPartTabNode, document.querySelector('.new-tab'));
+                evt.stopPropagation();
+                changeTab(newPartTabNode);
+            }
+        });
+    </script>
+</body>
+</html>
