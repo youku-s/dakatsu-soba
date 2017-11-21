@@ -1,0 +1,78 @@
+.content {
+    margin: 10px;
+}
+.tabcontrol {
+    padding: 0;
+    margin: 0;
+    vertical-align: top;
+    font-size:0;
+}
+.tabctl:not(.active) {
+    display: inline-block;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding: 5px;
+    border: 1px solid #000000;
+    border-bottom: none;
+    background-color: #CCCCCC;
+    margin-bottom: 0px;
+    padding-bottom: 5px;
+    font-size: 14px;
+}
+.tabctl.active {
+    display: inline-block;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding: 5px;
+    border: 1px solid #000000;
+    border-bottom: none;
+    background-color: #FFFFFF;
+    margin-bottom: -1px;
+    padding-bottom: 6px;
+    font-size: 14px;
+}
+.tabctl > span {
+    display: inline-block;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+.tabbody {
+    background-color: #FFFFFF;
+    padding: 5px;
+    border: 1px solid #000000;
+}
+.left {
+    display: inline-block;
+    border: solid 1px #000000;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding: 5px;
+    width: 200px;
+    margin-right: 10px;
+}
+.right {
+    vertical-align: top;
+    display: inline-block;
+    width: 1200px;
+}
+th {
+    background-color: #CCCCCC;
+}
+.number {
+    width: 40px;
+}
+.appendable:not(.show-input) > span.tab-name {
+	display: inline-block;
+}
+.appendable:not(.show-input) > span.tab-name-input {
+	display: none;
+}
+.appendable.show-input > span.tab-name {
+	display: none;
+}
+.appendable.show-input > span.tab-name-input {
+	display: inline-block;
+}
+.hidden {
+    display: none !important;
+}
