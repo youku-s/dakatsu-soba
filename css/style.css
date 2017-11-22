@@ -58,18 +58,6 @@ th {
 .number {
     width: 40px;
 }
-.appendable:not(.show-input) > span.tab-name {
-	display: inline-block;
-}
-.appendable:not(.show-input) > span.tab-name-input {
-	display: none;
-}
-.appendable.show-input > span.tab-name {
-	display: none;
-}
-.appendable.show-input > span.tab-name-input {
-	display: inline-block;
-}
 .hidden {
     display: none !important;
 }

@@ -5,7 +5,7 @@ import Html.Events exposing (onInput, onClick)
 import Html.Attributes exposing (..)
 import Messages exposing (Msg(..))
 import Models exposing (Model, ActiveTab(..), AppendMode(..), Tab, Profile, Classes, Favor, Place(..), Regret)
-import Utils exposing (updateOnWay)
+import Utils exposing (..)
 import Random.Pcg exposing (generate)
 import Uuid.Barebones exposing (uuidStringGenerator)
 
@@ -27,7 +27,6 @@ view model =
     body [] [
         stylesheet "./css/style.css",
         stylesheet "http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css",
-        input [type_ "hidden", value model.uuid] [],
         div [class "content"]
         [
             div [class "left"] [
@@ -128,8 +127,8 @@ profileTab profile =
             tbody [] (
                 [
                     tr [] [
-                        th [] [text "名前"],
-                        th [] [text "詳細"],
+                        th [style [("width", "175px")]] [text "名前"],
+                        th [style [("width", "385px")]] [text "詳細"],
                         td [] []
                     ]
                 ] ++ (List.map (\memory -> tr [] [
@@ -150,7 +149,13 @@ profileTab profile =
                         ] []
                     ],
                     td [] [
-                        span [class "ion-close-round"] []
+                        span [
+                            class "ion-close-round",
+                            let
+                                eq = \x -> x == memory
+                            in
+                                onClick (RemoveRow (\m -> {m | profile = {profile | memories = (Utils.takeNotWhile eq profile.memories) ++ (Utils.dropNotWhile eq profile.memories) }}))
+                        ] []
                     ]
                 ]) profile.memories)
             )
@@ -182,12 +187,12 @@ profileTab profile =
             tbody [] (
                 [
                     tr [] [
-                        th [] [text "対象"],
-                        th [] [text "種類"],
-                        th [] [text "現在値"],
-                        th [] [text "最大値"],
-                        th [] [text "発狂効果"],
-                        th [] [text "備考"],
+                        th [style [("width", "175px")]] [text "対象"],
+                        th [style [("width", "105px")]] [text "種類"],
+                        th [style [("width", "50px")]] [text "現在値"],
+                        th [style [("width", "50px")]] [text "最大値"],
+                        th [style [("width", "175px")]] [text "発狂効果"],
+                        th [style [("width", "315px")]] [text "備考"],
                         td [] []
                     ]
                 ] ++ (List.map (\regret ->
@@ -210,7 +215,6 @@ profileTab profile =
                         ],
                         td [] [
                             input [
-                                class "number",
                                 type_ "number",
                                 Html.Attributes.min "0",
                                 Html.Attributes.max (toString regret.maxVal),
@@ -220,7 +224,6 @@ profileTab profile =
                         ],
                         td [] [
                             input [
-                                class "number",
                                 type_ "number",
                                 Html.Attributes.min "4",
                                 value (toString regret.maxVal),
@@ -244,7 +247,13 @@ profileTab profile =
                             ] []
                         ],
                         td [] [
-                            span [class "ion-close-round"] []
+                            span [
+                                class "ion-close-round",
+                                let
+                                    eq = \x -> x == regret
+                                in
+                                    onClick (RemoveRow (\m -> {m | profile = {profile | regrets = (Utils.takeNotWhile eq profile.regrets) ++ (Utils.dropNotWhile eq profile.regrets) }}))
+                            ] []
                         ]
                     ]
                 ) profile.regrets)
@@ -281,9 +290,9 @@ profileTab profile =
             tbody [] (
                 [
                     tr [] [
-                        th [] [text "達成"],
-                        th [] [text "条件"],
-                        th [] [text "詳細"],
+                        th [style [("width", "35px")]] [text "達成"],
+                        th [style [("width", "175px")]] [text "条件"],
+                        th [style [("width", "385px")]] [text "詳細"],
                         td [] []
                     ]
                 ] ++ (List.map (\karma -> tr [] [
@@ -310,7 +319,13 @@ profileTab profile =
                         ] []
                     ],
                     td [] [
-                        span [class "ion-close-round"] []
+                        span [
+                            class "ion-close-round",
+                            let
+                                eq = \x -> x == karma
+                            in
+                                onClick (RemoveRow (\m -> {m | profile = {profile | karmas = (Utils.takeNotWhile eq profile.karmas) ++ (Utils.dropNotWhile eq profile.karmas) }}))
+                        ] []
                     ]
                 ]) profile.karmas)
             )
