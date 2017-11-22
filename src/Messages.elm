@@ -4,9 +4,10 @@ import Models exposing (..)
 
 type Msg =
     NoOp |
-    AddMemory |
-    RemoveMemory Memory |
+    AddRow (Model -> Cmd Msg) |
+    RemoveRow (Model -> Model) |
     PersonalTabClicked |
     ClassesTabClicked |
     FavorsTabClicked |
-    OtherTabClicked Tab
+    OtherTabClicked Tab |
+    FormUpdated (Model -> Model)

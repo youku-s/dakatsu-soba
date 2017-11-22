@@ -5,6 +5,9 @@ import Html.Events exposing (onInput, onClick)
 import Html.Attributes exposing (..)
 import Messages exposing (Msg(..))
 import Models exposing (Model, ActiveTab(..), AppendMode(..), Tab, Profile, Classes, Favor, Place(..), Regret)
+import Utils exposing (updateOnWay)
+import Random.Pcg exposing (generate)
+import Uuid.Barebones exposing (uuidStringGenerator)
 
 stylesheet : String -> Html Msg
 stylesheet path =
@@ -23,7 +26,8 @@ view : Model -> Html Msg
 view model =
     body [] [
         stylesheet "./css/style.css",
-        stylesheet "http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css", 
+        stylesheet "http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css",
+        input [type_ "hidden", value model.uuid] [],
         div [class "content"]
         [
             div [class "left"] [
@@ -56,65 +60,65 @@ profileTab profile =
                 tr [] [
                     th [colspan 2] [text "キャラクター名"],
                     td [colspan 4] [
-                        input [size 55, type_ "text", value profile.name] []
+                        input [size 55, type_ "text", value profile.name, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | name = s}}))] []
                     ]
                 ],
                 tr [] [
                     th [] [text "種族"],
                     td [] [
-                        input [size 16, type_ "text", value profile.race] []
+                        input [size 16, type_ "text", value profile.race, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | race = s}}))] []
                     ],
                     th [] [text "享年"],
                     td [] [
-                        input [size 16, type_ "text", value profile.age] []
+                        input [size 16, type_ "text", value profile.age, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | age = s}}))] []
                     ],
                     th [] [text "初期配置"],
                     td [] [
                         select [] [
-                            option (
+                            option ([onInput (\s -> FormUpdated (\m -> {m | profile = {profile | place = Purgatory}}))] ++ (
                                 case profile.place of
                                     Purgatory -> [selected True]
                                     _ -> []
-                            ) [text "煉獄"],
-                            option (
+                            )) [text "煉獄"],
+                            option ([onInput (\s -> FormUpdated (\m -> {m | profile = {profile | place = Garden}}))] ++ (
                                 case profile.place of
                                     Garden -> [selected True]
                                     _ -> []
-                            ) [text "花園"],
-                            option (
+                            )) [text "花園"],
+                            option ([onInput (\s -> FormUpdated (\m -> {m | profile = {profile | place = Paradise}}))] ++ (
                                 case profile.place of
-                                    Paradice -> [selected True]
+                                    Paradise -> [selected True]
                                     _ -> []
-                            ) [text "楽園"]
+                            )) [text "楽園"]
                         ]
                     ]
                 ],
                 tr [] [
                     th [] [text "身長"],
                     td [] [
-                        input [size 16, type_ "text", value profile.height] []
+                        input [size 16, type_ "text", value profile.height, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | height = s}}))] []
                     ],
                     th [] [text "体重"],
                     td [] [
-                        input [size 16, type_ "text", value profile.weight] []
+                        input [size 16, type_ "text", value profile.weight, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | weight = s}}))] []
                     ],
                     th [] [text "暗示"],
                     td [] [
-                        input [size 16, type_ "text", value profile.implication] []
+                        input [size 16, type_ "text", value profile.implication, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | implication = s}}))] []
                     ]
                 ],
                 tr [] [
                     th [] [text "髪の色"],
                     td [] [
-                        input [size 16, type_ "text", value profile.hair] []
+                        input [size 16, type_ "text", value profile.hair, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | hair = s}}))] []
                     ],
                     th [] [text "瞳の色"],
                     td [] [
-                        input [size 16, type_ "text", value profile.eye] []
+                        input [size 16, type_ "text", value profile.eye, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | eye = s}}))] []
                     ],
                     th [] [text "肌の色"],
                     td [] [
-                        input [size 16, type_ "text", value profile.skin] []
+                        input [size 16, type_ "text", value profile.skin, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | skin = s}}))] []
                     ]
                 ]
             ]
@@ -130,10 +134,20 @@ profileTab profile =
                     ]
                 ] ++ (List.map (\memory -> tr [] [
                     th [] [
-                        input [size 20, type_ "text", value memory.name] []
+                        input [
+                            size 20,
+                            type_ "text",
+                            value memory.name,
+                            onInput (\s -> FormUpdated (\m -> {m | profile = {profile | memories = Utils.updateOnWay profile.memories memory (\mem -> {mem | name = s})}}))
+                        ] []
                     ],
                     td [] [
-                        input [size 50, type_ "text", value memory.description] []
+                        input [
+                            size 50,
+                            type_ "text",
+                            value memory.description,
+                            onInput (\s -> FormUpdated (\m -> {m | profile = {profile | memories = Utils.updateOnWay profile.memories memory (\mem -> {mem | description = s})}}))
+                        ] []
                     ],
                     td [] [
                         span [class "ion-close-round"] []
@@ -142,7 +156,26 @@ profileTab profile =
             )
         ],
         div [] [
-            button [type_ "button", onClick AddMemory] [text "追加"]
+            button [
+                type_ "button",
+                onClick (AddRow 
+                    (\m -> 
+                        generate (\uuid -> 
+                            FormUpdated (\m -> {m | profile = {
+                                        profile | memories = profile.memories ++ [
+                                            {
+                                                uuid = uuid,
+                                                name = "",
+                                                description = ""
+                                            }
+                                        ]
+                                    }
+                                }
+                            )
+                        ) uuidStringGenerator
+                    )
+                )
+            ] [text "追加"]
         ],
         div [class "section-title"] [text "未練"],
         table [] [
@@ -160,22 +193,55 @@ profileTab profile =
                 ] ++ (List.map (\regret ->
                     tr [] [
                         td [] [
-                            input [size 20, type_ "text", value regret.target] []
+                            input [
+                                size 20,
+                                type_ "text",
+                                value regret.target,
+                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | target = s})}}))
+                            ] []
                         ],
                         td [] [
-                            input [size 10, type_ "text", value regret.name] []
+                            input [
+                                size 10,
+                                type_ "text",
+                                value regret.name,
+                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | name = s})}}))
+                            ] []
                         ],
                         td [] [
-                            input [class "number", type_ "number", Html.Attributes.min "0", Html.Attributes.max (toString regret.maxVal), value (toString regret.currentVal)] []
+                            input [
+                                class "number",
+                                type_ "number",
+                                Html.Attributes.min "0",
+                                Html.Attributes.max (toString regret.maxVal),
+                                value (toString regret.currentVal),
+                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | currentVal = Result.withDefault 0 (String.toInt s)})}}))
+                            ] []
                         ],
                         td [] [
-                            input [class "number", type_ "number", Html.Attributes.min "4", value (toString regret.maxVal)] []
+                            input [
+                                class "number",
+                                type_ "number",
+                                Html.Attributes.min "4",
+                                value (toString regret.maxVal),
+                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | maxVal = Result.withDefault 0 (String.toInt s)})}}))
+                            ] []
                         ],
                         td [] [
-                            input [size 20, type_ "text", value regret.negative] []
+                            input [
+                                size 20,
+                                type_ "text",
+                                value regret.negative,
+                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | negative = s})}}))
+                            ] []
                         ],
                         td [] [
-                            input [size 40, type_ "text", value regret.description] []
+                            input [
+                                size 40,
+                                type_ "text",
+                                value regret.description,
+                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | description = s})}}))
+                            ] []
                         ],
                         td [] [
                             span [class "ion-close-round"] []
@@ -185,7 +251,92 @@ profileTab profile =
             )
         ],
         div [] [
-            button [type_ "button", onClick AddMemory] [text "追加"]
+            button [
+                type_ "button",
+                onClick (AddRow 
+                    (\m -> 
+                        generate (\uuid -> 
+                            FormUpdated (\m -> {m | profile = {
+                                        profile | regrets = profile.regrets ++ [
+                                            {
+                                                uuid = uuid,
+                                                target = "",
+                                                name = "",
+                                                currentVal = 3,
+                                                maxVal = 4,
+                                                negative = "",
+                                                description = ""
+                                            }
+                                        ]
+                                    }
+                                }
+                            )
+                        ) uuidStringGenerator
+                    )
+                )
+            ] [text "追加"]
+        ],
+        div [class "section-title"] [text "カルマ"],
+        table [] [
+            tbody [] (
+                [
+                    tr [] [
+                        th [] [text "達成"],
+                        th [] [text "条件"],
+                        th [] [text "詳細"],
+                        td [] []
+                    ]
+                ] ++ (List.map (\karma -> tr [] [
+                    th [] [
+                        input [
+                            type_ "checkbox",
+                            checked karma.achieved
+                        ] []
+                    ],
+                    th [] [
+                        input [
+                            size 20,
+                            type_ "text",
+                            value karma.name,
+                            onInput (\s -> FormUpdated (\m -> {m | profile = {profile | karmas = Utils.updateOnWay profile.karmas karma (\kar -> {kar | name = s})}}))
+                        ] []
+                    ],
+                    td [] [
+                        input [
+                            size 50,
+                            type_ "text",
+                            value karma.description,
+                            onInput (\s -> FormUpdated (\m -> {m | profile = {profile | karmas = Utils.updateOnWay profile.karmas karma (\kar -> {kar | description = s})}}))
+                        ] []
+                    ],
+                    td [] [
+                        span [class "ion-close-round"] []
+                    ]
+                ]) profile.karmas)
+            )
+        ],
+        div [] [
+            button [
+                type_ "button",
+                onClick (AddRow 
+                    (\m -> 
+                        generate (\uuid -> 
+                            FormUpdated (\m -> {m | profile = {
+                                        profile | karmas = profile.karmas ++ [
+                                            {
+                                                uuid = uuid,
+                                                achieved = False,
+                                                name = "",
+                                                description = ""
+                                            }
+                                        ]
+                                    }
+                                }
+                            )
+                        ) uuidStringGenerator
+                    )
+            )
+            ] [text "追加"]
         ]
     ]
 

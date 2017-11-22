@@ -2,7 +2,7 @@ module Models exposing (..)
 
 type alias Model =
     {
-        cid: String,
+        uuid: String,
         isPrivate: Bool,
         passhash: Maybe String,
         tags: List String,
@@ -22,22 +22,25 @@ type ActiveTab =
 
 type alias Favor =
     {
+        uuid: String,
         personal: Maybe Int,
         battle: Maybe Int,
         memo: String
     }
 
 type Place =
-    Purgatory | Garden | Paradice
+    Purgatory | Garden | Paradise
 
 type alias Memory =
     {
+        uuid: String,
         name: String,
         description: String
     }
 
 type alias Regret =
     {
+        uuid: String,
         target: String,
         name: String,
         currentVal: Int,
@@ -48,6 +51,7 @@ type alias Regret =
 
 type alias Karma =
     {
+        uuid: String,
         achieved: Bool,
         name: String,
         description: String
@@ -82,6 +86,7 @@ type ClassCategory =
 
 type alias ClassDetail =
     {
+        uuid: String,
         category: ClassCategory,
         from: String,
         name: String,
@@ -90,6 +95,7 @@ type alias ClassDetail =
 
 type alias Point =
     {
+        uuid: String,
         name: String,
         busou: Maybe Int,
         heni: Maybe Int,
@@ -108,6 +114,7 @@ type alias Classes =
 
 type alias Tab =
     {
+        uuid: String,
         title: String,
         isEditing: Bool,
         items: List Maneuva
@@ -115,6 +122,7 @@ type alias Tab =
 
 type Maneuva =
     Skill {
+        uuid: String, 
         used: Bool, -- 使用済み
         lost: Bool, -- 破損済み
         act: Maybe Int, -- 行動値
@@ -129,6 +137,7 @@ type Maneuva =
         from: SkillFrom -- 取得元
     } |
     Part {
+        uuid: String,
         used: Bool, -- 使用済み
         lost: Bool, -- 破損済み
         act: Maybe Int, -- 行動値
