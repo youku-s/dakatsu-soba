@@ -5,4 +5,8 @@ import Models exposing (..)
 type Msg =
     NoOp |
     AddMemory |
-    RemoveMemory Memory
+    RemoveMemory Memory |
+    PersonalTabClicked |
+    ClassesTabClicked |
+    FavorsTabClicked |
+    OtherTabClicked Tab

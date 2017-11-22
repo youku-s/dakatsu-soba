@@ -2,9 +2,9 @@ module View exposing (..)
 
 import Html exposing (..)
 import Html.Events exposing (onInput, onClick)
-import Html.Attributes exposing (class, value, attribute, selected, type_, size, colspan)
+import Html.Attributes exposing (..)
 import Messages exposing (Msg(..))
-import Models exposing (Model, ActiveTab(..), AppendMode(..), Tab, Profile, Classes, Favor, Place(..))
+import Models exposing (Model, ActiveTab(..), AppendMode(..), Tab, Profile, Classes, Favor, Place(..), Regret)
 
 stylesheet : String -> Html Msg
 stylesheet path =
@@ -50,7 +50,7 @@ view model =
 profileTab : Profile -> Html Msg
 profileTab profile =
     div [] [
-        span [class "section-title"] [text "パーソナル"],
+        div [class "section-title"] [text "パーソナル"],
         table [] [
             tbody [] [
                 tr [] [
@@ -119,13 +119,14 @@ profileTab profile =
                 ]
             ]
         ],
-        span [class "section-title"] [text "記憶のカケラ"],
+        div [class "section-title"] [text "記憶のカケラ"],
         table [] [
             tbody [] (
                 [
                     tr [] [
                         th [] [text "名前"],
-                        th [] [text "詳細"]
+                        th [] [text "詳細"],
+                        td [] []
                     ]
                 ] ++ (List.map (\memory -> tr [] [
                     th [] [
@@ -133,8 +134,54 @@ profileTab profile =
                     ],
                     td [] [
                         input [size 50, type_ "text", value memory.description] []
+                    ],
+                    td [] [
+                        span [class "ion-close-round"] []
                     ]
                 ]) profile.memories)
+            )
+        ],
+        div [] [
+            button [type_ "button", onClick AddMemory] [text "追加"]
+        ],
+        div [class "section-title"] [text "未練"],
+        table [] [
+            tbody [] (
+                [
+                    tr [] [
+                        th [] [text "対象"],
+                        th [] [text "種類"],
+                        th [] [text "現在値"],
+                        th [] [text "最大値"],
+                        th [] [text "発狂効果"],
+                        th [] [text "備考"],
+                        td [] []
+                    ]
+                ] ++ (List.map (\regret ->
+                    tr [] [
+                        td [] [
+                            input [size 20, type_ "text", value regret.target] []
+                        ],
+                        td [] [
+                            input [size 10, type_ "text", value regret.name] []
+                        ],
+                        td [] [
+                            input [class "number", type_ "number", Html.Attributes.min "0", Html.Attributes.max (toString regret.maxVal), value (toString regret.currentVal)] []
+                        ],
+                        td [] [
+                            input [class "number", type_ "number", Html.Attributes.min "4", value (toString regret.maxVal)] []
+                        ],
+                        td [] [
+                            input [size 20, type_ "text", value regret.negative] []
+                        ],
+                        td [] [
+                            input [size 40, type_ "text", value regret.description] []
+                        ],
+                        td [] [
+                            span [class "ion-close-round"] []
+                        ]
+                    ]
+                ) profile.regrets)
             )
         ],
         div [] [
@@ -157,7 +204,7 @@ otherTab tab =
 tabToLi : Model -> Tab -> Html Msg
 tabToLi model currentTab =
     let
-        classes = [class "tabctl", class "appendable"] ++ case model.activeTab of
+        classes = [class "tabctl", class "appendable", onClick (OtherTabClicked currentTab)] ++ case model.activeTab of
                 OtherTab active -> if active == currentTab then [class "active"] else []
                 _ -> []
     in
@@ -174,14 +221,14 @@ tabToLi model currentTab =
 tabcontorls : Model -> List (Html Msg)
 tabcontorls model = 
     let
-        personalClass = [class "tabctl"] ++ case model.activeTab of
+        personalClass = [class "tabctl", onClick PersonalTabClicked] ++ case model.activeTab of
             ProfileTab -> [class "active"]
             _ -> []
-        classesClass = [class "tabctl"] ++ case model.activeTab of
-            FavorsTab -> [class "active"]
-            _ -> []
-        favorsClass = [class "tabctl"] ++ case model.activeTab of
+        classesClass = [class "tabctl", onClick ClassesTabClicked] ++ case model.activeTab of
             ClassesTab -> [class "active"]
+            _ -> []
+        favorsClass = [class "tabctl", onClick FavorsTabClicked] ++ case model.activeTab of
+            FavorsTab -> [class "active"]
             _ -> []
     in
         [   

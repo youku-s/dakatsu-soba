@@ -40,8 +40,8 @@ type alias Regret =
     {
         target: String,
         name: String,
-        current: Int,
-        max: Int,
+        currentVal: Int,
+        maxVal: Int,
         negative: String,
         description: String
     }

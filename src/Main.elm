@@ -27,13 +27,22 @@ init =
                 eye = "",
                 skin = "",
                 memo = "",
-                memories = [],
+                memories = [
+                    {
+                        name = "",
+                        description = ""
+                    },
+                    {
+                        name = "",
+                        description = ""
+                    }
+                ],
                 regrets = [
                     {
                         target = "たからもの",
                         name = "依存",
-                        current = 3,
-                        max = 4,
+                        currentVal = 3,
+                        maxVal = 4,
                         negative = "最大行動値減少(-2)",
                         description = "パーツとして所持。破壊で狂気点+1"
                     }

@@ -1,11 +1,15 @@
 module Update exposing (..)
 
 import Messages exposing (Msg(..))
-import Models exposing (Model)
+import Models exposing (..)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         NoOp -> ( model, Cmd.none )
         AddMemory ->( model, Cmd.none )
-        RemoveMemory memory -> ( model, Cmd.none )
+        RemoveMemory memory -> (model, Cmd.none)
+        PersonalTabClicked -> ({ model | activeTab = ProfileTab }, Cmd.none)
+        ClassesTabClicked -> ({ model | activeTab = ClassesTab }, Cmd.none)
+        FavorsTabClicked -> ({ model | activeTab = FavorsTab }, Cmd.none)
+        OtherTabClicked tab -> ({ model | activeTab = OtherTab tab }, Cmd.none)
