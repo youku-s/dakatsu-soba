@@ -67,3 +67,10 @@ th {
     background-color: #999999;
     padding: 3px 5px 3px 5px;
 }
+.position {
+    display: inline-block;
+    vertical-align: top;
+}
+.favor {
+    width: 75px;
+}

@@ -1,7 +1,7 @@
 module View exposing (..)
 
 import Html exposing (..)
-import Html.Events exposing (onInput, onClick)
+import Html.Events exposing (onInput, onClick, onCheck)
 import Html.Attributes exposing (..)
 import Messages exposing (Msg(..))
 import Models exposing (Model, ActiveTab(..), AppendMode(..), Tab, Profile, Classes, Favor, Place(..), Regret)
@@ -215,6 +215,7 @@ profileTab profile =
                         ],
                         td [] [
                             input [
+                                class "number",
                                 type_ "number",
                                 Html.Attributes.min "0",
                                 Html.Attributes.max (toString regret.maxVal),
@@ -224,6 +225,7 @@ profileTab profile =
                         ],
                         td [] [
                             input [
+                                class "number",
                                 type_ "number",
                                 Html.Attributes.min "4",
                                 value (toString regret.maxVal),
@@ -299,7 +301,8 @@ profileTab profile =
                     th [] [
                         input [
                             type_ "checkbox",
-                            checked karma.achieved
+                            checked karma.achieved,
+                            onCheck (\s -> FormUpdated (\m -> {m | profile = {profile | karmas = Utils.updateOnWay profile.karmas karma (\kar -> {kar | achieved = s})}}))
                         ] []
                     ],
                     th [] [
@@ -352,7 +355,13 @@ profileTab profile =
                     )
             )
             ] [text "追加"]
-        ]
+        ],
+        div [class "section-title"] [text "メモ"],
+        textarea [
+            style [("width", "1180px")],
+            rows (Basics.max (List.length (String.lines profile.memo) + 1) 5),
+            onInput (\s -> FormUpdated (\m -> {m | profile = {profile | memo = s }}))
+        ] [text profile.memo]
     ]
 
 favorsTab : List Favor -> Html Msg
@@ -361,7 +370,183 @@ favorsTab favors =
 
 classesTab : Classes -> Html Msg
 classesTab classes =
-    div [] []
+    div [] [
+        div [class "section-title"] [text "ポジション"],
+        div [class "position"] [
+            table [] [
+                tbody [] (
+                    [
+                        tr [] [
+                            th [style [("width", "175px")]] [text "ポジション"],
+                            td [style [("width", "15px")]] []
+                        ]
+                    ] ++
+                    (List.map (\position -> tr [] [
+                        td [] [
+                            input [
+                                size 20,
+                                type_ "text",
+                                value position.name,
+                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | positions = Utils.updateOnWay classes.positions position (\x -> {position | name = s})}}))
+                            ] []
+                        ],
+                        td [] [
+                            span [
+                                class "ion-close-round",
+                                let
+                                    eq = \x -> x == position
+                                in
+                                    onClick (RemoveRow (\m -> {m | classes = {classes | positions = (Utils.takeNotWhile eq classes.positions) ++ (Utils.dropNotWhile eq classes.positions) }}))
+                            ] []
+                        ]
+                    ]) classes.positions)
+                )
+            ],
+            button [
+                type_ "button",
+                onClick (AddRow 
+                    (\m -> 
+                        generate (\uuid -> 
+                            FormUpdated (\m -> {m | classes = {
+                                        classes | positions = (
+                                            classes.positions ++ [
+                                                {
+                                                    uuid = uuid,
+                                                    name = ""
+                                                }
+                                            ]
+                                        )
+                                    }
+                                }
+                            )
+                        ) uuidStringGenerator
+                    )
+            )
+            ] [text "追加"]
+        ],
+        div [class "position"] [
+            table [] [
+                tbody [] (
+                    [
+                        tr [] [
+                            th [style [("width", "175px")]] [text "サブポジション"],
+                            td [style [("width", "15px")]] []
+                        ]
+                    ] ++
+                    (List.map (\subPosition -> tr [] [
+                        td [] [
+                            input [
+                                size 20,
+                                type_ "text",
+                                value subPosition.name,
+                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | subPositions = Utils.updateOnWay classes.subPositions subPosition (\x -> {subPosition | name = s})}}))
+                            ] []
+                        ],
+                        td [] [
+                            span [
+                                class "ion-close-round",
+                                let
+                                    eq = \x -> x == subPosition
+                                in
+                                    onClick (RemoveRow (\m -> {m | classes = {classes | subPositions = (Utils.takeNotWhile eq classes.subPositions) ++ (Utils.dropNotWhile eq classes.subPositions) }}))
+                            ] []
+                        ]
+                    ]) classes.subPositions)
+                )
+            ],
+            button [
+                type_ "button",
+                onClick (AddRow 
+                    (\m -> 
+                        generate (\uuid -> 
+                            FormUpdated (\m -> {m | classes = {
+                                        classes | subPositions = (
+                                            classes.subPositions ++ [
+                                                {
+                                                    uuid = uuid,
+                                                    name = ""
+                                                }
+                                            ]
+                                        )
+                                    }
+                                }
+                            )
+                        ) uuidStringGenerator
+                    )
+            )
+            ] [text "追加"]
+        ],
+        div [class "position"] [
+            table [] [
+                tbody [] ([
+                    tr [] [
+                            th [style [("width", "175px")]] [text "ハイテック"],
+                            th [style [("width", "85px")]] [text "取得寵愛"],
+                            td [style [("width", "15px")]] []
+                        ]
+                    ] ++ (List.map (\highTech -> tr [] [
+                        td [] [
+                            input [
+                                size 20,
+                                type_ "text",
+                                value highTech.name,
+                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | highTechs = Utils.updateOnWay classes.highTechs highTech (\x -> {highTech | name = s})}}))
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                class "favor",
+                                type_ "number",
+                                value (
+                                    case highTech.favor of
+                                        Just favor -> toString favor
+                                        Nothing -> ""
+                                ),
+                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | highTechs = Utils.updateOnWay classes.highTechs highTech (\x -> {highTech | favor = 
+                                    case String.toInt s of
+                                        Ok num -> Just num
+                                        Err _ -> Nothing
+                                })}}))
+                            ] []
+                        ],
+                        td [] [
+                            span [
+                                class "ion-close-round",
+                                let
+                                    eq = \x -> x == highTech
+                                in
+                                    onClick (RemoveRow (\m -> {m | classes = {classes | highTechs = (Utils.takeNotWhile eq classes.highTechs) ++ (Utils.dropNotWhile eq classes.highTechs)}}))
+                            ] []
+                        ]
+                    ]) classes.highTechs)
+                )
+            ],
+            button [
+                type_ "button",
+                onClick (AddRow 
+                    (\m -> 
+                        generate (\uuid -> 
+                            FormUpdated (\m -> {m | classes = {
+                                        classes | highTechs = (
+                                            classes.highTechs ++ [
+                                                {
+                                                    uuid = uuid,
+                                                    name = "",
+                                                    favor = Nothing
+                                                }
+                                            ]
+                                        )
+                                    }
+                                }
+                            )
+                        ) uuidStringGenerator
+                    )
+            )
+            ] [text "追加"]
+        ],
+        div [class "section-title"] [text "クラス"],
+        div [class "section-title"] [text "強化値"]
+    ]
 
 otherTab : Tab -> Html Msg
 otherTab tab =

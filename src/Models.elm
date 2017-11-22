@@ -75,8 +75,21 @@ type alias Profile =
         karmas: List Karma
     }
 
+type alias PositionDetail =
+    {
+        uuid: String,
+        name: String
+    }
+
+type alias SubPositionDetail =
+    {
+        uuid: String,
+        name: String
+    }
+
 type alias HighTechDetail =
     {
+        uuid: String,
         name: String,
         favor: Maybe Int
     }
@@ -105,8 +118,8 @@ type alias Point =
 
 type alias Classes =
     {
-        positions: List String,
-        subPositions: List String,
+        positions: List PositionDetail,
+        subPositions: List SubPositionDetail,
         highTechs: List HighTechDetail,
         classes: List ClassDetail,
         points: List Point

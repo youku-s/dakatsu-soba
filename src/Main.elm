@@ -65,10 +65,28 @@ init =
                     ]
                 },
                 classes = {
-                    positions = [],
-                    subPositions = [],
-                    highTechs = [],
-                    classes = [],
+                    positions = [
+                        {
+                            uuid = "",
+                            name = ""
+                        }
+                    ],
+                    subPositions = [
+                        {
+                            uuid = "",
+                            name = ""
+                        }
+                    ],
+                    highTechs = [
+                        {
+                            uuid = "",
+                            name = "",
+                            favor = Nothing
+                        }
+                    ],
+                    classes = [
+
+                    ],
                     points = []
                 },
                 favors = [],
@@ -88,7 +106,8 @@ init =
                 ],
                 appendMode = AppendSkill
             }
-        profile = model.profile     
+        profile = model.profile
+        classes = model.classes
     in
         (
             model,
@@ -112,11 +131,21 @@ init =
                         FormUpdated (\m -> {m | profile = {profile | karmas = Utils.updateOnWay profile.karmas karma (\kar -> {kar | uuid = x})}})
                     ) uuidStringGenerator
                 ) model.profile.karmas ++
-                List.map (\tab -> 
+                List.map (\position -> 
                     generate (\x -> 
-                        FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs tab (\t -> {t | uuid = x})})
+                        FormUpdated (\m -> {m | classes = {classes | positions = Utils.updateOnWay classes.positions position (\pos -> {pos | uuid = x})}})
                     ) uuidStringGenerator
-                ) model.tabs
+                ) model.classes.positions ++
+                List.map (\subPosition -> 
+                    generate (\x -> 
+                        FormUpdated (\m -> {m | classes = {classes | subPositions = Utils.updateOnWay classes.subPositions subPosition (\sup -> {sup | uuid = x})}})
+                    ) uuidStringGenerator
+                ) model.classes.subPositions ++
+                List.map (\highTech -> 
+                    generate (\x -> 
+                        FormUpdated (\m -> {m | classes = {classes | highTechs = Utils.updateOnWay classes.highTechs highTech (\ht -> {ht | uuid = x})}})
+                    ) uuidStringGenerator
+                ) model.classes.highTechs
             )
         )
 
