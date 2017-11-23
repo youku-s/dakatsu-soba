@@ -84,6 +84,7 @@ table {
 }
 .tags {
     margin: 2px;
+    line-height: 24px;
 }
 .tag {
     border-radius: 2px;
