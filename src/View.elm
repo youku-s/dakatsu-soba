@@ -32,13 +32,14 @@ view model =
         div [class "content"]
         [
             div [class "left"] [
+                div [class "section-title"] [text "パスワード"],
                 div [] [
-                    span [] [text "パスワード："],
                     input [
                         type_ "password",
-                        size 10,
                         onInput (\s -> FormUpdated (\m -> {m | password = if String.isEmpty s then Nothing else Just s}))
-                    ] [],
+                    ] []
+                ],
+                div [] [
                     button [] [text "保存"]
                 ],
                 div [] [
@@ -73,11 +74,15 @@ view model =
                     ] [],
                     span [] [text "プライベートモード"]
                 ],
+                div [class "section-title"] [text "出力"],
                 div [] [
                     button [] [text "Text出力"]
                 ],
+                div [class "section-title"] [text "タグ"],
                 div [] [
-                    span [] [text "タグ："],
+                    span [] [text "タグは以下に入力し、Enterで追加できます。"]
+                ],
+                div [] [
                     input [
                         type_ "text",
                         size 10,
@@ -563,7 +568,9 @@ favorsTab model =
                                     readonly True
                                 ] []
                             ],
-                            td [] []
+                            td [] [
+                                span [class "ion-locked"] []
+                            ]
                         ],
                         tr [] [
                             td [] [
@@ -600,7 +607,9 @@ favorsTab model =
                                     readonly True
                                 ] []
                             ],
-                            td [] []
+                            td [] [
+                                span [class "ion-locked"] []
+                            ]
                         ],
                         tr [] [
                             td [] [
@@ -624,7 +633,9 @@ favorsTab model =
                                     readonly True
                                 ] []
                             ],
-                            td [] []
+                            td [] [
+                                span [class "ion-locked"] []
+                            ]
                         ],
                         tr [] [
                             td [] [
@@ -648,7 +659,9 @@ favorsTab model =
                                     readonly True
                                 ] []
                             ],
-                            td [] []
+                            td [] [
+                                span [class "ion-locked"] []
+                            ]
                         ]
                     ] ++ (List.map (\used -> tr [] [
                         td [] [
@@ -1153,7 +1166,9 @@ classesTab classes =
                                 readonly True
                             ] []
                         ],
-                        td [] []
+                        td [] [
+                            span [class "ion-locked"] []
+                        ]
                     ]
                 ]
             )
