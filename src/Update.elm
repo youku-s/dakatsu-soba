@@ -40,7 +40,7 @@ update msg model =
                     (List.map (\x -> {x | isEditing = False}) (Utils.dropNotWhile eq model.tabs))
         }, Cmd.none)
         FormUpdated f ->(f(model), Cmd.none)
-        AddTab tabname -> (model, Cmd.none)
+        AddTab newCmd -> (model, newCmd(model))
         RemoveTab tab -> 
             let
                 eq = \x -> x.uuid == tab.uuid

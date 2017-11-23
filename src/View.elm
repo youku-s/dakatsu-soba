@@ -2206,7 +2206,14 @@ tabcontorls model =
         [
             li [class "tabctl", class "new-tab"] [
                 span [class "ion-locked"] [],
-                select [class "new-tab-type"] [
+                select [
+                    class "new-tab-type",
+                    onInput (\s -> FormUpdated (\m -> {m | appendMode = case s of
+                        "skill" -> AppendSkill
+                        "part" -> AppendPart
+                        _ -> AppendSkill
+                    }))
+                ] [
                     option [value "skill", selected (
                             case model.appendMode of
                                 AppendSkill -> True
@@ -2220,6 +2227,38 @@ tabcontorls model =
                             )
                     ] [text "パーツ"]
                 ],
-                span [class "add-tab", class "ion-plus-round"] []
+                span [
+                    class "add-tab",
+                    class "ion-plus-round",
+                    onClick (AddTab 
+                        (\model -> 
+                            generate (\uuid -> FormUpdated (\m -> 
+                                let
+                                    tabType = 
+                                        case model.appendMode of
+                                            AppendPart -> PartTab
+                                            AppendSkill -> SkillTab
+
+                                    title = 
+                                        case model.appendMode of
+                                            AppendPart -> "パーツ"
+                                            AppendSkill -> "スキル"
+
+                                    newTabState = {
+                                        uuid = uuid,
+                                        tabType = tabType,
+                                        title = title,
+                                        isEditing = False,
+                                        items = []
+                                    }
+                                in
+                                    {m | 
+                                        tabs = m.tabs ++ [newTabState]
+                                    }
+                            )
+                            ) uuidStringGenerator
+                        )
+                    )
+                ] []
             ]
         ]
