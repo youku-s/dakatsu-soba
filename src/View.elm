@@ -1,13 +1,14 @@
 module View exposing (..)
 
 import Html exposing (..)
-import Html.Events exposing (onInput, onClick, onCheck)
+import Html.Events exposing (onInput, onClick, onCheck, onWithOptions, targetValue)
 import Html.Attributes exposing (..)
 import Messages exposing (Msg(..))
 import Models exposing (..)
 import Utils exposing (..)
 import Random.Pcg exposing (generate)
 import Uuid.Barebones exposing (uuidStringGenerator)
+import Json.Decode
 
 stylesheet : String -> Html Msg
 stylesheet path =
@@ -142,7 +143,6 @@ profileTab profile =
                 ] ++ (List.map (\memory -> tr [] [
                     th [] [
                         input [
-                            size 20,
                             type_ "text",
                             value memory.name,
                             onInput (\s -> FormUpdated (\m -> {m | profile = {profile | memories = Utils.updateOnWay profile.memories memory (\mem -> {mem | name = s})}}))
@@ -150,7 +150,6 @@ profileTab profile =
                     ],
                     td [] [
                         input [
-                            size 50,
                             type_ "text",
                             value memory.description,
                             onInput (\s -> FormUpdated (\m -> {m | profile = {profile | memories = Utils.updateOnWay profile.memories memory (\mem -> {mem | description = s})}}))
@@ -207,7 +206,6 @@ profileTab profile =
                     tr [] [
                         td [] [
                             input [
-                                size 20,
                                 type_ "text",
                                 value regret.target,
                                 onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | target = s})}}))
@@ -215,7 +213,6 @@ profileTab profile =
                         ],
                         td [] [
                             input [
-                                size 10,
                                 type_ "text",
                                 value regret.name,
                                 onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | name = s})}}))
@@ -242,7 +239,6 @@ profileTab profile =
                         ],
                         td [] [
                             input [
-                                size 20,
                                 type_ "text",
                                 value regret.negative,
                                 onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | negative = s})}}))
@@ -250,7 +246,6 @@ profileTab profile =
                         ],
                         td [] [
                             input [
-                                size 40,
                                 type_ "text",
                                 value regret.description,
                                 onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | description = s})}}))
@@ -315,7 +310,6 @@ profileTab profile =
                     ],
                     th [] [
                         input [
-                            size 20,
                             type_ "text",
                             value karma.name,
                             onInput (\s -> FormUpdated (\m -> {m | profile = {profile | karmas = Utils.updateOnWay profile.karmas karma (\kar -> {kar | name = s})}}))
@@ -323,7 +317,6 @@ profileTab profile =
                     ],
                     td [] [
                         input [
-                            size 50,
                             type_ "text",
                             value karma.description,
                             onInput (\s -> FormUpdated (\m -> {m | profile = {profile | karmas = Utils.updateOnWay profile.karmas karma (\kar -> {kar | description = s})}}))
@@ -366,7 +359,7 @@ profileTab profile =
         ],
         div [class "section-title"] [text "メモ"],
         textarea [
-            style [("width", "1180px")],
+            style [("width", "90%")],
             rows (Basics.max (List.length (String.lines profile.memo) + 1) 5),
             onInput (\s -> FormUpdated (\m -> {m | profile = {profile | memo = s }}))
         ] [text profile.memo]
@@ -392,7 +385,6 @@ classesTab classes =
                     (List.map (\position -> tr [] [
                         td [] [
                             input [
-                                size 20,
                                 type_ "text",
                                 value position.name,
                                 onInput (\s -> FormUpdated (\m -> {m | classes = {classes | positions = Utils.updateOnWay classes.positions position (\x -> {position | name = s})}}))
@@ -444,7 +436,6 @@ classesTab classes =
                     (List.map (\subPosition -> tr [] [
                         td [] [
                             input [
-                                size 20,
                                 type_ "text",
                                 value subPosition.name,
                                 onInput (\s -> FormUpdated (\m -> {m | classes = {classes | subPositions = Utils.updateOnWay classes.subPositions subPosition (\x -> {subPosition | name = s})}}))
@@ -495,7 +486,6 @@ classesTab classes =
                     ] ++ (List.map (\highTech -> tr [] [
                         td [] [
                             input [
-                                size 20,
                                 type_ "text",
                                 value highTech.name,
                                 onInput (\s -> FormUpdated (\m -> {m | classes = {classes | highTechs = Utils.updateOnWay classes.highTechs highTech (\x -> {highTech | name = s})}}))
@@ -618,7 +608,6 @@ classesTab classes =
                         ],
                         td [] [
                             input [
-                                size 10,
                                 type_ "text",
                                 value clazz.from,
                                 onInput (\s -> FormUpdated (\m -> {m | classes = {classes | classes = Utils.updateOnWay classes.classes clazz (\cls -> {cls | from = s})}}))
@@ -626,7 +615,6 @@ classesTab classes =
                         ],
                         td [] [
                             input [
-                                size 30,
                                 type_ "text",
                                 value clazz.name,
                                 onInput (\s -> FormUpdated (\m -> {m | classes = {classes | classes = Utils.updateOnWay classes.classes clazz (\cls -> {cls | name = s})}}))
@@ -693,7 +681,6 @@ classesTab classes =
                 ] ++ (List.map (\point -> tr [] [
                         td [] [
                             input [
-                                size 10,
                                 type_ "text",
                                 value point.name,
                                 onInput (\s -> FormUpdated (\m -> {m | classes = {classes | points = Utils.updateOnWay classes.points point (\x -> {point | name = s})}}))
@@ -780,7 +767,6 @@ classesTab classes =
                     tr [] [
                         td [] [
                             input [
-                                size 10,
                                 type_ "text",
                                 value "総計",
                                 readonly True
@@ -870,11 +856,21 @@ otherTab : Tab -> Html Msg
 otherTab tab =
     div [] []
 
+onClickNoBubble : Msg -> Attribute Msg
+onClickNoBubble msg =
+    let
+        options = {
+            stopPropagation = True,
+            preventDefault = True
+        }
+    in
+        onWithOptions "click" options (Json.Decode.succeed msg)
+
 tabToLi : Model -> Tab -> Html Msg
 tabToLi model currentTab =
     let
-        classes = [class "tabctl", class "appendable", onClick (OtherTabClicked currentTab)] ++ case model.activeTab of
-                OtherTab active -> if active == currentTab then [class "active"] else []
+        classes = [class "tabctl", class "appendable", onClickNoBubble (OtherTabClicked currentTab)] ++ case model.activeTab of
+                OtherTab active -> if active.uuid == currentTab.uuid then [class "active"] else []
                 _ -> []
     in
         li classes [
@@ -887,7 +883,8 @@ tabToLi model currentTab =
                     input [type_ "text", value currentTab.title, size 10] [] else
                     text currentTab.title
             ],
-            span [class "ion-close-round"] []
+            span [class "ion-close-round"] [],
+            input [type_ "hidden", value currentTab.uuid] []
         ]
 
 tabcontorls : Model -> List (Html Msg)

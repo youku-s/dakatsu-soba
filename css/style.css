@@ -50,7 +50,7 @@
 .right {
     vertical-align: top;
     display: inline-block;
-    width: 1200px;
+    width: 80%;
 }
 th {
     background-color: #CCCCCC;
@@ -76,4 +76,7 @@ th {
 }
 .point {
     width: 75px;
+}
+input[type=text] {
+    width: 95%;
 }

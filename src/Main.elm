@@ -193,7 +193,12 @@ init =
                     generate (\x -> 
                         FormUpdated (\m -> {m | classes = {classes | points = Utils.updateOnWay classes.points point (\pt -> {pt | uuid = x})}})
                     ) uuidStringGenerator
-                ) model.classes.points
+                ) model.classes.points ++
+                List.map (\tab -> 
+                    generate (\x -> 
+                        FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs tab (\tb -> {tb | uuid = x})})
+                    ) uuidStringGenerator
+                ) model.tabs
             )
         )
 
