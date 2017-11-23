@@ -883,8 +883,10 @@ tabToLi model currentTab =
                     input [type_ "text", value currentTab.title, size 10] [] else
                     text currentTab.title
             ],
-            span [class "ion-close-round"] [],
-            input [type_ "hidden", value currentTab.uuid] []
+            span [
+                class "ion-close-round",
+                onClickNoBubble (RemoveTab currentTab)
+            ] []
         ]
 
 tabcontorls : Model -> List (Html Msg)

@@ -11,4 +11,6 @@ type Msg =
     ClassesTabClicked |
     FavorsTabClicked |
     OtherTabClicked Tab |
-    FormUpdated (Model -> Model)
+    FormUpdated (Model -> Model) |
+    AddTab String |
+    RemoveTab Tab

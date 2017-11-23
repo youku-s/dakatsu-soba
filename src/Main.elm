@@ -138,7 +138,7 @@ init =
                     {
                         uuid = "",
                         title = "パーツ",
-                        isEditing = True,
+                        isEditing = False,
                         items = []
                     }
                 ],

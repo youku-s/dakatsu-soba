@@ -31,3 +31,11 @@ update msg model =
         FavorsTabClicked -> ({ model | activeTab = FavorsTab, tabs = List.map (\x -> {x | isEditing = False}) model.tabs }, Cmd.none)
         OtherTabClicked tab -> ({ model | activeTab = OtherTab tab }, Cmd.none)
         FormUpdated f ->(f(model), Cmd.none)
+        AddTab tabname -> (model, Cmd.none)
+        RemoveTab tab -> ({model |
+            tabs = 
+                let
+                    eq = \x -> x.uuid == tab.uuid
+                in
+                    (Utils.takeNotWhile eq model.tabs) ++ (Utils.dropNotWhile eq model.tabs)
+        }, Cmd.none)
