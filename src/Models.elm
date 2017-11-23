@@ -160,7 +160,8 @@ type Maneuva =
         cost: String, -- コスト
         range: String, -- 射程
         description: String, -- 説明
-        from: SkillFrom -- 取得元
+        skillFrom: SkillFrom, -- 取得元
+        from: String
     } |
     Part {
         uuid: String,
@@ -182,7 +183,7 @@ type Timing =
     AutoAlways | AutoNeedsDeclearation | AutoOthers | Action | Judge | Damage | Rapid
 
 type SkillFrom =
-    None | PositionSkill String | SubPositionSkill String | HighPositionSkill String |
-    HighTechSkill String | MainClassSkill String | SubClassSkill String | SecondClassSkill String |
-    CUGSkill String | ThirdClassSkill String | ThirdPointFiveClassSkill String | HighSocietySkill String |
-    SenarioSkill | OtherSkill String
+    None | PositionSkill | SubPositionSkill | HighPositionSkill |
+    HighTechSkill | MainClassSkill | SubClassSkill | SecondClassSkill |
+    CUGSkill | ThirdClassSkill | ThirdPointFiveClassSkill | HighSocietySkill |
+    SenarioSkill | OtherSkill

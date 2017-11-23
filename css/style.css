@@ -51,6 +51,7 @@
     vertical-align: top;
     display: inline-block;
     width: 80%;
+    font-size: 12px;    
 }
 th {
     background-color: #CCCCCC;

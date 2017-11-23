@@ -1,5 +1,16 @@
 module Utils exposing (..)
 
+zipWithIndex : List a -> List (Int, a)
+zipWithIndex ls =
+    let
+        apply xs idxs =
+            case (xs, idxs) of
+                (x :: xs, idx :: idxs) -> (idx, x) :: (apply xs idxs)
+                ([], []) -> []
+                _ -> []
+    in
+        apply ls (List.range 1 (List.length ls))
+
 takeNotWhile : (a -> Bool) -> List a -> List a
 takeNotWhile f ls =
     case ls of
