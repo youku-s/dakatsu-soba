@@ -17,7 +17,7 @@ init =
             {
                 uuid = "",
                 isPrivate = False,
-                passhash = Just "dummy",
+                password = Nothing,
                 tags = [],
                 activeTab = ProfileTab,
                 profile = {

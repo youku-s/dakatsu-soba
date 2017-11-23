@@ -4,7 +4,7 @@ type alias Model =
     {
         uuid: String,
         isPrivate: Bool,
-        passhash: Maybe String,
+        password: Maybe String,
         tags: List String,
         activeTab: ActiveTab,
         profile: Profile,

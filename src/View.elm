@@ -32,9 +32,30 @@ view model =
         div [class "content"]
         [
             div [class "left"] [
-                div [] [text "なんか"],
-                div [] [text "Text出力とか"],
-                div [] [text "保存とか"],
+                div [] [
+                    label [] [text "パスワード"],
+                    input [
+                        type_ "password",
+                        size 10,
+                        onInput (\s -> FormUpdated (\m -> {m | password = Just s}))
+                    ] [],
+                    button [] [text "保存"]
+                ],
+                div [] [
+                    input [type_ "radio", name "save-option"] [],
+                    span [] [text "通常の保存"]
+                ],
+                div [] [
+                    input [type_ "radio", name "save-option"] [],
+                    span [] [text "シートをコピーする"]
+                ],
+                div [] [
+                    input [type_ "checkbox"] [],
+                    span [] [text "プライベートモード"]
+                ],
+                div [] [
+                    button [] [text "Text出力"]
+                ],
                 div [] [text "なんか"],
                 div [] [text "なんか"],
                 div [] [text "なんか"]
