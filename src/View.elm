@@ -55,10 +55,7 @@ view model =
                 ],
                 div [] [
                     button [] [text "Text出力"]
-                ],
-                div [] [text "なんか"],
-                div [] [text "なんか"],
-                div [] [text "なんか"]
+                ]
             ],
             div [class "right"] [
                 ul [class "tabcontrol"] (tabcontorls model),
@@ -1176,20 +1173,20 @@ skillTab tab =
         items = List.filter filterF tab.items
     in
         div [] [
-            table [style [("width", "1315px")]] [
+            table [style [("width", "1195px")]] [
                 tbody [] ([
                     tr [] [
-                        th [style [("width", "50px")]] [text "No."],
-                        th [style [("width", "50px")]] [text "損傷"],
-                        th [style [("width", "50px")]] [text "使用"],
+                        th [style [("width", "30px")]] [text "No."],
+                        th [style [("width", "30px")]] [text "損傷"],
+                        th [style [("width", "30px")]] [text "使用"],
                         th [style [("width", "50px")]] [text "悪意"],
                         th [style [("width", "50px")]] [text "行動値"],
                         th [style [("width", "100px")]] [text "種別"],
                         th [style [("width", "100px")]] [text "マニューバ"],
-                        th [style [("width", "150px")]] [text "タイミング"],
+                        th [style [("width", "130px")]] [text "タイミング"],
                         th [style [("width", "60px")]] [text "コスト"],
                         th [style [("width", "50px")]] [text "射程"],
-                        th [style [("width", "300px")]] [text "効果"],
+                        th [style [("width", "250px")]] [text "効果"],
                         th [style [("width", "250px")], colspan 2] [text "取得先"],
                         th [style [("width", "50px")]] [text "寵愛"],
                         td [style [("width", "15px")]] []
@@ -1685,7 +1682,20 @@ tabToLi model currentTab =
             ] [],
             span [] [
                 if currentTab.isEditing then 
-                    input [type_ "text", value currentTab.title, size 10] [] else
+                    input [
+                        type_ "text",
+                        value currentTab.title,
+                        size 10,
+                        onInput (\s -> FormUpdated (\m ->
+                            let 
+                                newTabState = {currentTab | title = s}
+                            in
+                                {m |
+                                    tabs = Utils.updateOnWay m.tabs currentTab (\tb -> newTabState),
+                                    activeTab = OtherTab newTabState
+                                }
+                            ))
+                    ] [] else
                     text currentTab.title
             ],
             span [
