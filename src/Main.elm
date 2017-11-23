@@ -3,7 +3,7 @@ module Main exposing (..)
 import Random.Pcg exposing (generate)
 import Html exposing (Html, div, text, program)
 import Messages exposing (Msg(..))
-import Models exposing (Model, ActiveTab(..), AppendMode(..), Place(..), ClassCategory(..), TabType(..))
+import Models exposing (Model, ActiveTab(..), AppendMode(..), Place(..), ClassCategory(..), TabType(..), SaveMode(..))
 import Update exposing (update)
 import View exposing (view)
 import Utils exposing (updateOnWay)
@@ -18,6 +18,7 @@ init =
                 uuid = "",
                 isPrivate = False,
                 password = Nothing,
+                tagform = "",
                 tags = [],
                 activeTab = ProfileTab,
                 profile = {
@@ -177,7 +178,8 @@ init =
                         items = []
                     }
                 ],
-                appendMode = AppendSkill
+                appendMode = AppendSkill,
+                saveMode = UpdateSheet
             }
         profile = model.profile
         classes = model.classes

@@ -5,6 +5,7 @@ type alias Model =
         uuid: String,
         isPrivate: Bool,
         password: Maybe String,
+        tagform: String,
         tags: List String,
         activeTab: ActiveTab,
         profile: Profile,
@@ -12,11 +13,15 @@ type alias Model =
         usedFavors: List UsedFavor,
         classes: Classes,
         tabs: List Tab,
-        appendMode: AppendMode
+        appendMode: AppendMode,
+        saveMode: SaveMode
     }
 
 type AppendMode =
     AppendSkill | AppendPart
+
+type SaveMode =
+    UpdateSheet | CloneSheet
 
 type ActiveTab =
     ProfileTab | FavorsTab | ClassesTab | OtherTab Tab

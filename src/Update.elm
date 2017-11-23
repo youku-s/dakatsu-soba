@@ -53,3 +53,11 @@ update msg model =
                     tabs = (Utils.takeNotWhile eq model.tabs) ++ (Utils.dropNotWhile eq model.tabs),
                     activeTab = if activeTabRemoved then ProfileTab else model.activeTab
                 }, Cmd.none)
+        AddTag -> (
+            {model | tagform = "", tags = ((List.filter (\x -> x /= model.tagform) model.tags) ++ [model.tagform])},
+            Cmd.none
+        )
+        RemoveTag tagname -> (
+            {model | tags = List.filter (\x -> x /= tagname) model.tags },
+            Cmd.none
+        )

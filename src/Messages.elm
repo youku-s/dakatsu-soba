@@ -13,4 +13,6 @@ type Msg =
     OtherTabClicked Tab |
     FormUpdated (Model -> Model) |
     AddTab (Model -> Cmd Msg) |
-    RemoveTab Tab
+    RemoveTab Tab |
+    AddTag |
+    RemoveTag String

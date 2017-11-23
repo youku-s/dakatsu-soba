@@ -1,7 +1,7 @@
 module View exposing (..)
 
 import Html exposing (..)
-import Html.Events exposing (onInput, onClick, onCheck, onWithOptions, targetValue)
+import Html.Events exposing (onInput, onClick, onCheck, onSubmit, onWithOptions, targetValue, on, keyCode)
 import Html.Attributes exposing (..)
 import Messages exposing (Msg(..))
 import Models exposing (..)
@@ -33,29 +33,60 @@ view model =
         [
             div [class "left"] [
                 div [] [
-                    label [] [text "パスワード"],
+                    span [] [text "パスワード："],
                     input [
                         type_ "password",
                         size 10,
-                        onInput (\s -> FormUpdated (\m -> {m | password = Just s}))
+                        onInput (\s -> FormUpdated (\m -> {m | password = if String.isEmpty s then Nothing else Just s}))
                     ] [],
                     button [] [text "保存"]
                 ],
                 div [] [
-                    input [type_ "radio", name "save-option"] [],
+                    input [
+                        type_ "radio",
+                        name "save-option",
+                        checked (case model.saveMode of
+                            UpdateSheet -> True
+                            _ -> False
+                        ),
+                        onInput (\s -> FormUpdated (\m -> {m | saveMode = UpdateSheet}))
+                    ] [],
                     span [] [text "通常の保存"]
                 ],
                 div [] [
-                    input [type_ "radio", name "save-option"] [],
+                    input [
+                        type_ "radio",
+                        name "save-option",
+                        checked (case model.saveMode of
+                            CloneSheet -> True
+                            _ -> False
+                        ),
+                        onInput (\s -> FormUpdated (\m -> {m | saveMode = CloneSheet}))
+                    ] [],
                     span [] [text "シートをコピーする"]
                 ],
                 div [] [
-                    input [type_ "checkbox"] [],
+                    input [
+                        type_ "checkbox",
+                        checked model.isPrivate,
+                        onCheck (\b -> FormUpdated (\m -> {m | isPrivate = b}))
+                    ] [],
                     span [] [text "プライベートモード"]
                 ],
                 div [] [
                     button [] [text "Text出力"]
-                ]
+                ],
+                div [] [
+                    span [] [text "タグ："],
+                    input [
+                        type_ "text",
+                        size 10,
+                        value model.tagform,
+                        onInput (\s -> FormUpdated (\m -> {m | tagform = s})),
+                        onKeyPress (\code -> if code == 13 then AddTag else NoOp)
+                    ] []
+                ],
+                div [class "tags"] (List.map (\t -> span [class "tag"] [text t, span [class "ion-close-circled", onClick (RemoveTag t)] []]) model.tags)
             ],
             div [class "right"] [
                 ul [class "tabcontrol"] (tabcontorls model),
@@ -69,6 +100,10 @@ view model =
             ]
         ]
     ]
+
+onKeyPress : (Int -> msg) -> Attribute msg
+onKeyPress tagger =
+  on "keypress" (Json.Decode.map tagger keyCode)
 
 profileTab : Profile -> Html Msg
 profileTab profile =
