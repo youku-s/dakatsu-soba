@@ -44,7 +44,7 @@
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     padding: 5px;
-    width: 200px;
+    width: 15%;
     margin-right: 10px;
     font-size: 14px;
 }
@@ -76,7 +76,7 @@ th {
 input[type=text] {
     width: 95%;
 }
-input[type=number] {
+input[type=number]:not(.num) {
     width: 90%;
 }
 table {
@@ -91,4 +91,10 @@ table {
     background-color: #55EE55;
     margin: 2px;
     padding: 1px;
+}
+.num {
+    width: 50px;
+}
+.check {
+    width: 25px;
 }

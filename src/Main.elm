@@ -3,11 +3,11 @@ module Main exposing (..)
 import Random.Pcg exposing (generate)
 import Html exposing (Html, div, text, program)
 import Messages exposing (Msg(..))
-import Models exposing (Model, ActiveTab(..), AppendMode(..), Place(..), ClassCategory(..), TabType(..), SaveMode(..))
+import Models exposing (..)
 import Update exposing (update)
 import View exposing (view)
 import Utils exposing (updateOnWay)
-
+import List.FlatMap exposing (..)
 import Uuid.Barebones exposing (uuidStringGenerator)
 
 init : ( Model, Cmd Msg )
@@ -168,14 +168,48 @@ init =
                         title = "スキル",
                         tabType = SkillTab,
                         isEditing = False,
-                        items = []
+                        items = [
+                            Skill {
+                                uuid = "", 
+                                used = False,
+                                lost = False,
+                                act = Nothing,
+                                malice = Nothing,
+                                favor = Nothing,
+                                category = "0",
+                                name = "",
+                                timing = AutoAlways,
+                                cost = "",
+                                range = "",
+                                description = "",
+                                skillFrom = None,
+                                from = ""
+                            }
+                        ]
                     },
                     {
                         uuid = "",
                         title = "パーツ",
                         tabType = PartTab,
                         isEditing = False,
-                        items = []
+                        items = [
+                            Part {
+                                uuid = "", 
+                                used = False,
+                                lost = False,
+                                act = Nothing,
+                                malice = Nothing,
+                                favor = Nothing,
+                                category = "0",
+                                name = "",
+                                timing = AutoAlways,
+                                cost = "",
+                                range = "",
+                                description = "",
+                                from = "",
+                                region = Head
+                            }
+                        ]
                     }
                 ],
                 appendMode = AppendSkill,
@@ -231,10 +265,18 @@ init =
                         FormUpdated (\m -> {m | classes = {classes | points = Utils.updateOnWay classes.points point (\pt -> {pt | uuid = x})}})
                     ) uuidStringGenerator
                 ) model.classes.points ++
-                List.map (\tab -> 
+                List.FlatMap.flatMap (\tab -> 
                     generate (\x -> 
                         FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs tab (\tb -> {tb | uuid = x})})
-                    ) uuidStringGenerator
+                    ) uuidStringGenerator ::
+                    (List.map (\item -> 
+                        generate (\x -> 
+                            FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs tab (\tb -> {tb | items = Utils.updateOnWay tab.items item (\it -> case it of
+                                Skill data -> Skill {data | uuid = x}
+                                Part data -> Part {data | uuid = x}
+                            )})})
+                        ) uuidStringGenerator
+                    ) tab.items)
                 ) model.tabs ++
                 List.map (\favor -> 
                     generate (\x -> 

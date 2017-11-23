@@ -1223,24 +1223,24 @@ partTab tab =
         items = List.filter filterF tab.items
     in
         div [] [
-            table [style [("width", "1195px")]] [
+            table [] [
                 tbody [] ([
                     tr [] [
-                        th [style [("width", "30px")]] [text "No."],
-                        th [style [("width", "30px")]] [text "損傷"],
-                        th [style [("width", "30px")]] [text "使用"],
-                        th [style [("width", "50px")]] [text "悪意"],
-                        th [style [("width", "50px")]] [text "行動値"],
-                        th [style [("width", "50px")]] [text "部位"],
-                        th [style [("width", "100px")]] [text "種別"],
-                        th [style [("width", "100px")]] [text "マニューバ"],
-                        th [style [("width", "130px")]] [text "タイミング"],
-                        th [style [("width", "60px")]] [text "コスト"],
-                        th [style [("width", "50px")]] [text "射程"],
-                        th [style [("width", "250px")]] [text "効果"],
-                        th [style [("width", "120px")]] [text "取得先"],
-                        th [style [("width", "50px")]] [text "寵愛"],
-                        td [style [("width", "15px")]] []
+                        th [] [text "No."],
+                        th [] [text "損傷"],
+                        th [] [text "使用"],
+                        th [] [text "悪意"],
+                        th [] [text "行動値"],
+                        th [] [text "部位"],
+                        th [] [text "種別"],
+                        th [] [text "マニューバ"],
+                        th [] [text "タイミング"],
+                        th [] [text "コスト"],
+                        th [] [text "射程"],
+                        th [] [text "効果"],
+                        th [] [text "取得先"],
+                        th [] [text "寵愛"],
+                        td [] []
                     ]
                 ] ++ (List.map (\(index, item) -> tr [] [
                     th [] [text (toString index)],
@@ -1252,6 +1252,7 @@ partTab tab =
                                     _ -> False
                         in
                             input [
+                                class "check",
                                 type_ "checkbox",
                                 checked boxChecked,
                                 onCheck (\s -> FormUpdated (\m ->
@@ -1277,6 +1278,7 @@ partTab tab =
                                     _ -> False
                         in
                             input [
+                                class "check",
                                 type_ "checkbox",
                                 checked boxChecked,
                                 onCheck (\s -> FormUpdated (\m ->
@@ -1304,6 +1306,7 @@ partTab tab =
                                     _ -> ""
                         in
                             input [
+                                class "num",
                                 type_ "number",
                                 value val,
                                 Html.Attributes.min "0",
@@ -1335,6 +1338,7 @@ partTab tab =
                                     _ -> ""
                         in
                             input [
+                                class "num",
                                 type_ "number",
                                 value val,
                                 Html.Attributes.min "0",
@@ -1508,6 +1512,7 @@ partTab tab =
                             input [
                                 type_ "text",
                                 value val,
+                                size 4,
                                 onInput (\s -> FormUpdated (\m ->
                                 let 
                                     newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
@@ -1533,6 +1538,7 @@ partTab tab =
                             input [
                                 type_ "text",
                                 value val,
+                                size 4,
                                 onInput (\s -> FormUpdated (\m ->
                                 let 
                                     newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
@@ -1583,6 +1589,7 @@ partTab tab =
                             input [
                                 type_ "text",
                                 value val,
+                                size 10,
                                 onInput (\s -> FormUpdated (\m ->
                                 let 
                                     newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
@@ -1609,6 +1616,7 @@ partTab tab =
                                     _ -> ""
                         in
                             input [
+                                class "num",
                                 type_ "number",
                                 value val,
                                 Html.Attributes.min "0",
@@ -1631,17 +1639,22 @@ partTab tab =
                             ] []
                     ],
                     td [] [
-                        span [
-                            class "ion-close-round",
-                            let
-                                eq = \x -> x == item
-                                newTabState = {tab | items = (Utils.takeNotWhile eq tab.items) ++ (Utils.dropNotWhile eq tab.items)}
-                            in
-                                onClick (RemoveRow (\m -> {m |
-                                    activeTab = OtherTab newTabState,
-                                    tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
-                                }))
-                        ] []
+                        if index == 1 then
+                            span [
+                                class "ion-locked"
+                            ] []
+                        else
+                            span [
+                                class "ion-close-round",
+                                let
+                                    eq = \x -> x == item
+                                    newTabState = {tab | items = (Utils.takeNotWhile eq tab.items) ++ (Utils.dropNotWhile eq tab.items)}
+                                in
+                                    onClick (RemoveRow (\m -> {m |
+                                        activeTab = OtherTab newTabState,
+                                        tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
+                                    }))
+                            ] []
                     ]
                 ]) (Utils.zipWithIndex items)))
             ],
@@ -1691,23 +1704,23 @@ skillTab tab =
         items = List.filter filterF tab.items
     in
         div [] [
-            table [style [("width", "1195px")]] [
+            table [] [
                 tbody [] ([
                     tr [] [
-                        th [style [("width", "30px")]] [text "No."],
-                        th [style [("width", "30px")]] [text "損傷"],
-                        th [style [("width", "30px")]] [text "使用"],
-                        th [style [("width", "50px")]] [text "悪意"],
-                        th [style [("width", "50px")]] [text "行動値"],
-                        th [style [("width", "100px")]] [text "種別"],
-                        th [style [("width", "100px")]] [text "マニューバ"],
-                        th [style [("width", "130px")]] [text "タイミング"],
-                        th [style [("width", "60px")]] [text "コスト"],
-                        th [style [("width", "50px")]] [text "射程"],
-                        th [style [("width", "250px")]] [text "効果"],
-                        th [style [("width", "250px")], colspan 2] [text "取得先"],
-                        th [style [("width", "50px")]] [text "寵愛"],
-                        td [style [("width", "15px")]] []
+                        th [] [text "No."],
+                        th [] [text "損傷"],
+                        th [] [text "使用"],
+                        th [] [text "悪意"],
+                        th [] [text "行動値"],
+                        th [] [text "種別"],
+                        th [] [text "マニューバ"],
+                        th [] [text "タイミング"],
+                        th [] [text "コスト"],
+                        th [] [text "射程"],
+                        th [] [text "効果"],
+                        th [colspan 2] [text "取得先"],
+                        th [] [text "寵愛"],
+                        td [] []
                     ]
                 ] ++ (List.map (\(index, item) -> tr [] [
                     th [] [text (toString index)],
@@ -1719,6 +1732,7 @@ skillTab tab =
                                     _ -> False
                         in
                             input [
+                                class "check",
                                 type_ "checkbox",
                                 checked boxChecked,
                                 onCheck (\s -> FormUpdated (\m ->
@@ -1744,6 +1758,7 @@ skillTab tab =
                                     _ -> False
                         in
                             input [
+                                class "check",
                                 type_ "checkbox",
                                 checked boxChecked,
                                 onCheck (\s -> FormUpdated (\m ->
@@ -1771,6 +1786,7 @@ skillTab tab =
                                     _ -> ""
                         in
                             input [
+                                class "num",
                                 type_ "number",
                                 Html.Attributes.min "0",
                                 value val,
@@ -1802,6 +1818,7 @@ skillTab tab =
                                     _ -> ""
                         in
                             input [
+                                class "num",
                                 type_ "number",
                                 value val,
                                 Html.Attributes.min "0",
@@ -1937,6 +1954,7 @@ skillTab tab =
                             input [
                                 type_ "text",
                                 value val,
+                                size 4,
                                 onInput (\s -> FormUpdated (\m ->
                                 let 
                                     newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
@@ -1962,6 +1980,7 @@ skillTab tab =
                             input [
                                 type_ "text",
                                 value val,
+                                size 4,
                                 onInput (\s -> FormUpdated (\m ->
                                 let 
                                     newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
@@ -2081,6 +2100,7 @@ skillTab tab =
                             input [
                                 type_ "text",
                                 value val,
+                                size 10,
                                 onInput (\s -> FormUpdated (\m ->
                                 let 
                                     newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
@@ -2107,6 +2127,7 @@ skillTab tab =
                                     _ -> ""
                         in
                             input [
+                                class "num",
                                 type_ "number",
                                 value val,
                                 Html.Attributes.min "0",
@@ -2129,17 +2150,22 @@ skillTab tab =
                             ] []
                     ],
                     td [] [
-                        span [
-                            class "ion-close-round",
-                            let
-                                eq = \x -> x == item
-                                newTabState = {tab | items = (Utils.takeNotWhile eq tab.items) ++ (Utils.dropNotWhile eq tab.items)}
-                            in
-                                onClick (RemoveRow (\m -> {m |
-                                    activeTab = OtherTab newTabState,
-                                    tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
-                                }))
-                        ] []
+                        if index == 1 then
+                            span [
+                                class "ion-locked"
+                            ] []
+                        else
+                            span [
+                                class "ion-close-round",
+                                let
+                                    eq = \x -> x == item
+                                    newTabState = {tab | items = (Utils.takeNotWhile eq tab.items) ++ (Utils.dropNotWhile eq tab.items)}
+                                in
+                                    onClick (RemoveRow (\m -> {m |
+                                        activeTab = OtherTab newTabState,
+                                        tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
+                                    }))
+                            ] []
                     ]
                 ]) (Utils.zipWithIndex items)))
             ],
@@ -2281,32 +2307,80 @@ tabcontorls model =
                     class "add-tab",
                     class "ion-plus-round",
                     onClick (AddTab 
-                        (\model -> 
-                            generate (\uuid -> FormUpdated (\m -> 
-                                let
-                                    tabType = 
-                                        case model.appendMode of
-                                            AppendPart -> PartTab
-                                            AppendSkill -> SkillTab
+                        (\model ->
+                            let
+                                tabType = 
+                                    case model.appendMode of
+                                        AppendPart -> PartTab
+                                        AppendSkill -> SkillTab
 
-                                    title = 
-                                        case model.appendMode of
-                                            AppendPart -> "パーツ"
-                                            AppendSkill -> "スキル"
+                                title = 
+                                    case model.appendMode of
+                                        AppendPart -> "パーツ"
+                                        AppendSkill -> "スキル"
 
-                                    newTabState = {
-                                        uuid = uuid,
-                                        tabType = tabType,
-                                        title = title,
-                                        isEditing = False,
-                                        items = []
-                                    }
-                                in
-                                    {m | 
-                                        tabs = m.tabs ++ [newTabState]
-                                    }
-                            )
-                            ) uuidStringGenerator
+                                newItem = 
+                                    case model.appendMode of
+                                        AppendPart -> Part {
+                                            uuid = "", 
+                                            used = False,
+                                            lost = False,
+                                            act = Nothing,
+                                            malice = Nothing,
+                                            favor = Nothing,
+                                            category = "0",
+                                            name = "",
+                                            timing = AutoAlways,
+                                            cost = "",
+                                            range = "",
+                                            description = "",
+                                            from = "",
+                                            region = Head
+                                        }
+                                        AppendSkill -> Skill {
+                                            uuid = "", 
+                                            used = False,
+                                            lost = False,
+                                            act = Nothing,
+                                            malice = Nothing,
+                                            favor = Nothing,
+                                            category = "0",
+                                            name = "",
+                                            timing = AutoAlways,
+                                            cost = "",
+                                            range = "",
+                                            description = "",
+                                            skillFrom = None,
+                                            from = ""
+                                        }
+
+                                newTabState = {
+                                    uuid = "",
+                                    tabType = tabType,
+                                    title = title,
+                                    isEditing = False,
+                                    items = [newItem]
+                                }
+                            in
+                                Cmd.batch (
+                                    [
+                                    generate (\uuid -> FormUpdated (\m -> 
+                                            {m | 
+                                                tabs = m.tabs ++ [{newTabState | uuid = uuid}]
+                                            }
+                                        )
+                                    ) uuidStringGenerator
+                                    ]
+                                    -- ::
+                                    -- (List.map (\item -> 
+                                    --     generate (\x -> 
+                                    --         FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs newTabState (\tb -> {tb | items = Utils.updateOnWay newTabState.items item (\it -> case it of
+                                    --             Skill data -> Skill {data | uuid = x}
+                                    --             Part data -> Part {data | uuid = x}
+                                    --         )})})
+                                    --     ) uuidStringGenerator
+                                    -- ) newTabState.items)
+                                )
                         )
                     )
                 ] []
