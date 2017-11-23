@@ -71,12 +71,12 @@ th {
     display: inline-block;
     vertical-align: top;
 }
-.favor {
-    width: 75px;
-}
-.point {
-    width: 75px;
-}
 input[type=text] {
     width: 95%;
+}
+input[type=number] {
+    width: 90%;
+}
+table {
+    table-layout: fixed;
 }

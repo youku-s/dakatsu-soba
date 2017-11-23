@@ -9,6 +9,7 @@ type alias Model =
         activeTab: ActiveTab,
         profile: Profile,
         favors: List Favor,
+        usedFavors: List UsedFavor,
         classes: Classes,
         tabs: List Tab,
         appendMode: AppendMode
@@ -25,6 +26,14 @@ type alias Favor =
         uuid: String,
         personal: Maybe Int,
         battle: Maybe Int,
+        memo: String
+    }
+
+type alias UsedFavor =
+    {
+        uuid: String,
+        purpose: String,
+        favor: Int,
         memo: String
     }
 
@@ -125,9 +134,13 @@ type alias Classes =
         points: List Point
     }
 
+type TabType =
+    SkillTab | PartTab
+
 type alias Tab =
     {
         uuid: String,
+        tabType: TabType,
         title: String,
         isEditing: Bool,
         items: List Maneuva

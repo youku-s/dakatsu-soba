@@ -7,8 +7,9 @@ import Messages exposing (Msg(..))
 import Models exposing (..)
 import Utils exposing (..)
 import Random.Pcg exposing (generate)
-import Uuid.Barebones exposing (uuidStringGenerator)
 import Json.Decode
+import Uuid.Barebones exposing (uuidStringGenerator)
+import List.FlatMap exposing (..)
 
 stylesheet : String -> Html Msg
 stylesheet path =
@@ -43,7 +44,7 @@ view model =
                 div [class "tabbody"] [
                     case model.activeTab of
                         ProfileTab -> profileTab model.profile
-                        FavorsTab -> favorsTab model.favors
+                        FavorsTab -> favorsTab model
                         ClassesTab -> classesTab model.classes
                         OtherTab tab -> otherTab tab
                 ]
@@ -220,7 +221,6 @@ profileTab profile =
                         ],
                         td [] [
                             input [
-                                class "number",
                                 type_ "number",
                                 Html.Attributes.min "0",
                                 Html.Attributes.max (toString regret.maxVal),
@@ -230,7 +230,6 @@ profileTab profile =
                         ],
                         td [] [
                             input [
-                                class "number",
                                 type_ "number",
                                 Html.Attributes.min "4",
                                 value (toString regret.maxVal),
@@ -365,16 +364,307 @@ profileTab profile =
         ] [text profile.memo]
     ]
 
-favorsTab : List Favor -> Html Msg
-favorsTab favors =
-    div [] []
+favorsTab : Model -> Html Msg
+favorsTab model =
+    let
+        favors = model.favors
+        usedFavors = model.usedFavors
+        tabs = model.tabs
+        points = model.classes.points
+        highTechs = model.classes.highTechs
+    in
+        div [] [
+            div [class "section-title"] [text "獲得寵愛点"],
+            table [style[("width", "465px")]] [
+                tbody [] ([
+                    tr [] [
+                            th [style [("width", "50px")]] [text "戦闘"],
+                            th [style [("width", "50px")]] [text "個人"],
+                            th [style [("width", "50px")]] [text "総計"],
+                            th [style [("width", "300px")]] [text "備考"],
+                            td [style [("width", "15px")]] []
+                        ]
+                    ] ++ (List.map (\favor -> tr [] [
+                        td [] [
+                            input [
+                                type_ "number",
+                                Html.Attributes.min "0",
+                                value (
+                                    case favor.battle of
+                                        Just favor -> toString favor
+                                        Nothing -> ""
+                                ),
+                                onInput (\s -> FormUpdated (\m -> {m | favors = Utils.updateOnWay favors favor (\x -> {favor | battle = 
+                                    case String.toInt s of
+                                        Ok num -> Just num
+                                        Err _ -> Nothing
+                                })}))
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                type_ "number",
+                                Html.Attributes.min "0",
+                                value (
+                                    case favor.personal of
+                                        Just favor -> toString favor
+                                        Nothing -> ""
+                                ),
+                                onInput (\s -> FormUpdated (\m -> {m | favors = Utils.updateOnWay favors favor (\x -> {favor | personal = 
+                                    case String.toInt s of
+                                        Ok num -> Just num
+                                        Err _ -> Nothing
+                                })}))
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                type_ "number",
+                                value (
+                                    toString ((Maybe.withDefault 0 favor.battle) + (Maybe.withDefault 0 favor.personal))
+                                ),
+                                readonly True
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                type_ "text",
+                                value favor.memo,
+                                onInput (\s -> FormUpdated (\m -> {m | favors = Utils.updateOnWay favors favor (\x -> {favor | memo = s})}))
+                            ] []
+                        ],
+                        td [] [
+                            span [
+                                class "ion-close-round",
+                                let
+                                    eq = \x -> x.uuid == favor.uuid
+                                in
+                                    onClick (RemoveRow (\m -> {m | favors = (Utils.takeNotWhile eq favors) ++ (Utils.dropNotWhile eq favors)}))
+                            ] []
+                        ]
+                    ]) favors)
+                )
+            ],
+            button [
+                type_ "button",
+                onClick (AddRow 
+                    (\m -> 
+                        generate (\uuid -> 
+                            FormUpdated (\m -> {m | favors = (
+                                        favors ++ [
+                                            {
+                                                uuid = uuid,
+                                                memo = "",
+                                                battle = Nothing,
+                                                personal = Nothing
+                                            }
+                                        ]
+                                    )
+                                }
+                            )
+                        ) uuidStringGenerator
+                    )
+            )
+            ] [text "追加"],
+            div [class "section-title"] [text "使用済み寵愛点"],
+            table [style[("width", "540px")]] [
+                tbody [] ([
+                        tr [] [
+                            th [style [("width", "175px")]] [text "目的"],
+                            th [style [("width", "50px")]] [text "消費"],
+                            th [style [("width", "300px")]] [text "備考"],
+                            td [style [("width", "15px")]] []
+                        ],
+                        tr [] [
+                            td [] [
+                                input [
+                                    type_ "text",
+                                    value "スキル",
+                                    readonly True
+                                ] []
+                            ],
+                            td [] [
+                                input [
+                                    type_ "number",
+                                    value (
+                                        let
+                                            isSkillTab = \x -> case x.tabType of
+                                                SkillTab -> True
+                                                _ -> False
+                                            skillTabs = List.filter isSkillTab tabs
+                                            unWrap = \x -> case x of
+                                                Skill data -> data.favor
+                                                Part data -> Nothing
+                                            totalAsTab = \x -> List.map (\y -> Maybe.withDefault 0 (unWrap y)) x.items
+                                            total = List.sum (flatMap totalAsTab skillTabs)
+                                        in
+                                            toString total
+                                    ),
+                                    readonly True
+                                ] []
+                            ],
+                            td [] [
+                                input [
+                                    type_ "text",
+                                    value "",
+                                    readonly True
+                                ] []
+                            ],
+                            td [] []
+                        ],
+                        tr [] [
+                            td [] [
+                                input [
+                                    type_ "text",
+                                    value "パーツ",
+                                    readonly True
+                                ] []
+                            ],
+                            td [] [
+                                input [
+                                    type_ "number",
+                                    value (
+                                        let
+                                            isPartTab = \x -> case x.tabType of
+                                                PartTab -> True
+                                                _ -> False
+                                            partTab = List.filter isPartTab tabs
+                                            unWrap = \x -> case x of
+                                                Skill data -> Nothing
+                                                Part data -> data.favor
+                                            totalAsTab = \x -> List.map (\y -> Maybe.withDefault 0 (unWrap y)) x.items
+                                            total = List.sum (flatMap totalAsTab partTab)
+                                        in
+                                            toString total
+                                    ),
+                                    readonly True
+                                ] []
+                            ],
+                            td [] [
+                                input [
+                                    type_ "text",
+                                    value "",
+                                    readonly True
+                                ] []
+                            ],
+                            td [] []
+                        ],
+                        tr [] [
+                            td [] [
+                                input [
+                                    type_ "text",
+                                    value "強化値",
+                                    readonly True
+                                ] []
+                            ],
+                            td [] [
+                                input [
+                                    type_ "number",
+                                    value (List.sum (List.map (\x -> Maybe.withDefault 0 x.favor) points) |> toString),
+                                    readonly True
+                                ] []
+                            ],
+                            td [] [
+                                input [
+                                    type_ "text",
+                                    value "",
+                                    readonly True
+                                ] []
+                            ],
+                            td [] []
+                        ],
+                        tr [] [
+                            td [] [
+                                input [
+                                    type_ "text",
+                                    value "ポジション類",
+                                    readonly True
+                                ] []
+                            ],
+                            td [] [
+                                input [
+                                    type_ "number",
+                                    value (List.sum (List.map (\x -> Maybe.withDefault 0 x.favor) highTechs) |> toString),
+                                    readonly True
+                                ] []
+                            ],
+                            td [] [
+                                input [
+                                    type_ "text",
+                                    value "",
+                                    readonly True
+                                ] []
+                            ],
+                            td [] []
+                        ]
+                    ] ++ (List.map (\used -> tr [] [
+                        td [] [
+                            input [
+                                type_ "text",
+                                value used.purpose,
+                                onInput (\s -> FormUpdated (\m -> {m | usedFavors = Utils.updateOnWay usedFavors used (\x -> {used | purpose = s})}))
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                type_ "number",
+                                Html.Attributes.min "0",
+                                value (toString used.favor),
+                                onInput (\s -> FormUpdated (\m -> {m | usedFavors = Utils.updateOnWay usedFavors used (\x -> {used | favor = 
+                                    case String.toInt s of
+                                        Ok num -> num
+                                        Err _ -> 0
+                                })}))
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                type_ "text",
+                                value used.memo,
+                                onInput (\s -> FormUpdated (\m -> {m | usedFavors = Utils.updateOnWay usedFavors used (\x -> {used | memo = s})}))
+                            ] []
+                        ],
+                        td [] [
+                            span [
+                                class "ion-close-round",
+                                let
+                                    eq = \x -> x.uuid == used.uuid
+                                in
+                                    onClick (RemoveRow (\m -> {m | usedFavors = (Utils.takeNotWhile eq usedFavors) ++ (Utils.dropNotWhile eq usedFavors)}))
+                            ] []
+                        ]
+                    ]) usedFavors)
+                )
+            ],
+            button [
+                type_ "button",
+                onClick (AddRow 
+                    (\m -> 
+                        generate (\uuid -> 
+                            FormUpdated (\m -> {m | usedFavors = (
+                                        usedFavors ++ [
+                                            {
+                                                uuid = uuid,
+                                                purpose = "",
+                                                memo = "",
+                                                favor = 0
+                                            }
+                                        ]
+                                    )
+                                }
+                            )
+                        ) uuidStringGenerator
+                    )
+                )
+            ] [text "追加"]
+        ]
 
 classesTab : Classes -> Html Msg
 classesTab classes =
     div [] [
         div [class "section-title"] [text "ポジション"],
         div [class "position"] [
-            table [] [
+            table [style[("width", "190px")]] [
                 tbody [] (
                     [
                         tr [] [
@@ -425,7 +715,7 @@ classesTab classes =
             ] [text "追加"]
         ],
         div [class "position"] [
-            table [] [
+            table [style[("width", "190px")]] [
                 tbody [] (
                     [
                         tr [] [
@@ -476,11 +766,11 @@ classesTab classes =
             ] [text "追加"]
         ],
         div [class "position"] [
-            table [] [
+            table [style[("width", "240px")]] [
                 tbody [] ([
                     tr [] [
                             th [style [("width", "175px")]] [text "ハイテック"],
-                            th [style [("width", "85px")]] [text "寵愛"],
+                            th [style [("width", "50px")]] [text "寵愛"],
                             td [style [("width", "15px")]] []
                         ]
                     ] ++ (List.map (\highTech -> tr [] [
@@ -493,7 +783,6 @@ classesTab classes =
                         ],
                         td [] [
                             input [
-                                class "favor",
                                 type_ "number",
                                 value (
                                     case highTech.favor of
@@ -543,13 +832,13 @@ classesTab classes =
             ] [text "追加"]
         ],
         div [class "section-title"] [text "クラス"],
-        table [] [
+        table [style[("width", "470px")]] [
             tbody [] (
                 [
                     tr [] [
-                        th [style [("width", "105px")]] [text "種別"],
-                        th [style [("width", "105px")]] [text "取得元"],
-                        th [style [("width", "245px")]] [text "クラス名"],
+                        th [style [("width", "110px")]] [text "種別"],
+                        th [style [("width", "110px")]] [text "取得元"],
+                        th [style [("width", "200px")]] [text "クラス名"],
                         th [style [("width", "50px")]] [text "個数"],
                         td [] []
                     ]
@@ -622,7 +911,6 @@ classesTab classes =
                         ],
                         td [] [
                             input [
-                                class "number",
                                 type_ "number",
                                 Html.Attributes.min "0",
                                 value (toString clazz.number),
@@ -667,15 +955,15 @@ classesTab classes =
             ] [text "追加"]
         ],
         div [class "section-title"] [text "強化値"],
-        table [] [
+        table [style[("width", "365px")]] [
             tbody [] (
                 [
                     tr [] [
-                        th [style [("width", "105px")]] [text "クラス名"],
-                        th [style [("width", "85px")]] [text "武装"],
-                        th [style [("width", "85px")]] [text "変異"],
-                        th [style [("width", "85px")]] [text "改造"],
-                        th [style [("width", "85px")]] [text "寵愛"],
+                        th [style [("width", "150px")]] [text "クラス名"],
+                        th [style [("width", "50px")]] [text "武装"],
+                        th [style [("width", "50px")]] [text "変異"],
+                        th [style [("width", "50px")]] [text "改造"],
+                        th [style [("width", "50px")]] [text "寵愛"],
                         td [style [("width", "15px")]] []
                     ]
                 ] ++ (List.map (\point -> tr [] [
@@ -688,7 +976,6 @@ classesTab classes =
                         ],
                         td [] [
                             input [
-                                class "point",
                                 type_ "number",
                                 value (
                                     case point.busou of
@@ -705,7 +992,6 @@ classesTab classes =
                         ],
                         td [] [
                             input [
-                                class "point",
                                 type_ "number",
                                 value (
                                     case point.heni of
@@ -722,7 +1008,6 @@ classesTab classes =
                         ],
                         td [] [
                             input [
-                                class "point",
                                 type_ "number",
                                 value (
                                     case point.kaizou of
@@ -739,7 +1024,6 @@ classesTab classes =
                         ],
                         td [] [
                             input [
-                                class "favor",
                                 type_ "number",
                                 value (
                                     case point.favor of
@@ -774,8 +1058,7 @@ classesTab classes =
                         ],
                         td [] [
                             input [
-                                class "point",
-                                type_ "text",
+                                type_ "number",
                                 value ((List.sum (List.map (\x -> 
                                     case x.busou of
                                         Just num -> num
@@ -786,8 +1069,7 @@ classesTab classes =
                         ],
                         td [] [
                             input [
-                                class "point",
-                                type_ "text",
+                                type_ "number",
                                 value ((List.sum (List.map (\x -> 
                                     case x.heni of
                                         Just num -> num
@@ -798,8 +1080,7 @@ classesTab classes =
                         ],
                         td [] [
                             input [
-                                class "point",
-                                type_ "text",
+                                type_ "number",
                                 value ((List.sum (List.map (\x -> 
                                     case x.kaizou of
                                         Just num -> num
@@ -810,8 +1091,7 @@ classesTab classes =
                         ],
                         td [] [
                             input [
-                                class "favor",
-                                type_ "text",
+                                type_ "number",
                                 value ((List.sum (List.map (\x -> 
                                     case x.favor of
                                         Just num -> num

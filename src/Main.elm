@@ -3,7 +3,7 @@ module Main exposing (..)
 import Random.Pcg exposing (generate)
 import Html exposing (Html, div, text, program)
 import Messages exposing (Msg(..))
-import Models exposing (Model, ActiveTab(..), AppendMode(..), Place(..), ClassCategory(..))
+import Models exposing (Model, ActiveTab(..), AppendMode(..), Place(..), ClassCategory(..), TabType(..))
 import Update exposing (update)
 import View exposing (view)
 import Utils exposing (updateOnWay)
@@ -127,17 +127,52 @@ init =
                         }
                     ]
                 },
-                favors = [],
+                favors = [
+                    {
+                        uuid = "",
+                        battle = Nothing,
+                        personal = Nothing,
+                        memo = ""
+                    },
+                    {
+                        uuid = "",
+                        battle = Nothing,
+                        personal = Nothing,
+                        memo = ""
+                    },
+                    {
+                        uuid = "",
+                        battle = Nothing,
+                        personal = Nothing,
+                        memo = ""
+                    }
+                ],
+                usedFavors = [
+                    {
+                        uuid = "",
+                        purpose = "",
+                        favor = 0,
+                        memo = ""
+                    },
+                    {
+                        uuid = "",
+                        purpose = "",
+                        favor = 0,
+                        memo = ""
+                    }
+                ],
                 tabs = [
                     {
                         uuid = "",
                         title = "スキル",
+                        tabType = SkillTab,
                         isEditing = False,
                         items = []
                     },
                     {
                         uuid = "",
                         title = "パーツ",
+                        tabType = PartTab,
                         isEditing = False,
                         items = []
                     }
@@ -198,7 +233,17 @@ init =
                     generate (\x -> 
                         FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs tab (\tb -> {tb | uuid = x})})
                     ) uuidStringGenerator
-                ) model.tabs
+                ) model.tabs ++
+                List.map (\favor -> 
+                    generate (\x -> 
+                        FormUpdated (\m -> {m | favors = Utils.updateOnWay model.favors favor (\fv -> {fv | uuid = x})})
+                    ) uuidStringGenerator
+                ) model.favors ++
+                List.map (\used -> 
+                    generate (\x -> 
+                        FormUpdated (\m -> {m | usedFavors = Utils.updateOnWay model.usedFavors used (\us -> {us | uuid = x})})
+                    ) uuidStringGenerator
+                ) model.usedFavors
             )
         )
 
