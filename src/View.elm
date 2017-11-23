@@ -4,7 +4,7 @@ import Html exposing (..)
 import Html.Events exposing (onInput, onClick, onCheck)
 import Html.Attributes exposing (..)
 import Messages exposing (Msg(..))
-import Models exposing (Model, ActiveTab(..), AppendMode(..), Tab, Profile, Classes, Favor, Place(..), Regret)
+import Models exposing (..)
 import Utils exposing (..)
 import Random.Pcg exposing (generate)
 import Uuid.Barebones exposing (uuidStringGenerator)
@@ -73,22 +73,30 @@ profileTab profile =
                     ],
                     th [] [text "初期配置"],
                     td [] [
-                        select [] [
-                            option ([onInput (\s -> FormUpdated (\m -> {m | profile = {profile | place = Purgatory}}))] ++ (
+                        select [
+                            let 
+                                toPlace = \str -> case str of
+                                    "煉獄" -> Purgatory
+                                    "花園" -> Garden
+                                    _ -> Paradise
+                            in
+                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | place = toPlace(s)}}))
+                        ] [
+                            option [selected (
                                 case profile.place of
-                                    Purgatory -> [selected True]
-                                    _ -> []
-                            )) [text "煉獄"],
-                            option ([onInput (\s -> FormUpdated (\m -> {m | profile = {profile | place = Garden}}))] ++ (
+                                    Purgatory -> True
+                                    _ -> False
+                            ), value "煉獄"] [text "煉獄"],
+                            option [selected (
                                 case profile.place of
-                                    Garden -> [selected True]
-                                    _ -> []
-                            )) [text "花園"],
-                            option ([onInput (\s -> FormUpdated (\m -> {m | profile = {profile | place = Paradise}}))] ++ (
+                                    Garden -> True
+                                    _ -> False
+                            ), value "花園"] [text "花園"],
+                            option [selected (
                                 case profile.place of
-                                    Paradise -> [selected True]
-                                    _ -> []
-                            )) [text "楽園"]
+                                    Paradise -> True
+                                    _ -> False
+                            ), value "楽園"] [text "楽園"]
                         ]
                     ]
                 ],
@@ -481,7 +489,7 @@ classesTab classes =
                 tbody [] ([
                     tr [] [
                             th [style [("width", "175px")]] [text "ハイテック"],
-                            th [style [("width", "85px")]] [text "取得寵愛"],
+                            th [style [("width", "85px")]] [text "寵愛"],
                             td [style [("width", "15px")]] []
                         ]
                     ] ++ (List.map (\highTech -> tr [] [
@@ -545,7 +553,317 @@ classesTab classes =
             ] [text "追加"]
         ],
         div [class "section-title"] [text "クラス"],
-        div [class "section-title"] [text "強化値"]
+        table [] [
+            tbody [] (
+                [
+                    tr [] [
+                        th [style [("width", "105px")]] [text "種別"],
+                        th [style [("width", "105px")]] [text "取得元"],
+                        th [style [("width", "245px")]] [text "クラス名"],
+                        th [style [("width", "50px")]] [text "個数"],
+                        td [] []
+                    ]
+                ] ++ (List.map (\clazz ->
+                    tr [] [
+                        td [] [
+                            select [
+                                let 
+                                    toCategory = \str -> case str of
+                                        "メインクラス" -> MainClass
+                                        "サブクラス" -> SubClass
+                                        "2次クラス" -> SecondClass
+                                        "3次クラス" -> ThirdClass
+                                        "3.5次クラス" -> ThirdPointFiveClass
+                                        "HS" -> HighSociety
+                                        _ -> OtherClass
+                                in
+                                    onInput (\s -> FormUpdated (\m -> {m | classes = {classes | classes = Utils.updateOnWay classes.classes clazz (\cls -> {cls | category = toCategory(s)})}}))
+                            ] [
+                                option [selected (
+                                    case clazz.category of
+                                        MainClass -> True
+                                        _ -> False
+                                ), value "メインクラス"] [text "メインクラス"],
+                                option [selected (
+                                    case clazz.category of
+                                        SubClass -> True
+                                        _ -> False
+                                ), value "サブクラス"] [text "サブクラス"],
+                                option [selected (
+                                    case clazz.category of
+                                        SecondClass -> True
+                                        _ -> False
+                                ), value "2次クラス"] [text "2次クラス"],
+                                option [selected (
+                                    case clazz.category of
+                                        ThirdClass -> True
+                                        _ -> False
+                                ), value "3次クラス"] [text "3次クラス"],
+                                option [selected (
+                                    case clazz.category of
+                                        ThirdPointFiveClass -> True
+                                        _ -> False
+                                ), value "3.5次クラス"] [text "3.5次クラス"],
+                                option [selected (
+                                    case clazz.category of
+                                        HighSociety -> True
+                                        _ -> False
+                                ), value "HS"] [text "HS"],
+                                option [selected (
+                                    case clazz.category of
+                                        OtherClass -> True
+                                        _ -> False
+                                ), value "その他"] [text "その他"]
+                            ]
+                        ],
+                        td [] [
+                            input [
+                                size 10,
+                                type_ "text",
+                                value clazz.from,
+                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | classes = Utils.updateOnWay classes.classes clazz (\cls -> {cls | from = s})}}))
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                size 30,
+                                type_ "text",
+                                value clazz.name,
+                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | classes = Utils.updateOnWay classes.classes clazz (\cls -> {cls | name = s})}}))
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                class "number",
+                                type_ "number",
+                                Html.Attributes.min "0",
+                                value (toString clazz.number),
+                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | classes = Utils.updateOnWay classes.classes clazz (\cls -> {cls | number = Result.withDefault 0 (String.toInt s)})}}))
+                            ] []
+                        ],
+                        td [] [
+                            span [
+                                class "ion-close-round",
+                                let
+                                    eq = \x -> x == clazz
+                                in
+                                    onClick (RemoveRow (\m -> {m | classes = {classes | classes = (Utils.takeNotWhile eq classes.classes) ++ (Utils.dropNotWhile eq classes.classes) }}))
+                            ] []
+                        ]
+                    ]
+                ) classes.classes)
+            )
+        ],
+        div [] [
+            button [
+                type_ "button",
+                onClick (AddRow 
+                    (\m -> 
+                        generate (\uuid -> 
+                            FormUpdated (\m -> {m | classes = {
+                                        classes | classes = classes.classes ++ [
+                                            {
+                                                uuid = uuid,
+                                                category = MainClass,
+                                                name = "",
+                                                from = "",
+                                                number = 0
+                                            }
+                                        ]
+                                    }
+                                }
+                            )
+                        ) uuidStringGenerator
+                    )
+                )
+            ] [text "追加"]
+        ],
+        div [class "section-title"] [text "強化値"],
+        table [] [
+            tbody [] (
+                [
+                    tr [] [
+                        th [style [("width", "105px")]] [text "クラス名"],
+                        th [style [("width", "85px")]] [text "武装"],
+                        th [style [("width", "85px")]] [text "変異"],
+                        th [style [("width", "85px")]] [text "改造"],
+                        th [style [("width", "85px")]] [text "寵愛"],
+                        td [style [("width", "15px")]] []
+                    ]
+                ] ++ (List.map (\point -> tr [] [
+                        td [] [
+                            input [
+                                size 10,
+                                type_ "text",
+                                value point.name,
+                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | points = Utils.updateOnWay classes.points point (\x -> {point | name = s})}}))
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                class "point",
+                                type_ "number",
+                                value (
+                                    case point.busou of
+                                        Just busou -> toString busou
+                                        Nothing -> ""
+                                ),
+                                Html.Attributes.min "0",
+                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | points = Utils.updateOnWay classes.points point (\x -> {point | busou = 
+                                    case String.toInt s of
+                                        Ok num -> Just num
+                                        Err _ -> Nothing
+                                })}}))
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                class "point",
+                                type_ "number",
+                                value (
+                                    case point.heni of
+                                        Just heni -> toString heni
+                                        Nothing -> ""
+                                ),
+                                Html.Attributes.min "0",
+                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | points = Utils.updateOnWay classes.points point (\x -> {point | heni = 
+                                    case String.toInt s of
+                                        Ok num -> Just num
+                                        Err _ -> Nothing
+                                })}}))
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                class "point",
+                                type_ "number",
+                                value (
+                                    case point.kaizou of
+                                        Just kaizou -> toString kaizou
+                                        Nothing -> ""
+                                ),
+                                Html.Attributes.min "0",
+                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | points = Utils.updateOnWay classes.points point (\x -> {point | kaizou = 
+                                    case String.toInt s of
+                                        Ok num -> Just num
+                                        Err _ -> Nothing
+                                })}}))
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                class "favor",
+                                type_ "number",
+                                value (
+                                    case point.favor of
+                                        Just favor -> toString favor
+                                        Nothing -> ""
+                                ),
+                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | points = Utils.updateOnWay classes.points point (\x -> {point | favor = 
+                                    case String.toInt s of
+                                        Ok num -> Just num
+                                        Err _ -> Nothing
+                                })}}))
+                            ] []
+                        ],
+                        td [] [
+                            span [
+                                class "ion-close-round",
+                                let
+                                    eq = \x -> x == point
+                                in
+                                    onClick (RemoveRow (\m -> {m | classes = {classes | points = (Utils.takeNotWhile eq classes.points) ++ (Utils.dropNotWhile eq classes.points)}}))
+                            ] []
+                        ]
+                    ]
+                ) classes.points) ++ [
+                    tr [] [
+                        td [] [
+                            input [
+                                size 10,
+                                type_ "text",
+                                value "総計",
+                                readonly True
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                class "point",
+                                type_ "text",
+                                value ((List.sum (List.map (\x -> 
+                                    case x.busou of
+                                        Just num -> num
+                                        Nothing -> 0
+                                ) classes.points)) |> toString),
+                                readonly True
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                class "point",
+                                type_ "text",
+                                value ((List.sum (List.map (\x -> 
+                                    case x.heni of
+                                        Just num -> num
+                                        Nothing -> 0
+                                ) classes.points)) |> toString),
+                                readonly True
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                class "point",
+                                type_ "text",
+                                value ((List.sum (List.map (\x -> 
+                                    case x.kaizou of
+                                        Just num -> num
+                                        Nothing -> 0
+                                ) classes.points)) |> toString),
+                                readonly True
+                            ] []
+                        ],
+                        td [] [
+                            input [
+                                class "favor",
+                                type_ "text",
+                                value ((List.sum (List.map (\x -> 
+                                    case x.favor of
+                                        Just num -> num
+                                        Nothing -> 0
+                                ) classes.points)) |> toString),
+                                readonly True
+                            ] []
+                        ],
+                        td [] []
+                    ]
+                ]
+            )
+        ],
+        button [
+            type_ "button",
+            onClick (AddRow 
+                (\m -> 
+                    generate (\uuid -> 
+                        FormUpdated (\m -> {m | classes = {
+                                    classes | points = (
+                                        classes.points ++ [
+                                            {
+                                                uuid = uuid,
+                                                name = "",
+                                                busou = Nothing,
+                                                heni = Nothing,
+                                                kaizou = Nothing,
+                                                favor = Nothing
+                                            }
+                                        ]
+                                    )
+                                }
+                            }
+                        )
+                    ) uuidStringGenerator
+                )
+        )
+        ] [text "追加"]
     ]
 
 otherTab : Tab -> Html Msg

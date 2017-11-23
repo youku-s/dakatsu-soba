@@ -3,7 +3,7 @@ module Main exposing (..)
 import Random.Pcg exposing (generate)
 import Html exposing (Html, div, text, program)
 import Messages exposing (Msg(..))
-import Models exposing (Model, ActiveTab(..), AppendMode(..), Place(..))
+import Models exposing (Model, ActiveTab(..), AppendMode(..), Place(..), ClassCategory(..))
 import Update exposing (update)
 import View exposing (view)
 import Utils exposing (updateOnWay)
@@ -85,9 +85,47 @@ init =
                         }
                     ],
                     classes = [
-
+                        {
+                            uuid = "",
+                            category = MainClass,
+                            from = "初期",
+                            name = "",
+                            number = 1
+                        },
+                        {
+                            uuid = "",
+                            category = SubClass,
+                            from = "初期",
+                            name = "",
+                            number = 1
+                        }
                     ],
-                    points = []
+                    points = [
+                        {
+                            uuid = "",
+                            name = "",
+                            busou = Nothing,
+                            heni = Nothing,
+                            kaizou = Nothing,
+                            favor = Nothing
+                        },
+                        {
+                            uuid = "",
+                            name = "",
+                            busou = Nothing,
+                            heni = Nothing,
+                            kaizou = Nothing,
+                            favor = Nothing
+                        },
+                        {
+                            uuid = "",
+                            name = "ボーナス",
+                            busou = Nothing,
+                            heni = Nothing,
+                            kaizou = Nothing,
+                            favor = Nothing
+                        }
+                    ]
                 },
                 favors = [],
                 tabs = [
@@ -145,7 +183,17 @@ init =
                     generate (\x -> 
                         FormUpdated (\m -> {m | classes = {classes | highTechs = Utils.updateOnWay classes.highTechs highTech (\ht -> {ht | uuid = x})}})
                     ) uuidStringGenerator
-                ) model.classes.highTechs
+                ) model.classes.highTechs ++
+                List.map (\clazz -> 
+                    generate (\x -> 
+                        FormUpdated (\m -> {m | classes = {classes | classes = Utils.updateOnWay classes.classes clazz (\cls -> {cls | uuid = x})}})
+                    ) uuidStringGenerator
+                ) model.classes.classes ++
+                List.map (\point -> 
+                    generate (\x -> 
+                        FormUpdated (\m -> {m | classes = {classes | points = Utils.updateOnWay classes.points point (\pt -> {pt | uuid = x})}})
+                    ) uuidStringGenerator
+                ) model.classes.points
             )
         )
 

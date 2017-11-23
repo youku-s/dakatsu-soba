@@ -95,7 +95,7 @@ type alias HighTechDetail =
     }
 
 type ClassCategory =
-    MainClass | SubClass | SecondClass | ThirdClass | ThirdPointFiveClass | HighSociety
+    MainClass | SubClass | SecondClass | ThirdClass | ThirdPointFiveClass | HighSociety | OtherClass
 
 type alias ClassDetail =
     {
