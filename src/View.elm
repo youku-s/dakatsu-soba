@@ -28,7 +28,7 @@ view : Model -> Html Msg
 view model =
     body [] [
         stylesheet "./css/style.css",
-        stylesheet "http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css",
+        stylesheet "./css/ionicons.min.css",
         div [class "content"]
         [
             div [class "left"] [
