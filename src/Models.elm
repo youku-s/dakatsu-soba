@@ -176,8 +176,12 @@ type Maneuva =
         cost: String, -- コスト
         range: String, -- 射程
         description: String, -- 説明
-        from: String -- 取得元
+        from: String, -- 取得元
+        region: Region -- 部位
     }
+
+type Region =
+    Head | Arm | Body | Leg
 
 type Timing =
     AutoAlways | AutoNeedsDeclearation | AutoOthers | Action | Judge | Damage | Rapid

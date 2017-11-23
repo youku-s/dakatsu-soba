@@ -1158,10 +1158,478 @@ otherTab tab =
             tabbody =
                 case tab.tabType of
                     SkillTab -> skillTab tab
-                    PartTab -> div [] []
+                    PartTab -> partTab tab
         in
             tabbody
     ]
+
+partTab : Tab -> Html Msg
+partTab tab =
+    let
+        filterF = \x ->
+            case x of
+                Part _ -> True
+                _ -> False
+        items = List.filter filterF tab.items
+    in
+        div [] [
+            table [style [("width", "1195px")]] [
+                tbody [] ([
+                    tr [] [
+                        th [style [("width", "30px")]] [text "No."],
+                        th [style [("width", "30px")]] [text "損傷"],
+                        th [style [("width", "30px")]] [text "使用"],
+                        th [style [("width", "50px")]] [text "悪意"],
+                        th [style [("width", "50px")]] [text "行動値"],
+                        th [style [("width", "50px")]] [text "部位"],
+                        th [style [("width", "100px")]] [text "種別"],
+                        th [style [("width", "100px")]] [text "マニューバ"],
+                        th [style [("width", "130px")]] [text "タイミング"],
+                        th [style [("width", "60px")]] [text "コスト"],
+                        th [style [("width", "50px")]] [text "射程"],
+                        th [style [("width", "250px")]] [text "効果"],
+                        th [style [("width", "120px")]] [text "取得先"],
+                        th [style [("width", "50px")]] [text "寵愛"],
+                        td [style [("width", "15px")]] []
+                    ]
+                ] ++ (List.map (\(index, item) -> tr [] [
+                    th [] [text (toString index)],
+                    th [] [
+                        let
+                            boxChecked =
+                                case item of
+                                    Part data -> data.lost
+                                    _ -> False
+                        in
+                            input [
+                                type_ "checkbox",
+                                checked boxChecked,
+                                onCheck (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                        case x of
+                                            Part data -> Part {data | lost = s }
+                                            _ -> x
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    th [] [
+                        let
+                            boxChecked =
+                                case item of
+                                    Part data -> data.used
+                                    _ -> False
+                        in
+                            input [
+                                type_ "checkbox",
+                                checked boxChecked,
+                                onCheck (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                        case x of
+                                            Part data -> Part {data | used = s }
+                                            _ -> x
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    td [] [
+                        let
+                            val =
+                                case item of
+                                    Part data -> case data.malice of
+                                        Just malice -> toString malice
+                                        Nothing -> ""
+                                    _ -> ""
+                        in
+                            input [
+                                type_ "number",
+                                value val,
+                                Html.Attributes.min "0",
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                    case x of
+                                        Part data -> Part {data | malice = (case String.toInt s of
+                                            Ok num -> Just num
+                                            _ -> Nothing
+                                        ) }
+                                        _ -> x
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    td [] [
+                        let
+                            val =
+                                case item of
+                                    Part data -> case data.act of
+                                        Just act -> toString act
+                                        Nothing -> ""
+                                    _ -> ""
+                        in
+                            input [
+                                type_ "number",
+                                value val,
+                                Html.Attributes.min "0",
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                    case x of
+                                        Part data -> Part {data | act = (case String.toInt s of
+                                            Ok num -> Just num
+                                            _ -> Nothing
+                                        ) }
+                                        _ -> x
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    td [] [
+                        let
+                            val =
+                                case item of
+                                    Part data -> case data.region of
+                                        Head -> "0"
+                                        Arm -> "1"
+                                        Body -> "2"
+                                        Leg -> "3"
+                                    _ -> ""
+                        in
+                            select [
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                    case x of
+                                        Part data -> Part {data | region = case s of 
+                                            "0" -> Head
+                                            "1" -> Arm
+                                            "2" -> Body
+                                            "3" -> Leg
+                                            _ -> Head
+                                        }
+                                        _ -> x
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] [
+                                option [value "0", selected (val == "0")] [text "頭"],
+                                option [value "1", selected (val == "1")] [text "腕"],
+                                option [value "2", selected (val == "2")] [text "胴"],
+                                option [value "3", selected (val == "3")] [text "脚"]
+                            ]
+                    ],
+                    td [] [
+                        let
+                            val =
+                                case item of
+                                    Part data -> data.category
+                                    _ -> ""
+                        in
+                            select [
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                    case x of
+                                        Part data -> Part {data | category = s}
+                                        _ -> x
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] [
+                                option [value "0", selected (val == "0")] [text "通常技"],
+                                option [value "1", selected (val == "1")] [text "必殺技"],
+                                option [value "2", selected (val == "2")] [text "行動値増加"],
+                                option [value "3", selected (val == "3")] [text "補助"],
+                                option [value "4", selected (val == "4")] [text "妨害"],
+                                option [value "5", selected (val == "5")] [text "防御/生贄"],
+                                option [value "6", selected (val == "6")] [text "移動"]
+                            ]
+                    ],
+                    td [] [
+                        let
+                            val =
+                                case item of
+                                    Part data -> data.name
+                                    _ -> ""
+                        in
+                            input [
+                                type_ "text",
+                                value val,
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                    case x of
+                                        Part data -> Part {data | name = s}
+                                        _ -> x
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    td [] [
+                        let
+                            val =
+                                case item of
+                                    Part data -> case data.timing of
+                                        AutoAlways -> "0"
+                                        AutoNeedsDeclearation -> "1"
+                                        AutoOthers -> "2"
+                                        Action -> "3"
+                                        Judge -> "4"
+                                        Damage -> "5"
+                                        Rapid -> "6"
+                                    _ -> ""
+                        in
+                            select [
+                                value val,
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                    case x of
+                                        Part data -> Part {data | timing = case s of
+                                            "0" -> AutoAlways
+                                            "1" -> AutoNeedsDeclearation
+                                            "2" -> AutoOthers
+                                            "3" -> Action
+                                            "4" -> Judge
+                                            "5" -> Damage
+                                            "6" -> Rapid
+                                            _ -> AutoAlways
+                                        }
+                                        _ -> x
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] [
+                                option [value "0", selected (val == "0")] [text "オート(常時)"],
+                                option [value "1", selected (val == "1")] [text "オート(宣言)"],
+                                option [value "2", selected (val == "2")] [text "オート(その他)"],
+                                option [value "3", selected (val == "3")] [text "アクション"],
+                                option [value "4", selected (val == "4")] [text "ジャッジ"],
+                                option [value "5", selected (val == "5")] [text "ダメージ"],
+                                option [value "6", selected (val == "6")] [text "ラピッド"]
+                            ]
+                    ],
+                    td [] [
+                        let
+                            val =
+                                case item of
+                                    Part data -> data.cost
+                                    _ -> ""
+                        in
+                            input [
+                                type_ "text",
+                                value val,
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                    case x of
+                                        Part data -> Part {data | cost = s}
+                                        _ -> x
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    td [] [
+                        let
+                            val =
+                                case item of
+                                    Part data -> data.range
+                                    _ -> ""
+                        in
+                            input [
+                                type_ "text",
+                                value val,
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                    case x of
+                                        Part data -> Part {data | range = s}
+                                        _ -> x
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    td [] [
+                        let
+                            val =
+                                case item of
+                                    Part data -> data.description
+                                    _ -> ""
+                        in
+                            input [
+                                type_ "text",
+                                value val,
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                    case x of
+                                        Part data -> Part {data | description = s}
+                                        _ -> x
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    td [] [
+                        let
+                            val =
+                                case item of
+                                    Part data -> data.from
+                                    _ -> ""
+                        in
+                            input [
+                                type_ "text",
+                                value val,
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                    case x of
+                                        Part data -> Part {data | from = s}
+                                        _ -> x
+
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    td [] [
+                        let
+                            val =
+                                case item of
+                                    Part data -> case data.favor of
+                                        Just favor -> toString favor
+                                        Nothing -> ""
+                                    _ -> ""
+                        in
+                            input [
+                                type_ "number",
+                                value val,
+                                Html.Attributes.min "0",
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
+                                    case x of
+                                        Part data -> Part {data | favor = (case String.toInt s of
+                                            Ok num -> Just num
+                                            _ -> Nothing
+                                        ) }
+                                        _ -> x
+                                    )}
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    td [] [
+                        span [
+                            class "ion-close-round",
+                            let
+                                eq = \x -> x == item
+                                newTabState = {tab | items = (Utils.takeNotWhile eq tab.items) ++ (Utils.dropNotWhile eq tab.items)}
+                            in
+                                onClick (RemoveRow (\m -> {m |
+                                    activeTab = OtherTab newTabState,
+                                    tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
+                                }))
+                        ] []
+                    ]
+                ]) (Utils.zipWithIndex items)))
+            ],
+            button [
+                type_ "button",
+                onClick (AddRow 
+                    (\model -> 
+                        generate (\uuid -> FormUpdated (\m -> 
+                            let
+                                newTabState = {tab | items = tab.items ++ [
+                                    Part {
+                                        uuid = uuid, 
+                                        used = False,
+                                        lost = False,
+                                        act = Nothing,
+                                        malice = Nothing,
+                                        favor = Nothing,
+                                        category = "0",
+                                        name = "",
+                                        timing = AutoAlways,
+                                        cost = "",
+                                        range = "",
+                                        description = "",
+                                        from = "",
+                                        region = Head
+                                    }
+                                ]}
+                            in
+                            {m | 
+                                activeTab = OtherTab newTabState,
+                                tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState)
+                            }
+                        )
+                        ) uuidStringGenerator
+                    )
+                )
+            ] [text "追加"]
+        ]
 
 skillTab : Tab -> Html Msg
 skillTab tab =
@@ -1254,6 +1722,7 @@ skillTab tab =
                         in
                             input [
                                 type_ "number",
+                                Html.Attributes.min "0",
                                 value val,
                                 onInput (\s -> FormUpdated (\m ->
                                 let 
@@ -1285,6 +1754,7 @@ skillTab tab =
                             input [
                                 type_ "number",
                                 value val,
+                                Html.Attributes.min "0",
                                 onInput (\s -> FormUpdated (\m ->
                                 let 
                                     newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
@@ -1589,6 +2059,7 @@ skillTab tab =
                             input [
                                 type_ "number",
                                 value val,
+                                Html.Attributes.min "0",
                                 onInput (\s -> FormUpdated (\m ->
                                 let 
                                     newTabState = {tab | items = Utils.updateOnWay tab.items item (\x -> 
