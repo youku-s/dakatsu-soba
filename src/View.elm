@@ -869,14 +869,14 @@ onClickNoBubble msg =
 tabToLi : Model -> Tab -> Html Msg
 tabToLi model currentTab =
     let
-        classes = [class "tabctl", class "appendable", onClickNoBubble (OtherTabClicked currentTab)] ++ case model.activeTab of
+        classes = [class "tabctl", class "appendable", onClick (OtherTabClicked currentTab)] ++ case model.activeTab of
                 OtherTab active -> if active.uuid == currentTab.uuid then [class "active"] else []
                 _ -> []
     in
         li classes [
             span [
                 class "ion-edit",
-                onClick (ToggleEdit currentTab)
+                onClickNoBubble (ToggleEdit currentTab)
             ] [],
             span [] [
                 if currentTab.isEditing then 

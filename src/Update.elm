@@ -29,13 +29,27 @@ update msg model =
         PersonalTabClicked -> ({ model | activeTab = ProfileTab, tabs = List.map (\x -> {x | isEditing = False}) model.tabs }, Cmd.none)
         ClassesTabClicked -> ({ model | activeTab = ClassesTab, tabs = List.map (\x -> {x | isEditing = False}) model.tabs }, Cmd.none)
         FavorsTabClicked -> ({ model | activeTab = FavorsTab, tabs = List.map (\x -> {x | isEditing = False}) model.tabs }, Cmd.none)
-        OtherTabClicked tab -> ({ model | activeTab = OtherTab tab }, Cmd.none)
-        FormUpdated f ->(f(model), Cmd.none)
-        AddTab tabname -> (model, Cmd.none)
-        RemoveTab tab -> ({model |
+        OtherTabClicked tab -> ({ model |
+            activeTab = OtherTab tab,
             tabs = 
                 let
                     eq = \x -> x.uuid == tab.uuid
                 in
-                    (Utils.takeNotWhile eq model.tabs) ++ (Utils.dropNotWhile eq model.tabs)
+                    (List.map (\x -> {x | isEditing = False}) (Utils.takeNotWhile eq model.tabs)) ++ 
+                    [tab] ++ 
+                    (List.map (\x -> {x | isEditing = False}) (Utils.dropNotWhile eq model.tabs))
         }, Cmd.none)
+        FormUpdated f ->(f(model), Cmd.none)
+        AddTab tabname -> (model, Cmd.none)
+        RemoveTab tab -> 
+            let
+                eq = \x -> x.uuid == tab.uuid
+                activeTabRemoved = 
+                    case model.activeTab of
+                        OtherTab activeTab -> activeTab.uuid == tab.uuid
+                        _ -> False
+            in                
+                ({model |
+                    tabs = (Utils.takeNotWhile eq model.tabs) ++ (Utils.dropNotWhile eq model.tabs),
+                    activeTab = if activeTabRemoved then ProfileTab else model.activeTab
+                }, Cmd.none)
