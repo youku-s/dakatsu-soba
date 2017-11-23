@@ -878,7 +878,10 @@ tabToLi model currentTab =
                 _ -> []
     in
         li classes [
-            span [class "ion-edit"] [],
+            span [
+                class "ion-edit",
+                onClick (ToggleEdit currentTab)
+            ] [],
             span [] [
                 if currentTab.isEditing then 
                     input [type_ "text", value currentTab.title, size 10] [] else
