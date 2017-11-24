@@ -165,39 +165,14 @@ init =
                 tabs = [
                     {
                         uuid = "",
-                        title = "スキル",
-                        tabType = SkillTab,
-                        isEditing = False,
-                        items = [
-                            Skill {
+                        title = "マニューバ",
+                        tabType = ManeuvaTab [
+                            {
                                 uuid = "", 
                                 used = False,
                                 lost = False,
                                 act = Nothing,
-                                malice = Nothing,
-                                favor = Nothing,
-                                category = "0",
-                                name = "",
-                                timing = AutoAlways,
-                                cost = "",
-                                range = "",
-                                description = "",
-                                skillFrom = None,
-                                from = ""
-                            }
-                        ]
-                    },
-                    {
-                        uuid = "",
-                        title = "パーツ",
-                        tabType = PartTab,
-                        isEditing = False,
-                        items = [
-                            Part {
-                                uuid = "", 
-                                used = False,
-                                lost = False,
-                                act = Nothing,
+                                maneuvaType = Skill,
                                 malice = Nothing,
                                 favor = Nothing,
                                 category = "0",
@@ -209,10 +184,11 @@ init =
                                 from = "",
                                 region = Head
                             }
-                        ]
+                        ],
+                        isEditing = False
                     }
                 ],
-                appendMode = AppendSkill,
+                appendMode = AppendManeuva,
                 saveMode = UpdateSheet
             }
         profile = model.profile
@@ -271,12 +247,18 @@ init =
                     ) uuidStringGenerator ::
                     (List.map (\item -> 
                         generate (\x -> 
-                            FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs tab (\tb -> {tb | items = Utils.updateOnWay tab.items item (\it -> case it of
-                                Skill data -> Skill {data | uuid = x}
-                                Part data -> Part {data | uuid = x}
-                            )})})
+                            FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs tab (\tb -> {tb | tabType = 
+                                case tb.tabType of
+                                    ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\it -> {it | uuid = x}))
+                                    _ -> tb.tabType
+                            }
+                            )})
                         ) uuidStringGenerator
-                    ) tab.items)
+                    ) (case tab.tabType of
+                        ManeuvaTab items -> items
+                        _ -> []
+                    )
+                    )
                 ) model.tabs ++
                 List.map (\favor -> 
                     generate (\x -> 

@@ -18,7 +18,7 @@ type alias Model =
     }
 
 type AppendMode =
-    AppendSkill | AppendPart
+    AppendManeuva | AppendResource
 
 type SaveMode =
     UpdateSheet | CloneSheet
@@ -140,42 +140,30 @@ type alias Classes =
     }
 
 type TabType =
-    SkillTab | PartTab
+    ManeuvaTab (List Maneuva) |
+    ResourceTab
 
 type alias Tab =
     {
         uuid: String,
         tabType: TabType,
         title: String,
-        isEditing: Bool,
-        items: List Maneuva
+        isEditing: Bool
     }
 
-type Maneuva =
-    Skill {
-        uuid: String, 
-        used: Bool, -- 使用済み
-        lost: Bool, -- 破損済み
-        act: Maybe Int, -- 行動値
-        malice: Maybe Int, -- 悪意
-        favor: Maybe Int,  -- 寵愛
-        category: String, -- 種別
-        name: String, -- スキル名
-        timing: Timing, -- タイミング
-        cost: String, -- コスト
-        range: String, -- 射程
-        description: String, -- 説明
-        skillFrom: SkillFrom, -- 取得元
-        from: String
-    } |
-    Part {
+type ManeuvaType =
+    Skill | Part | Item | Effect | Archive
+
+type alias Maneuva =
+    {
         uuid: String,
         used: Bool, -- 使用済み
         lost: Bool, -- 破損済み
         act: Maybe Int, -- 行動値
         malice: Maybe Int, -- 悪意
         favor: Maybe Int,  -- 寵愛
-        category: String, -- 種別
+        maneuvaType: ManeuvaType, -- マニューバタイプ
+        category: String, -- カテゴリ
         name: String, -- パーツ名
         timing: Timing, -- タイミング
         cost: String, -- コスト
@@ -186,13 +174,7 @@ type Maneuva =
     }
 
 type Region =
-    Head | Arm | Body | Leg
+    Head | Arm | Body | Leg | OtherRegion
 
 type Timing =
-    AutoAlways | AutoNeedsDeclearation | AutoOthers | Action | Judge | Damage | Rapid
-
-type SkillFrom =
-    None | PositionSkill | SubPositionSkill | HighPositionSkill |
-    HighTechSkill | MainClassSkill | SubClassSkill | SecondClassSkill |
-    CUGSkill | ThirdClassSkill | ThirdPointFiveClassSkill | HighSocietySkill |
-    SenarioSkill | OtherSkill
+    AutoAlways | AutoNeedsDeclearation | AutoOthers | Action | Judge | Damage | Rapid | BeforeBattle | BattleStart | TurnStart | CountStart
