@@ -11,24 +11,9 @@ import Json.Decode
 import Uuid.Barebones exposing (uuidStringGenerator)
 import List.FlatMap exposing (..)
 
-stylesheet : String -> Html Msg
-stylesheet path =
-    let
-        tag = "link"
-        attrs =
-            [ attribute "rel"       "stylesheet"
-            , attribute "property"  "stylesheet"
-            , attribute "href"      path
-            ]
-        children = []
-    in 
-        node tag attrs children
-
 view : Model -> Html Msg
 view model =
     body [] [
-        stylesheet "./css/style.css",
-        stylesheet "./css/ionicons.min.css",
         div [class "content"]
         [
             div [class "left"] [
@@ -2364,22 +2349,21 @@ tabcontorls model =
                             in
                                 Cmd.batch (
                                     [
-                                    generate (\uuid -> FormUpdated (\m -> 
-                                            {m | 
-                                                tabs = m.tabs ++ [{newTabState | uuid = uuid}]
-                                            }
-                                        )
-                                    ) uuidStringGenerator
-                                    ]
-                                    -- ::
-                                    -- (List.map (\item -> 
-                                    --     generate (\x -> 
-                                    --         FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs newTabState (\tb -> {tb | items = Utils.updateOnWay newTabState.items item (\it -> case it of
-                                    --             Skill data -> Skill {data | uuid = x}
-                                    --             Part data -> Part {data | uuid = x}
-                                    --         )})})
-                                    --     ) uuidStringGenerator
-                                    -- ) newTabState.items)
+                                        generate (\uuid -> FormUpdated (\m -> 
+                                                {m | 
+                                                    tabs = m.tabs ++ [{newTabState | uuid = uuid}]
+                                                }
+                                            )
+                                        ) uuidStringGenerator
+                                    ] ++
+                                    (List.map (\item -> 
+                                        generate (\x -> 
+                                            FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs newTabState (\tb -> {tb | items = Utils.updateOnWay newTabState.items item (\it -> case it of
+                                                Skill data -> Skill {data | uuid = x}
+                                                Part data -> Part {data | uuid = x}
+                                            )})})
+                                        ) uuidStringGenerator
+                                    ) newTabState.items)
                                 )
                         )
                     )
