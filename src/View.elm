@@ -1224,6 +1224,7 @@ maneuvaTab tab =
                         th [] [text "効果"],
                         th [] [text "取得先"],
                         th [] [text "寵愛"],
+                        td [] [],
                         td [] []
                     ]
                 ] ++ (List.map (\(index, item) -> tr [] [
@@ -1666,47 +1667,57 @@ maneuvaTab tab =
                                         tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
                                     }))
                             ] []
-                    ]
-                ]) (Utils.zipWithIndex items)))
-            ],
-            button [
-                type_ "button",
-                onClick (AddRow 
-                    (\model -> 
-                        generate (\uuid -> FormUpdated (\m -> 
+                    ],
+                    td [] [
+                        span [
+                            class "ion-plus-round",
                             let
+                                eq = \x -> x == item
                                 newTabState = {tab | tabType = case tab.tabType of
-                                    ManeuvaTab items -> ManeuvaTab (items ++ [
-                                        {
-                                            uuid = uuid, 
-                                            used = False,
-                                            lost = False,
-                                            act = Nothing,
-                                            malice = Nothing,
-                                            favor = Nothing,
-                                            category = "0",
-                                            name = "",
-                                            timing = AutoAlways,
-                                            cost = "",
-                                            range = "",
-                                            description = "",
-                                            from = "",
-                                            region = Head,
-                                            maneuvaType = Skill
-                                        }
-                                    ])
+                                    ManeuvaTab items -> ManeuvaTab ((Utils.takeNotWhile eq items) ++ (Utils.dropNotWhile eq items))
                                     _ -> tab.tabType
                                 }
                             in
-                            {m | 
-                                activeTab = OtherTab newTabState,
-                                tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState)
-                            }
-                        )
-                        ) uuidStringGenerator
-                    )
-                )
-            ] [text "追加"]
+                                onClick (AddRow 
+                                    (\model -> 
+                                        generate (\uuid -> FormUpdated (\m -> 
+                                            let
+                                                newTabState = {tab | tabType = case tab.tabType of
+                                                    ManeuvaTab items -> ManeuvaTab ((Utils.takeNotWhile eq items) ++ [
+                                                        item,
+                                                        {
+                                                            uuid = uuid, 
+                                                            used = False,
+                                                            lost = False,
+                                                            act = Nothing,
+                                                            malice = Nothing,
+                                                            favor = Nothing,
+                                                            category = "0",
+                                                            name = "",
+                                                            timing = AutoAlways,
+                                                            cost = "",
+                                                            range = "",
+                                                            description = "",
+                                                            from = "",
+                                                            region = Head,
+                                                            maneuvaType = Skill
+                                                        }
+                                                    ] ++ (Utils.dropNotWhile eq items))
+                                                    _ -> tab.tabType
+                                                }
+                                            in
+                                            {m | 
+                                                activeTab = OtherTab newTabState,
+                                                tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState)
+                                            }
+                                        )
+                                        ) uuidStringGenerator
+                                    )
+                                )
+                        ] []
+                    ]
+                ]) (Utils.zipWithIndex items)))
+            ]
         ]
 
 onClickNoBubble : Msg -> Attribute Msg
@@ -1854,7 +1865,27 @@ tabcontorls model =
                                                 }
                                             )
                                         ) uuidStringGenerator
-                                    ]
+                                    ] ++
+                                    (List.map (\maneuva -> 
+                                            generate (\uuid -> FormUpdated (\model ->
+                                                let
+                                                    first = case List.head (List.reverse model.tabs) of
+                                                        Just tab -> tab
+                                                        Nothing -> newTabState
+                                                in
+                                                    {model | 
+                                                        tabs = Utils.updateOnWay model.tabs first (\tb ->
+                                                            {tb | tabType = 
+                                                                case tb.tabType of
+                                                                    ManeuvaTab maneuvas -> ManeuvaTab (Utils.updateOnWay maneuvas maneuva (\ma -> {ma | uuid = uuid}) )
+                                                                    _ -> tb.tabType
+                                                            }
+                                                        )
+                                                    }
+                                                )
+                                            ) uuidStringGenerator
+                                        ) 
+                                    items)
                                 )
                         )
                     )
