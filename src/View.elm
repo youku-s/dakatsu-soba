@@ -624,6 +624,43 @@ favorsTab model =
                             td [] [
                                 input [
                                     type_ "text",
+                                    value "リソースその他",
+                                    readonly True
+                                ] []
+                            ],
+                            td [] [
+                                input [
+                                    type_ "number",
+                                    value (
+                                        let
+                                            getFevors = \x -> case x.tabType of
+                                                ResourceTab resouces -> List.map (\res -> case res.favor of
+                                                    Just favor -> favor
+                                                    Nothing -> 0
+                                                ) resouces
+                                                _ -> []
+                                            total = List.sum (flatMap getFevors tabs)
+                                        in
+                                            toString total
+                                    ),
+                                    readonly True
+                                ] []
+                            ],
+                            td [] [
+                                input [
+                                    type_ "text",
+                                    value "",
+                                    readonly True
+                                ] []
+                            ],
+                            td [] [
+                                span [class "ion-locked"] []
+                            ]
+                        ],
+                        tr [] [
+                            td [] [
+                                input [
+                                    type_ "text",
                                     value "強化値",
                                     readonly True
                                 ] []
@@ -1217,11 +1254,163 @@ otherTab tab =
             tabbody =
                 case tab.tabType of
                     ManeuvaTab _ -> maneuvaTab tab
+                    ResourceTab _ -> resourceTab tab
                     -- TODO タブ種類が増えた時にここに追加する
-                    _ -> div [] []
         in
             tabbody
     ]
+
+resourceTab : Tab -> Html Msg
+resourceTab tab =
+    let
+        resources = case tab.tabType of
+            ResourceTab resources -> resources
+            _ -> []
+    in
+        div [] [
+            table [] [
+                tbody [] ([
+                    tr [] [
+                        th [] [text "No."],
+                        th [] [text "名前"],
+                        th [] [text "説明"],
+                        th [] [text "寵愛"],
+                        td [] [],
+                        td [] []
+                    ]
+                ] ++ (List.map (\(index, resource) -> tr [] [
+                    th [] [text (toString index)],
+                    td [] [
+                        let
+                            val = resource.name
+                        in
+                            input [
+                                type_ "text",
+                                value val,
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | tabType = case tab.tabType of
+                                        ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\x -> 
+                                        {x | name = s}))
+                                        _ -> tab.tabType
+                                    }
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    td [] [
+                        let
+                            val = resource.description
+                        in
+                            input [
+                                type_ "text",
+                                value val,
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | tabType = case tab.tabType of
+                                        ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\x -> 
+                                        {x | description = s}))
+                                        _ -> tab.tabType
+                                    }
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    td [] [
+                        let
+                            val = case resource.favor of
+                                Just favor -> toString favor
+                                Nothing -> ""
+                        in
+                            input [
+                                class "num",
+                                type_ "number",
+                                value val,
+                                Html.Attributes.min "0",
+                                onInput (\s -> FormUpdated (\m ->
+                                let 
+                                    newTabState = {tab | tabType = case tab.tabType of
+                                        ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\x -> {x | favor = 
+                                            case String.toInt s of
+                                                Ok num -> Just num
+                                                _ -> Nothing
+                                        }))
+                                        _ -> tab.tabType
+                                    }
+                                in
+                                    {m |
+                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                        activeTab = OtherTab newTabState
+                                    }
+                                ))
+                            ] []
+                    ],
+                    td [] [
+                        if index == 1 then
+                            span [
+                                class "ion-locked"
+                            ] []
+                        else
+                            span [
+                                class "ion-close-round",
+                                let
+                                    eq = \x -> x == resource
+                                    newTabState = {tab | tabType = case tab.tabType of
+                                        ResourceTab resources -> ResourceTab ((Utils.takeNotWhile eq resources) ++ (Utils.dropNotWhile eq resources))
+                                        _ -> tab.tabType
+                                    }
+                                in
+                                    onClick (RemoveRow (\m -> {m |
+                                        activeTab = OtherTab newTabState,
+                                        tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
+                                    }))
+                            ] []
+                    ],
+                    td [] [
+                        span [
+                            class "ion-plus-round",
+                            let
+                                eq = \x -> x == resource
+                            in
+                                onClick (AddRow 
+                                    (\model -> 
+                                        generate (\uuid -> FormUpdated (\m -> 
+                                            let
+                                                newTabState = {tab | tabType = case tab.tabType of
+                                                    ResourceTab resources -> ResourceTab ((Utils.takeNotWhile eq resources) ++ [
+                                                        resource,
+                                                        {
+                                                            uuid = uuid, 
+                                                            name = "",
+                                                            description = "",
+                                                            favor = Nothing
+                                                        }
+                                                    ] ++ (Utils.dropNotWhile eq resources))
+                                                    _ -> tab.tabType
+                                                }
+                                            in
+                                            {m | 
+                                                activeTab = OtherTab newTabState,
+                                                tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState)
+                                            }
+                                        )
+                                        ) uuidStringGenerator
+                                    )
+                                )
+                        ] []
+                    ]
+                ]) (Utils.zipWithIndex resources)))
+            ]
+        ]
+
 
 maneuvaTab : Tab -> Html Msg
 maneuvaTab tab =
@@ -1826,6 +2015,7 @@ tabcontorls model =
                     class "new-tab-type",
                     onInput (\s -> FormUpdated (\m -> {m | appendMode = case s of
                         "maneuva" -> AppendManeuva
+                        "resource" -> AppendResource
                         _ -> AppendResource
                     }))
                 ] [
@@ -1834,7 +2024,13 @@ tabcontorls model =
                                 AppendManeuva -> True
                                 _ -> False
                             )
-                    ] [text "マニューバ"]
+                    ] [text "マニューバ"],
+                    option [value "resource", selected (
+                            case model.appendMode of
+                                AppendResource -> True
+                                _ -> False
+                            )
+                    ] [text "リソース"]
                 ],
                 span [
                     class "add-tab",
@@ -1863,7 +2059,14 @@ tabcontorls model =
                                                 maneuvaType = Skill
                                             }
                                         ]
-                                        AppendResource -> ResourceTab
+                                        AppendResource -> ResourceTab [
+                                            {
+                                                uuid = "",
+                                                name = "",
+                                                description = "",
+                                                favor = Nothing
+                                            }
+                                        ]
 
                                 title = 
                                     case model.appendMode of
@@ -1873,6 +2076,11 @@ tabcontorls model =
                                 items =
                                     case tabType of
                                         ManeuvaTab items -> items
+                                        _ -> []
+
+                                resources =
+                                    case tabType of
+                                        ResourceTab resources -> resources
                                         _ -> []
 
                                 newTabState = {
@@ -1913,7 +2121,30 @@ tabcontorls model =
                                                 )
                                             ) uuidStringGenerator
                                         ) 
-                                    items)
+                                    items) ++
+                                    (List.map (\resource -> 
+                                            generate (\uuid -> FormUpdated (\model ->
+                                                let
+                                                    first = case List.head (List.reverse model.tabs) of
+                                                        Just tab -> tab
+                                                        Nothing -> newTabState
+                                                    tabs = case List.head (List.reverse model.tabs) of
+                                                        Just tab -> Utils.updateOnWay model.tabs tab (\tb ->
+                                                            {tb | tabType = 
+                                                                case tb.tabType of
+                                                                    ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\re -> {re | uuid = uuid}) )
+                                                                    _ -> tb.tabType
+                                                            }
+                                                        )
+                                                        Nothing -> []
+                                                in
+                                                    {model | 
+                                                        tabs = tabs
+                                                    }
+                                                )
+                                            ) uuidStringGenerator
+                                        ) 
+                                    resources)
                                 )
                         )
                     )

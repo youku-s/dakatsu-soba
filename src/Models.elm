@@ -21,6 +21,14 @@ type alias Model =
         windowSize: Size
     }
 
+type alias Resource =
+    {
+        uuid: String,
+        name: String,
+        description: String,
+        favor: Maybe Int
+    }
+
 type AppendMode =
     AppendManeuva | AppendResource
 
@@ -145,7 +153,7 @@ type alias Classes =
 
 type TabType =
     ManeuvaTab (List Maneuva) |
-    ResourceTab
+    ResourceTab (List Resource)
 
 type alias Tab =
     {
