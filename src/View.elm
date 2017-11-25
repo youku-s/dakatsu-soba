@@ -442,6 +442,38 @@ favorsTab model =
         highTechs = model.classes.highTechs
     in
         div [] [
+            div [class "section-title"] [text "寵愛点サマリー"],
+            table [] [
+                tbody [] [
+                    tr [] [
+                        th [] [text "獲得寵愛点"],
+                        th [] [text "消費寵愛点"]
+                    ],
+                    tr [] [
+                        td [] [
+                            input [
+                                type_ "number",
+                                value (toString (List.sum (List.map (\f -> (Maybe.withDefault 0 f.personal) + (Maybe.withDefault 0 f.battle)) favors))),
+                                readonly True
+                            ] []
+                        ],
+                        td [] [
+                            let
+                                parts = getPartFavor tabs
+                                skills = getSkillFavor tabs
+                                resources = getResourceFavor tabs
+                                points = getPointFavor model
+                                others = getOtherFavor model
+                            in
+                                input [
+                                    type_ "number",
+                                    value (toString (parts + skills + resources + points + others)),
+                                    readonly True
+                                ] []
+                        ]
+                    ]
+                ]
+            ],
             div [class "section-title"] [text "獲得寵愛点"],
             table [style[("width", "465px")]] [
                 tbody [] ([
@@ -554,20 +586,7 @@ favorsTab model =
                             td [] [
                                 input [
                                     type_ "number",
-                                    value (
-                                        let
-                                            getFevors = \x -> case x.tabType of
-                                                ManeuvaTab items -> List.map 
-                                                    (\item -> case item.maneuvaType of
-                                                        Skill -> Maybe.withDefault 0 item.favor
-                                                        _ -> 0
-                                                    ) items
-                                                _ -> []
-                                            total = List.sum (flatMap getFevors tabs)
-
-                                        in
-                                            toString total
-                                    ),
+                                    value (toString (getSkillFavor tabs)),
                                     readonly True
                                 ] []
                             ],
@@ -593,19 +612,7 @@ favorsTab model =
                             td [] [
                                 input [
                                     type_ "number",
-                                    value (
-                                        let
-                                            getFevors = \x -> case x.tabType of
-                                                ManeuvaTab items -> List.map 
-                                                    (\item -> case item.maneuvaType of
-                                                        Part -> Maybe.withDefault 0 item.favor
-                                                        _ -> 0
-                                                    ) items
-                                                _ -> []
-                                            total = List.sum (flatMap getFevors tabs)
-                                        in
-                                            toString total
-                                    ),
+                                    value (toString (getPartFavor tabs)),
                                     readonly True
                                 ] []
                             ],
@@ -631,18 +638,7 @@ favorsTab model =
                             td [] [
                                 input [
                                     type_ "number",
-                                    value (
-                                        let
-                                            getFevors = \x -> case x.tabType of
-                                                ResourceTab resouces -> List.map (\res -> case res.favor of
-                                                    Just favor -> favor
-                                                    Nothing -> 0
-                                                ) resouces
-                                                _ -> []
-                                            total = List.sum (flatMap getFevors tabs)
-                                        in
-                                            toString total
-                                    ),
+                                    value (toString (getResourceFavor tabs)),
                                     readonly True
                                 ] []
                             ],
@@ -668,7 +664,7 @@ favorsTab model =
                             td [] [
                                 input [
                                     type_ "number",
-                                    value (List.sum (List.map (\x -> Maybe.withDefault 0 x.favor) points) |> toString),
+                                    value (toString (getPointFavor model)),
                                     readonly True
                                 ] []
                             ],
@@ -694,7 +690,7 @@ favorsTab model =
                             td [] [
                                 input [
                                     type_ "number",
-                                    value (List.sum (List.map (\x -> Maybe.withDefault 0 x.favor) highTechs) |> toString),
+                                    value (toString (getOtherFavor model)),
                                     readonly True
                                 ] []
                             ],
@@ -770,6 +766,52 @@ favorsTab model =
                 )
             ] [text "追加"]
         ]
+
+getSkillFavor : List Tab -> Int
+getSkillFavor tabs =
+    let
+        getFevors = \x -> case x.tabType of
+            ManeuvaTab items -> List.map 
+                (\item -> case item.maneuvaType of
+                    Skill -> Maybe.withDefault 0 item.favor
+                    _ -> 0
+                ) items
+            _ -> []
+        total = List.sum (flatMap getFevors tabs)
+    in
+        List.sum (flatMap getFevors tabs)
+
+getPartFavor : List Tab -> Int
+getPartFavor tabs =
+    let
+        getFevors = \x -> case x.tabType of
+            ManeuvaTab items -> List.map 
+                (\item -> case item.maneuvaType of
+                    Part -> Maybe.withDefault 0 item.favor
+                    _ -> 0
+                ) items
+            _ -> []
+        total = List.sum (flatMap getFevors tabs)
+    in
+        List.sum (flatMap getFevors tabs)
+
+getResourceFavor : List Tab -> Int
+getResourceFavor tabs =
+    let
+        getFevors = \x -> case x.tabType of
+            ResourceTab resources -> List.map (\resource -> Maybe.withDefault 0 resource.favor) resources
+            _ -> []
+        total = List.sum (flatMap getFevors tabs)
+    in
+        List.sum (flatMap getFevors tabs)
+
+getPointFavor : Model -> Int
+getPointFavor model =
+    List.sum (List.map (\x -> Maybe.withDefault 0 x.favor) model.classes.points)
+
+getOtherFavor : Model -> Int
+getOtherFavor model =
+    List.sum (List.map (\x -> Maybe.withDefault 0 x.favor) model.classes.highTechs)
 
 classesTab : Classes -> Html Msg
 classesTab classes =
