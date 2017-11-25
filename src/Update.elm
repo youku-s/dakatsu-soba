@@ -3,6 +3,8 @@ module Update exposing (..)
 import Messages exposing (Msg(..))
 import Models exposing (..)
 import Utils exposing (..)
+import Task exposing (perform)
+import Window exposing (size)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -61,7 +63,7 @@ update msg model =
             {model | tags = List.filter (\x -> x /= tagname) model.tags },
             Cmd.none
         )
-        OpenDialog tab -> ({model | showDeleteTabialog = Just tab}, Cmd.none)
+        OpenDialog tab -> ({model | showDeleteTabialog = Just tab}, (Task.perform SetWindowSize Window.size))
         CloseDialog tab ->
             let
                 uuid = case tab of
@@ -84,3 +86,4 @@ update msg model =
                     activeTab = if activeTabRemoved then ProfileTab else model.activeTab,
                     showDeleteTabialog = Nothing
                 }, Cmd.none)
+        SetWindowSize sz -> ({model | windowSize = sz}, Cmd.none)

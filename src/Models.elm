@@ -1,5 +1,7 @@
 module Models exposing (..)
 
+import Window exposing (Size)
+
 type alias Model =
     {
         uuid: String,
@@ -15,7 +17,8 @@ type alias Model =
         tabs: List Tab,
         appendMode: AppendMode,
         saveMode: SaveMode,
-        showDeleteTabialog: Maybe Tab
+        showDeleteTabialog: Maybe Tab,
+        windowSize: Size
     }
 
 type AppendMode =

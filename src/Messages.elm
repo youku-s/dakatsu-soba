@@ -1,6 +1,7 @@
 module Messages exposing (..)
 
 import Models exposing (..)
+import Window exposing (Size)
 
 type Msg =
     NoOp |
@@ -17,4 +18,5 @@ type Msg =
     AddTag |
     RemoveTag String |
     OpenDialog Tab |
-    CloseDialog (Maybe Tab)
+    CloseDialog (Maybe Tab) |
+    SetWindowSize Size

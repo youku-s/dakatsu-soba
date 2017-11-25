@@ -9,6 +9,8 @@ import View exposing (view)
 import Utils exposing (updateOnWay)
 import List.FlatMap exposing (..)
 import Uuid.Barebones exposing (uuidStringGenerator)
+import Window exposing (..)
+import Task
 
 init : ( Model, Cmd Msg )
 init =
@@ -190,7 +192,11 @@ init =
                 ],
                 appendMode = AppendManeuva,
                 saveMode = UpdateSheet,
-                showDeleteTabialog = Nothing
+                showDeleteTabialog = Nothing,
+                windowSize = {
+                    width = 0,
+                    height = 0
+                }
             }
         profile = model.profile
         classes = model.classes
@@ -270,7 +276,8 @@ init =
                     generate (\x -> 
                         FormUpdated (\m -> {m | usedFavors = Utils.updateOnWay model.usedFavors used (\us -> {us | uuid = x})})
                     ) uuidStringGenerator
-                ) model.usedFavors
+                ) model.usedFavors ++
+                [(Task.perform SetWindowSize Window.size)]
             )
         )
 

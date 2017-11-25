@@ -10,6 +10,7 @@ import Random.Pcg exposing (generate)
 import Json.Decode
 import Uuid.Barebones exposing (uuidStringGenerator)
 import List.FlatMap exposing (..)
+import Window exposing (Size)
 
 view : Model -> Html Msg
 view model =
@@ -90,15 +91,15 @@ view model =
             ]
         ]
     ] ++ (case model.showDeleteTabialog of
-        Just tab -> [createDialog "このタブを削除してもよろしいですか？" tab]
+        Just tab -> [createDialog "このタブを削除してもよろしいですか？" tab model.windowSize]
         Nothing -> []
     ))
 
-createDialog : String -> Tab -> Html Msg
-createDialog content tab =
+createDialog : String -> Tab -> Size -> Html Msg
+createDialog content tab windowSize =
     div [] [
         div [class "mask"] [],
-        div [class "dialog"] [
+        div [class "dialog", style [("top", "10px"), ("left", String.append (toString (windowSize.width // 2 - 100)) "px")]] [
             div [class "dialog-content"] [
                 span [] [text content]
             ],
@@ -107,7 +108,10 @@ createDialog content tab =
                     type_ "button",
                     onClickNoBubble (CloseDialog (Just tab))
                 ] [text "OK"],
-                button [type_ "button"] [text "Cancel"]
+                button [
+                    type_ "button",
+                    onClickNoBubble (CloseDialog Nothing)
+                ] [text "Cancel"]
             ]
         ]        
     ]
@@ -1783,7 +1787,7 @@ tabToLi model currentTab =
             ],
             span [
                 class "ion-close-round",
-                onClickNoBubble (RemoveTab currentTab)
+                onClickNoBubble (OpenDialog currentTab)
             ] []
         ]
 
