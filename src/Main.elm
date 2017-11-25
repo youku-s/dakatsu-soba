@@ -190,7 +190,7 @@ init =
                 ],
                 appendMode = AppendManeuva,
                 saveMode = UpdateSheet,
-                showDialog = Nothing
+                showDeleteTabialog = Nothing
             }
         profile = model.profile
         classes = model.classes

@@ -16,5 +16,5 @@ type Msg =
     RemoveTab Tab |
     AddTag |
     RemoveTag String |
-    OpenDialog String Msg |
-    CloseDialog (Model -> Cmd Msg)
+    OpenDialog Tab |
+    CloseDialog (Maybe Tab)

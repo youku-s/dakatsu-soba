@@ -89,13 +89,13 @@ view model =
                 ]
             ]
         ]
-    ] ++ (case model.showDialog of
-        Just content -> [createDialog content]
+    ] ++ (case model.showDeleteTabialog of
+        Just tab -> [createDialog "このタブを削除してもよろしいですか？" tab]
         Nothing -> []
     ))
 
-createDialog : String -> Msg -> Html Msg
-createDialog content onOk =
+createDialog : String -> Tab -> Html Msg
+createDialog content tab =
     div [] [
         div [class "mask"] [],
         div [class "dialog"] [
@@ -103,7 +103,10 @@ createDialog content onOk =
                 span [] [text content]
             ],
             div [] [
-                button [type_ "button"] [text "OK"],
+                button [
+                    type_ "button",
+                    onClickNoBubble (CloseDialog (Just tab))
+                ] [text "OK"],
                 button [type_ "button"] [text "Cancel"]
             ]
         ]        

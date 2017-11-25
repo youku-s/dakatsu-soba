@@ -61,9 +61,26 @@ update msg model =
             {model | tags = List.filter (\x -> x /= tagname) model.tags },
             Cmd.none
         )
-        OpenDialog content -> ({model | showDialog = Just content}, Cmd.none)
-        CloseDialog newCmd-> 
+        OpenDialog tab -> ({model | showDeleteTabialog = Just tab}, Cmd.none)
+        CloseDialog tab ->
             let
-                closed = {model | showDialog = Nothing}
-            in
-                (model, newCmd closed)
+                uuid = case tab of
+                    Just tb -> tb.uuid
+                    Nothing -> ""
+
+                eq = \x -> x.uuid == uuid
+
+                activeTabRemoved =
+                    case (model.activeTab, tab) of
+                        (OtherTab activeTab, Just tab) -> activeTab.uuid == tab.uuid
+                        _ -> False
+                
+                isRemoved = case tab of
+                    Just tb -> True
+                    Nothing -> False
+            in                
+                ({model |
+                    tabs = if isRemoved then (Utils.takeNotWhile eq model.tabs) ++ (Utils.dropNotWhile eq model.tabs) else model.tabs,
+                    activeTab = if activeTabRemoved then ProfileTab else model.activeTab,
+                    showDeleteTabialog = Nothing
+                }, Cmd.none)

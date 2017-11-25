@@ -1,7 +1,5 @@
 module Models exposing (..)
 
-import Messages exposing (Msg(..))
-
 type alias Model =
     {
         uuid: String,
@@ -17,7 +15,7 @@ type alias Model =
         tabs: List Tab,
         appendMode: AppendMode,
         saveMode: SaveMode,
-        showDialog: Maybe String
+        showDeleteTabialog: Maybe Tab
     }
 
 type AppendMode =
