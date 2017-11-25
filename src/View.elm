@@ -13,7 +13,7 @@ import List.FlatMap exposing (..)
 
 view : Model -> Html Msg
 view model =
-    body [] [
+    body [] ([
         div [class "content"]
         [
             div [class "left"] [
@@ -89,6 +89,24 @@ view model =
                 ]
             ]
         ]
+    ] ++ (case model.showDialog of
+        Just content -> [createDialog content]
+        Nothing -> []
+    ))
+
+createDialog : String -> Msg -> Html Msg
+createDialog content onOk =
+    div [] [
+        div [class "mask"] [],
+        div [class "dialog"] [
+            div [class "dialog-content"] [
+                span [] [text content]
+            ],
+            div [] [
+                button [type_ "button"] [text "OK"],
+                button [type_ "button"] [text "Cancel"]
+            ]
+        ]        
     ]
 
 onKeyPress : (Int -> msg) -> Attribute msg

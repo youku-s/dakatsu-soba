@@ -61,3 +61,9 @@ update msg model =
             {model | tags = List.filter (\x -> x /= tagname) model.tags },
             Cmd.none
         )
+        OpenDialog content -> ({model | showDialog = Just content}, Cmd.none)
+        CloseDialog newCmd-> 
+            let
+                closed = {model | showDialog = Nothing}
+            in
+                (model, newCmd closed)

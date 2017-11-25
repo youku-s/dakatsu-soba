@@ -15,4 +15,6 @@ type Msg =
     AddTab (Model -> Cmd Msg) |
     RemoveTab Tab |
     AddTag |
-    RemoveTag String
+    RemoveTag String |
+    OpenDialog String Msg |
+    CloseDialog (Model -> Cmd Msg)
