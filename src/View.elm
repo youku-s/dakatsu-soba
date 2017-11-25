@@ -1897,15 +1897,18 @@ tabcontorls model =
                                                     first = case List.head (List.reverse model.tabs) of
                                                         Just tab -> tab
                                                         Nothing -> newTabState
-                                                in
-                                                    {model | 
-                                                        tabs = Utils.updateOnWay model.tabs first (\tb ->
+                                                    tabs = case List.head (List.reverse model.tabs) of
+                                                        Just tab -> Utils.updateOnWay model.tabs tab (\tb ->
                                                             {tb | tabType = 
                                                                 case tb.tabType of
                                                                     ManeuvaTab maneuvas -> ManeuvaTab (Utils.updateOnWay maneuvas maneuva (\ma -> {ma | uuid = uuid}) )
                                                                     _ -> tb.tabType
                                                             }
                                                         )
+                                                        Nothing -> []
+                                                in
+                                                    {model | 
+                                                        tabs = tabs
                                                     }
                                                 )
                                             ) uuidStringGenerator
