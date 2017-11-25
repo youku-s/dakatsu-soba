@@ -11,6 +11,7 @@ import List.FlatMap exposing (..)
 import Uuid.Barebones exposing (uuidStringGenerator)
 import Window exposing (..)
 import Task
+import Html5.DragDrop as DragDrop
 
 init : ( Model, Cmd Msg )
 init =
@@ -184,7 +185,8 @@ init =
                                 range = "",
                                 description = "",
                                 from = "",
-                                region = Head
+                                region = Head,
+                                position = Position 0
                             }
                         ],
                         isEditing = False
@@ -196,7 +198,8 @@ init =
                 windowSize = {
                     width = 0,
                     height = 0
-                }
+                },
+                dragDrop = DragDrop.init
             }
         profile = model.profile
         classes = model.classes

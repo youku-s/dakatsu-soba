@@ -1,5 +1,39 @@
 module Utils exposing (..)
 
+-- i番目の要素をj番目の位置に移動する
+move : Int -> Int -> List a -> Maybe (List a)
+move src dst ls =
+    let
+        (left, right) = List.partition (\(i, x) -> i < dst) (zipWithIndex ls)
+
+        -- 移動する要素を探す
+        target =
+            List.head (List.drop src ls)
+
+        -- 移動先にダミー要素を挿入しておく
+        dummyInserted =
+            Maybe.map (\x -> left ++ [(-1, x)] ++ right) target
+
+        -- 移動済みの要素を削除する
+        srcRemoved =
+            Maybe.map
+                (\xs -> 
+                    List.filter 
+                        (\(i, x) -> 
+                            case target of
+                                Just t -> i == -1 || t /= x
+                                Nothing -> False
+                        )
+                        xs
+                )
+                dummyInserted
+    in
+        Maybe.map (\ls -> List.map (\(i, x) -> x) ls) srcRemoved
+
+at : Int -> List a -> Maybe a
+at index ls =
+    List.head (List.drop index ls)
+
 zipWithIndex : List a -> List (Int, a)
 zipWithIndex ls =
     let
@@ -9,7 +43,7 @@ zipWithIndex ls =
                 ([], []) -> []
                 _ -> []
     in
-        apply ls (List.range 1 (List.length ls))
+        apply ls (List.range 0 ((List.length ls) - 1))
 
 takeNotWhile : (a -> Bool) -> List a -> List a
 takeNotWhile f ls =
@@ -30,6 +64,15 @@ updateOnWay ls elem f =
         -- [a, b, c, d, e] -> [a, b], [d, e]
         leftSide = takeNotWhile (\x -> x == elem) ls
         rightSide = dropNotWhile (\x -> x == elem) ls
+        updated = f elem
+    in
+        leftSide ++ [updated] ++ rightSide
+
+updateOnWayUseEq : List a -> (a -> Bool) -> a -> (a -> a) -> List a
+updateOnWayUseEq ls eq elem f =
+    let
+        leftSide = takeNotWhile eq ls
+        rightSide = dropNotWhile eq ls
         updated = f elem
     in
         leftSide ++ [updated] ++ rightSide

@@ -11,6 +11,7 @@ import Json.Decode
 import Uuid.Barebones exposing (uuidStringGenerator)
 import List.FlatMap exposing (..)
 import Window exposing (Size)
+import Html5.DragDrop as DragDrop
 
 view : Model -> Html Msg
 view model =
@@ -1320,136 +1321,157 @@ resourceTab tab =
                         td [] [],
                         td [] []
                     ]
-                ] ++ (List.map (\(index, resource) -> tr [] [
-                    th [] [text (toString index)],
-                    td [] [
-                        let
-                            val = resource.name
-                        in
-                            input [
-                                type_ "text",
-                                value val,
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\x -> 
-                                        {x | name = s}))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    td [] [
-                        let
-                            val = resource.description
-                        in
-                            input [
-                                type_ "text",
-                                value val,
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\x -> 
-                                        {x | description = s}))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    td [] [
-                        let
-                            val = case resource.favor of
-                                Just favor -> toString favor
-                                Nothing -> ""
-                        in
-                            input [
-                                class "num",
-                                type_ "number",
-                                value val,
-                                Html.Attributes.min "0",
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\x -> {x | favor = 
-                                            case String.toInt s of
-                                                Ok num -> Just num
-                                                _ -> Nothing
-                                        }))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    td [] [
-                        if index == 1 then
-                            span [
-                                class "ion-locked"
-                            ] []
-                        else
-                            span [
-                                class "ion-close-round",
+                ] ++ (List.map (\resource ->
+                    let
+                        index = case resource.position of
+                            Position index -> index
+                    in
+                        tr (
+                            (DragDrop.droppable RowDragDrop resource.position) ++ 
+                            (DragDrop.draggable RowDragDrop resource.uuid)
+                        )
+                        [
+                            th [] [text (toString (index + 1))],
+                            td [] [
                                 let
-                                    eq = \x -> x == resource
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ResourceTab resources -> ResourceTab ((Utils.takeNotWhile eq resources) ++ (Utils.dropNotWhile eq resources))
-                                        _ -> tab.tabType
-                                    }
+                                    val = resource.name
                                 in
-                                    onClick (RemoveRow (\m -> {m |
-                                        activeTab = OtherTab newTabState,
-                                        tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
-                                    }))
-                            ] []
-                    ],
-                    td [] [
-                        span [
-                            class "ion-plus-round",
-                            let
-                                eq = \x -> x == resource
-                            in
-                                onClick (AddRow 
-                                    (\model -> 
-                                        generate (\uuid -> FormUpdated (\m -> 
-                                            let
-                                                newTabState = {tab | tabType = case tab.tabType of
-                                                    ResourceTab resources -> ResourceTab ((Utils.takeNotWhile eq resources) ++ [
-                                                        resource,
-                                                        {
-                                                            uuid = uuid, 
-                                                            name = "",
-                                                            description = "",
-                                                            favor = Nothing
-                                                        }
-                                                    ] ++ (Utils.dropNotWhile eq resources))
-                                                    _ -> tab.tabType
-                                                }
-                                            in
-                                            {m | 
-                                                activeTab = OtherTab newTabState,
-                                                tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState)
+                                    input [
+                                        type_ "text",
+                                        value val,
+                                        onInput (\s -> FormUpdated (\m ->
+                                        let 
+                                            newTabState = {tab | tabType = case tab.tabType of
+                                                ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\x -> 
+                                                {x | name = s}))
+                                                _ -> tab.tabType
                                             }
+                                        in
+                                            {m |
+                                                tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                                activeTab = OtherTab newTabState
+                                            }
+                                        ))
+                                    ] []
+                            ],
+                            td [] [
+                                let
+                                    val = resource.description
+                                in
+                                    input [
+                                        type_ "text",
+                                        value val,
+                                        onInput (\s -> FormUpdated (\m ->
+                                        let 
+                                            newTabState = {tab | tabType = case tab.tabType of
+                                                ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\x -> 
+                                                {x | description = s}))
+                                                _ -> tab.tabType
+                                            }
+                                        in
+                                            {m |
+                                                tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                                activeTab = OtherTab newTabState
+                                            }
+                                        ))
+                                    ] []
+                            ],
+                            td [] [
+                                let
+                                    val = case resource.favor of
+                                        Just favor -> toString favor
+                                        Nothing -> ""
+                                in
+                                    input [
+                                        class "num",
+                                        type_ "number",
+                                        value val,
+                                        Html.Attributes.min "0",
+                                        onInput (\s -> FormUpdated (\m ->
+                                        let 
+                                            newTabState = {tab | tabType = case tab.tabType of
+                                                ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\x -> {x | favor = 
+                                                    case String.toInt s of
+                                                        Ok num -> Just num
+                                                        _ -> Nothing
+                                                }))
+                                                _ -> tab.tabType
+                                            }
+                                        in
+                                            {m |
+                                                tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                                activeTab = OtherTab newTabState
+                                            }
+                                        ))
+                                    ] []
+                            ],
+                            td [] [
+                                if index == 0 then
+                                    span [
+                                        class "ion-locked"
+                                    ] []
+                                else
+                                    span [
+                                        class "ion-close-round",
+                                        let
+                                            eq = \x -> x == resource
+
+                                            prevPosition = \resource ->
+                                                case resource.position of
+                                                    Position index -> Position (index - 1)
+
+                                            newTabState = {tab | tabType = case tab.tabType of
+                                                ResourceTab resources -> ResourceTab ((Utils.takeNotWhile eq resources) ++ (List.map (\r -> {r | position = prevPosition r}) (Utils.dropNotWhile eq resources)))
+                                                _ -> tab.tabType
+                                            }
+                                        in
+                                            onClick (RemoveRow (\m -> {m |
+                                                activeTab = OtherTab newTabState,
+                                                tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
+                                            }))
+                                    ] []
+                            ],
+                            td [] [
+                                span [
+                                    class "ion-plus-round",
+                                    let
+                                        eq = \x -> x == resource
+                                    in
+                                        onClick (AddRow 
+                                            (\model -> 
+                                                generate (\uuid -> FormUpdated (\m -> 
+                                                    let
+                                                        nextPosition = \item ->
+                                                            case item.position of
+                                                                Position index -> Position (index + 1)
+                                                        newTabState = {tab | tabType = case tab.tabType of
+                                                            ResourceTab resources -> ResourceTab ((Utils.takeNotWhile eq resources) ++ [
+                                                                resource,
+                                                                {
+                                                                    uuid = uuid, 
+                                                                    name = "",
+                                                                    description = "",
+                                                                    favor = Nothing,
+                                                                    position = nextPosition resource
+                                                                }
+                                                            ] ++(List.map (\x -> {x | position = nextPosition x}) (Utils.dropNotWhile eq resources)))
+                                                            _ -> tab.tabType
+                                                        }
+                                                    in
+                                                    {m | 
+                                                        activeTab = OtherTab newTabState,
+                                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState)
+                                                    }
+                                                )
+                                                ) uuidStringGenerator
+                                            )
                                         )
-                                        ) uuidStringGenerator
-                                    )
-                                )
-                        ] []
-                    ]
-                ]) (Utils.zipWithIndex resources)))
+                                ] []
+                            ]
+                        ]
+                )) (List.sortBy (\r -> case r.position of
+                    Position index -> index
+                ) resources))
             ]
         ]
 
@@ -1483,434 +1505,464 @@ maneuvaTab tab =
                         td [] [],
                         td [] []
                     ]
-                ] ++ (List.map (\(index, item) -> tr [] [
-                    th [] [text (toString index)],
-                    th [] [
-                        let
-                            boxChecked = item.lost
-                        in
-                            input [
-                                class "check",
-                                type_ "checkbox",
-                                checked boxChecked,
-                                onCheck (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> {x | lost = s}))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    th [] [
-                        let
-                            boxChecked = item.used
-                        in
-                            input [
-                                class "check",
-                                type_ "checkbox",
-                                checked boxChecked,
-                                onCheck (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> {x | used = s}))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    td [] [
-                        let
-                            val = 
-                                case item.malice of
-                                    Just malice -> toString malice
-                                    Nothing -> ""
-                        in
-                            input [
-                                class "num",
-                                type_ "number",
-                                value val,
-                                Html.Attributes.min "0",
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> {x | malice = 
-                                            case String.toInt s of
-                                                Ok num -> Just num
-                                                _ -> Nothing
+                ] ++ (List.map (\item -> 
+                let
+                    index = case item.position of
+                        Position index -> index
+                in
+                    tr (
+                        (DragDrop.droppable RowDragDrop item.position) ++ 
+                        (DragDrop.draggable RowDragDrop item.uuid)
+                    )
+                    [
+                        th [] [text (toString (index + 1))],
+                        th [] [
+                            let
+                                boxChecked = item.lost
+                            in
+                                input [
+                                    class "check",
+                                    type_ "checkbox",
+                                    checked boxChecked,
+                                    onCheck (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> {x | lost = s}))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] []
+                        ],
+                        th [] [
+                            let
+                                boxChecked = item.used
+                            in
+                                input [
+                                    class "check",
+                                    type_ "checkbox",
+                                    checked boxChecked,
+                                    onCheck (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> {x | used = s}))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] []
+                        ],
+                        td [] [
+                            let
+                                val = 
+                                    case item.malice of
+                                        Just malice -> toString malice
+                                        Nothing -> ""
+                            in
+                                input [
+                                    class "num",
+                                    type_ "number",
+                                    value val,
+                                    Html.Attributes.min "0",
+                                    onInput (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> {x | malice = 
+                                                case String.toInt s of
+                                                    Ok num -> Just num
+                                                    _ -> Nothing
+                                            }))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] []
+                        ],
+                        td [] [
+                            let
+                                val =
+                                    case item.act of
+                                        Just act -> toString act
+                                        Nothing -> ""
+                            in
+                                input [
+                                    class "num",
+                                    type_ "number",
+                                    value val,
+                                    Html.Attributes.min "0",
+                                    onInput (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> {x | act = 
+                                                case String.toInt s of
+                                                    Ok num -> Just num
+                                                    _ -> Nothing
+                                            }))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] []
+                        ],
+                        td [] [
+                            let
+                                val =
+                                    case item.maneuvaType of
+                                        Skill -> "0"
+                                        Part -> "1"
+                                        Item -> "2"
+                                        Effect -> "3"
+                                        Archive -> "4"
+                            in
+                                select [
+                                    onInput (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
+                                            {x | maneuvaType = case s of 
+                                                "0" -> Skill
+                                                "1" -> Part
+                                                "2" -> Item
+                                                "3" -> Effect
+                                                "4" -> Archive
+                                                _ -> Part
+                                            }))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] [
+                                    option [value "0", selected (val == "0")] [text "スキル"],
+                                    option [value "1", selected (val == "1")] [text "パーツ"],
+                                    option [value "2", selected (val == "2")] [text "アイテム"],
+                                    option [value "3", selected (val == "3")] [text "エフェクト"],
+                                    option [value "4", selected (val == "4")] [text "アーカイブ"]
+                                ]
+                        ],
+                        td [] [
+                            let
+                                val =
+                                    case item.region of
+                                        Head -> "0"
+                                        Arm -> "1"
+                                        Body -> "2"
+                                        Leg -> "3"
+                                        OtherRegion -> "4"
+                            in
+                                select [
+                                    onInput (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
+                                            {x | region = case s of 
+                                                "0" -> Head
+                                                "1" -> Arm
+                                                "2" -> Body
+                                                "3" -> Leg
+                                                "4" -> OtherRegion
+                                                _ -> Head
+                                            }))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] [
+                                    option [value "0", selected (val == "0")] [text "頭"],
+                                    option [value "1", selected (val == "1")] [text "腕"],
+                                    option [value "2", selected (val == "2")] [text "胴"],
+                                    option [value "3", selected (val == "3")] [text "脚"],
+                                    option [value "4", selected (val == "4")] [text "その他"]
+                                ]
+                        ],
+                        td [] [
+                            let
+                                val = item.category
+                            in
+                                select [
+                                    onInput (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
+                                            {x | category = s}))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] [
+                                    option [value "0", selected (val == "0")] [text "通常技"],
+                                    option [value "1", selected (val == "1")] [text "必殺技"],
+                                    option [value "2", selected (val == "2")] [text "行動値"],
+                                    option [value "3", selected (val == "3")] [text "支援"],
+                                    option [value "4", selected (val == "4")] [text "妨害"],
+                                    option [value "5", selected (val == "5")] [text "防御"],
+                                    option [value "6", selected (val == "6")] [text "移動"],
+                                    option [value "7", selected (val == "7")] [text "打ち消し"],
+                                    option [value "8", selected (val == "8")] [text "無効"],
+                                    option [value "9", selected (val == "9")] [text "効果なし"],
+                                    option [value "10", selected (val == "10")] [text "耐性"],
+                                    option [value "11", selected (val == "11")] [text "再使用"],
+                                    option [value "12", selected (val == "12")] [text "対話"],
+                                    option [value "13", selected (val == "13")] [text "行動出目"],
+                                    option [value "14", selected (val == "14")] [text "攻撃出目"]
+                                ]
+                        ],
+                        td [] [
+                            let
+                                val = item.name
+                            in
+                                input [
+                                    type_ "text",
+                                    value val,
+                                    onInput (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
+                                            {x | name = s}))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] []
+                        ],
+                        td [] [
+                            let
+                                val =
+                                    case item.timing of
+                                        AutoAlways -> "0"
+                                        AutoNeedsDeclearation -> "1"
+                                        AutoOthers -> "2"
+                                        Action -> "3"
+                                        Judge -> "4"
+                                        Damage -> "5"
+                                        Rapid -> "6"
+                                        BeforeBattle -> "7"
+                                        BattleStart -> "8"
+                                        TurnStart -> "9"
+                                        CountStart -> "10"
+                            in
+                                select [
+                                    value val,
+                                    onInput (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> {x | timing = case s of
+                                                "0" -> AutoAlways
+                                                "1" -> AutoNeedsDeclearation
+                                                "2" -> AutoOthers
+                                                "3" -> Action
+                                                "4" -> Judge
+                                                "5" -> Damage
+                                                "6" -> Rapid
+                                                "7" -> BeforeBattle
+                                                "8" -> BattleStart
+                                                "9" -> TurnStart
+                                                "10" -> CountStart
+                                                _ -> AutoAlways
+                                            }))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] [
+                                    option [value "0", selected (val == "0")] [text "オート(常時)"],
+                                    option [value "1", selected (val == "1")] [text "オート(宣言)"],
+                                    option [value "2", selected (val == "2")] [text "オート(その他)"],
+                                    option [value "3", selected (val == "3")] [text "アクション"],
+                                    option [value "4", selected (val == "4")] [text "ジャッジ"],
+                                    option [value "5", selected (val == "5")] [text "ダメージ"],
+                                    option [value "6", selected (val == "6")] [text "ラピッド"],
+                                    option [value "7", selected (val == "7")] [text "戦闘開始前"],
+                                    option [value "8", selected (val == "8")] [text "戦闘開始時"],
+                                    option [value "9", selected (val == "9")] [text "ターン開始"],
+                                    option [value "10", selected (val == "10")] [text "カウント開始"]
+                                ]
+                        ],
+                        td [] [
+                            let
+                                val = item.cost
+                            in
+                                input [
+                                    type_ "text",
+                                    value val,
+                                    size 4,
+                                    onInput (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
+                                            {x | cost = s}))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] []
+                        ],
+                        td [] [
+                            let
+                                val = item.range
+                            in
+                                input [
+                                    type_ "text",
+                                    value val,
+                                    size 4,
+                                    onInput (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
+                                            {x | range = s}))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] []
+                        ],
+                        td [] [
+                            let
+                                val = item.description
+                            in
+                                input [
+                                    type_ "text",
+                                    value val,
+                                    onInput (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
+                                            {x | description = s}))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] []
+                        ],
+                        td [] [
+                            let
+                                val = item.from
+                            in
+                                input [
+                                    type_ "text",
+                                    value val,
+                                    size 10,
+                                    onInput (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
+                                            {x | from = s}))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] []
+                        ],
+                        td [] [
+                            let
+                                val =
+                                    case item.favor of
+                                        Just favor -> toString favor
+                                        Nothing -> ""
+                            in
+                                input [
+                                    class "num",
+                                    type_ "number",
+                                    value val,
+                                    Html.Attributes.min "0",
+                                    onInput (\s -> FormUpdated (\m ->
+                                    let 
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> {x | favor = 
+                                                case String.toInt s of
+                                                    Ok num -> Just num
+                                                    _ -> Nothing
+                                            }))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        {m |
+                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            activeTab = OtherTab newTabState
+                                        }
+                                    ))
+                                ] []
+                        ],
+                        td [] [
+                            if index == 0 then
+                                span [
+                                    class "ion-locked"
+                                ] []
+                            else
+                                span [
+                                    class "ion-close-round",
+                                    let
+                                        eq = \x -> x == item
+
+                                        prevPosition = \item ->
+                                            case item.position of
+                                                Position index -> Position (index - 1)
+
+                                        newTabState = {tab | tabType = case tab.tabType of
+                                            ManeuvaTab items -> ManeuvaTab ((Utils.takeNotWhile eq items) ++ (List.map (\i -> {i | position = prevPosition(i)}) (Utils.dropNotWhile eq items)))
+                                            _ -> tab.tabType
+                                        }
+                                    in
+                                        onClick (RemoveRow (\m -> {m |
+                                            activeTab = OtherTab newTabState,
+                                            tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
                                         }))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    td [] [
-                        let
-                            val =
-                                case item.act of
-                                    Just act -> toString act
-                                    Nothing -> ""
-                        in
-                            input [
-                                class "num",
-                                type_ "number",
-                                value val,
-                                Html.Attributes.min "0",
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> {x | act = 
-                                            case String.toInt s of
-                                                Ok num -> Just num
-                                                _ -> Nothing
-                                        }))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    td [] [
-                        let
-                            val =
-                                case item.maneuvaType of
-                                    Skill -> "0"
-                                    Part -> "1"
-                                    Item -> "2"
-                                    Effect -> "3"
-                                    Archive -> "4"
-                        in
-                            select [
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
-                                        {x | maneuvaType = case s of 
-                                            "0" -> Skill
-                                            "1" -> Part
-                                            "2" -> Item
-                                            "3" -> Effect
-                                            "4" -> Archive
-                                            _ -> Part
-                                        }))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] [
-                                option [value "0", selected (val == "0")] [text "スキル"],
-                                option [value "1", selected (val == "1")] [text "パーツ"],
-                                option [value "2", selected (val == "2")] [text "アイテム"],
-                                option [value "3", selected (val == "3")] [text "エフェクト"],
-                                option [value "4", selected (val == "4")] [text "アーカイブ"]
-                            ]
-                    ],
-                    td [] [
-                        let
-                            val =
-                                case item.region of
-                                    Head -> "0"
-                                    Arm -> "1"
-                                    Body -> "2"
-                                    Leg -> "3"
-                                    OtherRegion -> "4"
-                        in
-                            select [
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
-                                        {x | region = case s of 
-                                            "0" -> Head
-                                            "1" -> Arm
-                                            "2" -> Body
-                                            "3" -> Leg
-                                            "4" -> OtherRegion
-                                            _ -> Head
-                                        }))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] [
-                                option [value "0", selected (val == "0")] [text "頭"],
-                                option [value "1", selected (val == "1")] [text "腕"],
-                                option [value "2", selected (val == "2")] [text "胴"],
-                                option [value "3", selected (val == "3")] [text "脚"],
-                                option [value "4", selected (val == "4")] [text "その他"]
-                            ]
-                    ],
-                    td [] [
-                        let
-                            val = item.category
-                        in
-                            select [
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
-                                        {x | category = s}))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] [
-                                option [value "0", selected (val == "0")] [text "通常技"],
-                                option [value "1", selected (val == "1")] [text "必殺技"],
-                                option [value "2", selected (val == "2")] [text "行動値"],
-                                option [value "3", selected (val == "3")] [text "支援"],
-                                option [value "4", selected (val == "4")] [text "妨害"],
-                                option [value "5", selected (val == "5")] [text "防御"],
-                                option [value "6", selected (val == "6")] [text "移動"],
-                                option [value "7", selected (val == "7")] [text "打ち消し"],
-                                option [value "8", selected (val == "8")] [text "無効"],
-                                option [value "9", selected (val == "9")] [text "効果なし"],
-                                option [value "10", selected (val == "10")] [text "耐性"],
-                                option [value "11", selected (val == "11")] [text "再使用"],
-                                option [value "12", selected (val == "12")] [text "対話"],
-                                option [value "13", selected (val == "13")] [text "行動出目"],
-                                option [value "14", selected (val == "14")] [text "攻撃出目"]
-                            ]
-                    ],
-                    td [] [
-                        let
-                            val = item.name
-                        in
-                            input [
-                                type_ "text",
-                                value val,
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
-                                        {x | name = s}))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    td [] [
-                        let
-                            val =
-                                case item.timing of
-                                    AutoAlways -> "0"
-                                    AutoNeedsDeclearation -> "1"
-                                    AutoOthers -> "2"
-                                    Action -> "3"
-                                    Judge -> "4"
-                                    Damage -> "5"
-                                    Rapid -> "6"
-                                    BeforeBattle -> "7"
-                                    BattleStart -> "8"
-                                    TurnStart -> "9"
-                                    CountStart -> "10"
-                        in
-                            select [
-                                value val,
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> {x | timing = case s of
-                                            "0" -> AutoAlways
-                                            "1" -> AutoNeedsDeclearation
-                                            "2" -> AutoOthers
-                                            "3" -> Action
-                                            "4" -> Judge
-                                            "5" -> Damage
-                                            "6" -> Rapid
-                                            "7" -> BeforeBattle
-                                            "8" -> BattleStart
-                                            "9" -> TurnStart
-                                            "10" -> CountStart
-                                            _ -> AutoAlways
-                                        }))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] [
-                                option [value "0", selected (val == "0")] [text "オート(常時)"],
-                                option [value "1", selected (val == "1")] [text "オート(宣言)"],
-                                option [value "2", selected (val == "2")] [text "オート(その他)"],
-                                option [value "3", selected (val == "3")] [text "アクション"],
-                                option [value "4", selected (val == "4")] [text "ジャッジ"],
-                                option [value "5", selected (val == "5")] [text "ダメージ"],
-                                option [value "6", selected (val == "6")] [text "ラピッド"],
-                                option [value "7", selected (val == "7")] [text "戦闘開始前"],
-                                option [value "8", selected (val == "8")] [text "戦闘開始時"],
-                                option [value "9", selected (val == "9")] [text "ターン開始"],
-                                option [value "10", selected (val == "10")] [text "カウント開始"]
-                            ]
-                    ],
-                    td [] [
-                        let
-                            val = item.cost
-                        in
-                            input [
-                                type_ "text",
-                                value val,
-                                size 4,
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
-                                        {x | cost = s}))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    td [] [
-                        let
-                            val = item.range
-                        in
-                            input [
-                                type_ "text",
-                                value val,
-                                size 4,
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
-                                        {x | range = s}))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    td [] [
-                        let
-                            val = item.description
-                        in
-                            input [
-                                type_ "text",
-                                value val,
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
-                                        {x | description = s}))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    td [] [
-                        let
-                            val = item.from
-                        in
-                            input [
-                                type_ "text",
-                                value val,
-                                size 10,
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> 
-                                        {x | from = s}))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    td [] [
-                        let
-                            val =
-                                case item.favor of
-                                    Just favor -> toString favor
-                                    Nothing -> ""
-                        in
-                            input [
-                                class "num",
-                                type_ "number",
-                                value val,
-                                Html.Attributes.min "0",
-                                onInput (\s -> FormUpdated (\m ->
-                                let 
-                                    newTabState = {tab | tabType = case tab.tabType of
-                                        ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\x -> {x | favor = 
-                                            case String.toInt s of
-                                                Ok num -> Just num
-                                                _ -> Nothing
-                                        }))
-                                        _ -> tab.tabType
-                                    }
-                                in
-                                    {m |
-                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
-                                        activeTab = OtherTab newTabState
-                                    }
-                                ))
-                            ] []
-                    ],
-                    td [] [
-                        if index == 1 then
+                                ] []
+                        ],
+                        td [] [
                             span [
-                                class "ion-locked"
-                            ] []
-                        else
-                            span [
-                                class "ion-close-round",
+                                class "ion-plus-round",
                                 let
                                     eq = \x -> x == item
                                     newTabState = {tab | tabType = case tab.tabType of
@@ -1918,61 +1970,52 @@ maneuvaTab tab =
                                         _ -> tab.tabType
                                     }
                                 in
-                                    onClick (RemoveRow (\m -> {m |
-                                        activeTab = OtherTab newTabState,
-                                        tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
-                                    }))
-                            ] []
-                    ],
-                    td [] [
-                        span [
-                            class "ion-plus-round",
-                            let
-                                eq = \x -> x == item
-                                newTabState = {tab | tabType = case tab.tabType of
-                                    ManeuvaTab items -> ManeuvaTab ((Utils.takeNotWhile eq items) ++ (Utils.dropNotWhile eq items))
-                                    _ -> tab.tabType
-                                }
-                            in
-                                onClick (AddRow 
-                                    (\model -> 
-                                        generate (\uuid -> FormUpdated (\m -> 
-                                            let
-                                                newTabState = {tab | tabType = case tab.tabType of
-                                                    ManeuvaTab items -> ManeuvaTab ((Utils.takeNotWhile eq items) ++ [
-                                                        item,
-                                                        {
-                                                            uuid = uuid, 
-                                                            used = False,
-                                                            lost = False,
-                                                            act = Nothing,
-                                                            malice = Nothing,
-                                                            favor = Nothing,
-                                                            category = "0",
-                                                            name = "",
-                                                            timing = AutoAlways,
-                                                            cost = "",
-                                                            range = "",
-                                                            description = "",
-                                                            from = "",
-                                                            region = Head,
-                                                            maneuvaType = Skill
-                                                        }
-                                                    ] ++ (Utils.dropNotWhile eq items))
-                                                    _ -> tab.tabType
+                                    onClick (AddRow 
+                                        (\model -> 
+                                            generate (\uuid -> FormUpdated (\m -> 
+                                                let
+                                                    nextPosition = \item ->
+                                                        case item.position of
+                                                            Position index -> Position (index + 1)
+                                                    newTabState = {tab | tabType = case tab.tabType of
+                                                        ManeuvaTab items -> ManeuvaTab ((Utils.takeNotWhile eq items) ++ [
+                                                                item,
+                                                                {
+                                                                    uuid = uuid, 
+                                                                    used = False,
+                                                                    lost = False,
+                                                                    act = Nothing,
+                                                                    malice = Nothing,
+                                                                    favor = Nothing,
+                                                                    category = "0",
+                                                                    name = "",
+                                                                    timing = AutoAlways,
+                                                                    cost = "",
+                                                                    range = "",
+                                                                    description = "",
+                                                                    from = "",
+                                                                    region = Head,
+                                                                    maneuvaType = Skill,
+                                                                    position = nextPosition(item)
+                                                                }
+                                                            ] ++ (List.map (\x -> {x | position = nextPosition x}) (Utils.dropNotWhile eq items)))
+                                                        _ -> tab.tabType
+                                                    }
+                                                in
+                                                {m | 
+                                                    activeTab = OtherTab newTabState,
+                                                    tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState)
                                                 }
-                                            in
-                                            {m | 
-                                                activeTab = OtherTab newTabState,
-                                                tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState)
-                                            }
+                                            )
+                                            ) uuidStringGenerator
                                         )
-                                        ) uuidStringGenerator
                                     )
-                                )
-                        ] []
+                            ] []
+                        ]
                     ]
-                ]) (Utils.zipWithIndex items)))
+                ) (List.sortBy (\r -> case r.position of
+                    Position index -> index
+                ) items)))
             ]
         ]
 
@@ -2098,7 +2141,8 @@ tabcontorls model =
                                                 description = "",
                                                 from = "",
                                                 region = Head,
-                                                maneuvaType = Skill
+                                                maneuvaType = Skill,
+                                                position = Position 0
                                             }
                                         ]
                                         AppendResource -> ResourceTab [
@@ -2106,7 +2150,8 @@ tabcontorls model =
                                                 uuid = "",
                                                 name = "",
                                                 description = "",
-                                                favor = Nothing
+                                                favor = Nothing,
+                                                position = Position 0
                                             }
                                         ]
 

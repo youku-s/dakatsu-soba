@@ -2,6 +2,7 @@ module Messages exposing (..)
 
 import Models exposing (..)
 import Window exposing (Size)
+import Html5.DragDrop as DragDrop
 
 type Msg =
     NoOp |
@@ -19,4 +20,5 @@ type Msg =
     RemoveTag String |
     OpenDialog Tab |
     CloseDialog (Maybe Tab) |
-    SetWindowSize Size
+    SetWindowSize Size |
+    RowDragDrop (DragDrop.Msg String Position)

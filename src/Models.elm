@@ -1,6 +1,7 @@
 module Models exposing (..)
 
 import Window exposing (Size)
+import Html5.DragDrop as DragDrop
 
 type alias Model =
     {
@@ -18,15 +19,20 @@ type alias Model =
         appendMode: AppendMode,
         saveMode: SaveMode,
         showDeleteTabialog: Maybe Tab,
-        windowSize: Size
+        windowSize: Size,
+        dragDrop : DragDrop.Model String Position
     }
+
+type Position
+    = Position Int
 
 type alias Resource =
     {
         uuid: String,
         name: String,
         description: String,
-        favor: Maybe Int
+        favor: Maybe Int,
+        position: Position -- 行内の位置
     }
 
 type AppendMode =
@@ -182,7 +188,8 @@ type alias Maneuva =
         range: String, -- 射程
         description: String, -- 説明
         from: String, -- 取得元
-        region: Region -- 部位
+        region: Region, -- 部位
+        position: Position -- 行内の位置
     }
 
 type Region =
