@@ -7,12 +7,10 @@ move src dst ls =
         (left, right) = List.partition (\(i, x) -> i < dst) (zipWithIndex ls)
 
         -- 移動する要素を探す
-        target =
-            List.head (List.drop src ls)
+        target = List.head (List.drop src ls)
 
         -- 移動先にダミー要素を挿入しておく
-        dummyInserted =
-            Maybe.map (\x -> left ++ [(-1, x)] ++ right) target
+        dummyInserted = Maybe.map (\x -> left ++ [(-1, x)] ++ right) target
 
         -- 移動済みの要素を削除する
         srcRemoved =
@@ -29,6 +27,15 @@ move src dst ls =
                 dummyInserted
     in
         Maybe.map (\ls -> List.map (\(i, x) -> x) ls) srcRemoved
+
+insert : Int -> a -> List a -> List a
+insert dst elem ls =
+    let
+        (left, right) = List.partition (\(i, x) -> i < dst) (zipWithIndex ls)
+
+        inserted = right ++ [(-1, elem)] ++ left
+    in
+        List.map (\(i, x) -> x) inserted        
 
 at : Int -> List a -> Maybe a
 at index ls =

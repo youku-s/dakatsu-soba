@@ -252,23 +252,73 @@ init =
                     ) uuidStringGenerator
                 ) model.classes.points ++
                 List.FlatMap.flatMap (\tab -> 
-                    generate (\x -> 
-                        FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs tab (\tb -> {tb | uuid = x})})
-                    ) uuidStringGenerator ::
-                    (List.map (\item -> 
+                    (
+                        List.map (\item -> 
+                            generate (\uuid -> FormUpdated (\m ->
+                                let
+                                    tabs = case List.head (List.reverse m.tabs) of
+                                        Just tab -> Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb ->
+                                            {tb | tabType = 
+                                                case tb.tabType of
+                                                    ManeuvaTab maneuvas ->
+                                                        ManeuvaTab (
+                                                            let 
+                                                                newManeuvas =
+                                                                    Utils.updateOnWayUseEq maneuvas (\x -> x.uuid == "") item (\ma -> {ma | uuid = uuid})
+                                                            in
+                                                                newManeuvas
+                                                        )
+                                                    _ -> tb.tabType
+                                            }
+                                        )
+                                        Nothing -> []
+                                in
+                                    {m | 
+                                        tabs = tabs
+                                    }
+                                )
+                            ) uuidStringGenerator
+                        ) (case tab.tabType of
+                            ManeuvaTab items -> items
+                            _ -> []
+                        )
+                    ) ++
+                    (
+                        List.map (\resource -> 
+                            generate (\uuid -> FormUpdated (\m ->
+                                let
+                                    tabs = case List.head (List.reverse m.tabs) of
+                                        Just tab -> Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb ->
+                                            {tb | tabType = 
+                                                case tb.tabType of
+                                                    ResourceTab resources ->
+                                                        ResourceTab (
+                                                            let 
+                                                                newManeuvas =
+                                                                    Utils.updateOnWayUseEq resources (\x -> x.uuid == "") resource (\ma -> {ma | uuid = uuid})
+                                                            in
+                                                                newManeuvas
+                                                        )
+                                                    _ -> tb.tabType
+                                            }
+                                        )
+                                        Nothing -> []
+                                in
+                                    {m | 
+                                        tabs = tabs
+                                    }
+                                )
+                            ) uuidStringGenerator
+                        ) (case tab.tabType of
+                            ResourceTab resources -> resources
+                            _ -> []
+                        )
+                    ) ++ 
+                    [
                         generate (\x -> 
-                            FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs tab (\tb -> {tb | tabType = 
-                                case tb.tabType of
-                                    ManeuvaTab items -> ManeuvaTab (Utils.updateOnWay items item (\it -> {it | uuid = x}))
-                                    _ -> tb.tabType
-                            }
-                            )})
+                            FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs tab (\tb -> {tb | uuid = x})})
                         ) uuidStringGenerator
-                    ) (case tab.tabType of
-                        ManeuvaTab items -> items
-                        _ -> []
-                    )
-                    )
+                    ]
                 ) model.tabs ++
                 List.map (\favor -> 
                     generate (\x -> 

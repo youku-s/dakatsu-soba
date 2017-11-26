@@ -2131,50 +2131,52 @@ tabcontorls model =
                     onClick (AddTab 
                         (\model ->
                             let
+                                newManeuva =
+                                    {
+                                        uuid = "", 
+                                        used = False,
+                                        lost = False,
+                                        act = Nothing,
+                                        malice = Nothing,
+                                        favor = Nothing,
+                                        category = "0",
+                                        name = "",
+                                        timing = AutoAlways,
+                                        cost = "",
+                                        range = "",
+                                        description = "",
+                                        from = "",
+                                        region = Head,
+                                        maneuvaType = Skill,
+                                        position = Position 0
+                                    }
+
+                                newResource =
+                                    {
+                                        uuid = "",
+                                        name = "",
+                                        description = "",
+                                        favor = Nothing,
+                                        position = Position 0
+                                    }
+
                                 tabType = 
                                     case model.appendMode of
-                                        AppendManeuva -> ManeuvaTab [
-                                            {
-                                                uuid = "", 
-                                                used = False,
-                                                lost = False,
-                                                act = Nothing,
-                                                malice = Nothing,
-                                                favor = Nothing,
-                                                category = "0",
-                                                name = "",
-                                                timing = AutoAlways,
-                                                cost = "",
-                                                range = "",
-                                                description = "",
-                                                from = "",
-                                                region = Head,
-                                                maneuvaType = Skill,
-                                                position = Position 0
-                                            }
-                                        ]
-                                        AppendResource -> ResourceTab [
-                                            {
-                                                uuid = "",
-                                                name = "",
-                                                description = "",
-                                                favor = Nothing,
-                                                position = Position 0
-                                            }
-                                        ]
+                                        AppendManeuva -> ManeuvaTab [newManeuva]
+                                        AppendResource -> ResourceTab [newResource]
 
                                 title = 
                                     case model.appendMode of
                                         AppendManeuva -> "マニューバ"
                                         AppendResource -> "リソース"
 
-                                items =
-                                    case tabType of
+                                getItems = \tab ->
+                                    case tab.tabType of
                                         ManeuvaTab items -> items
                                         _ -> []
 
-                                resources =
-                                    case tabType of
+                                getResources = \tab ->
+                                    case tab.tabType of
                                         ResourceTab resources -> resources
                                         _ -> []
 
@@ -2184,62 +2186,96 @@ tabcontorls model =
                                     title = title,
                                     isEditing = False
                                 }
+
+                                newTabs = model.tabs ++ [newTabState]
                             in
                                 Cmd.batch (
                                     [
-                                        generate (\uuid -> FormUpdated (\m -> 
-                                                {m | 
-                                                    tabs = m.tabs ++ [{newTabState | uuid = uuid}]
-                                                }
-                                            )
-                                        ) uuidStringGenerator
-                                    ] ++
-                                    (List.map (\maneuva -> 
-                                            generate (\uuid -> FormUpdated (\model ->
+                                        (
+                                            generate (\uuid -> FormUpdated (\m ->
                                                 let
-                                                    first = case List.head (List.reverse model.tabs) of
-                                                        Just tab -> tab
-                                                        Nothing -> newTabState
-                                                    tabs = case List.head (List.reverse model.tabs) of
-                                                        Just tab -> Utils.updateOnWay model.tabs tab (\tb ->
+                                                    tabs = case List.head (List.reverse m.tabs) of
+                                                        Just tab -> Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb ->
                                                             {tb | tabType = 
                                                                 case tb.tabType of
-                                                                    ManeuvaTab maneuvas -> ManeuvaTab (Utils.updateOnWay maneuvas maneuva (\ma -> {ma | uuid = uuid}) )
+                                                                    ManeuvaTab maneuvas ->
+                                                                        ManeuvaTab (
+                                                                            let 
+                                                                                newManeuvas =
+                                                                                    Utils.updateOnWayUseEq maneuvas (\x -> x.uuid == "") newManeuva (\ma -> {ma | uuid = uuid})
+                                                                            in
+                                                                                newManeuvas
+                                                                        )
                                                                     _ -> tb.tabType
                                                             }
                                                         )
                                                         Nothing -> []
                                                 in
-                                                    {model | 
+                                                    {m | 
                                                         tabs = tabs
                                                     }
                                                 )
                                             ) uuidStringGenerator
-                                        ) 
-                                    items) ++
-                                    (List.map (\resource -> 
-                                            generate (\uuid -> FormUpdated (\model ->
+                                        ),
+                                        (
+                                            generate (\uuid -> FormUpdated (\m ->
                                                 let
-                                                    first = case List.head (List.reverse model.tabs) of
-                                                        Just tab -> tab
-                                                        Nothing -> newTabState
-                                                    tabs = case List.head (List.reverse model.tabs) of
-                                                        Just tab -> Utils.updateOnWay model.tabs tab (\tb ->
+                                                    tabs = case List.head (List.reverse m.tabs) of
+                                                        Just tab -> Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb ->
                                                             {tb | tabType = 
                                                                 case tb.tabType of
-                                                                    ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\re -> {re | uuid = uuid}) )
+                                                                    ResourceTab resources ->
+                                                                        ResourceTab (
+                                                                            let 
+                                                                                newResources =
+                                                                                    Utils.updateOnWayUseEq resources (\x -> x.uuid == "") newResource (\ma -> {ma | uuid = uuid})
+                                                                            in
+                                                                                newResources
+                                                                        )
                                                                     _ -> tb.tabType
                                                             }
                                                         )
                                                         Nothing -> []
                                                 in
-                                                    {model | 
+                                                    {m | 
                                                         tabs = tabs
                                                     }
                                                 )
                                             ) uuidStringGenerator
-                                        ) 
-                                    resources)
+                                        ),
+                                        (
+                                            generate (\uuid -> FormUpdated (\m -> 
+                                                    {m | 
+                                                        tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == "") newTabState (\tb -> {tb | uuid = uuid})
+                                                    }
+                                                )
+                                            ) uuidStringGenerator
+                                        )
+                                    ]
+                                    -- ++
+                                    -- (List.map (\resource -> 
+                                    --         generate (\uuid -> FormUpdated (\model ->
+                                    --             let
+                                    --                 first = case List.head (List.reverse model.tabs) of
+                                    --                     Just tab -> tab
+                                    --                     Nothing -> newTabState
+                                    --                 tabs = case List.head (List.reverse model.tabs) of
+                                    --                     Just tab -> Utils.updateOnWay model.tabs tab (\tb ->
+                                    --                         {tb | tabType = 
+                                    --                             case tb.tabType of
+                                    --                                 ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\re -> {re | uuid = uuid}) )
+                                    --                                 _ -> tb.tabType
+                                    --                         }
+                                    --                     )
+                                    --                     Nothing -> []
+                                    --             in
+                                    --                 {model | 
+                                    --                     tabs = tabs
+                                    --                 }
+                                    --             )
+                                    --         ) uuidStringGenerator
+                                    --     ) 
+                                    -- (getResources newTabState))
                                 )
                         )
                     )
