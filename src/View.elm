@@ -2193,7 +2193,7 @@ tabToLi model currentTab =
                                 newTabState = {currentTab | title = s}
                             in
                                 {m |
-                                    tabs = Utils.updateOnWay m.tabs currentTab (\tb -> newTabState),
+                                    tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == currentTab.uuid) currentTab (\tb -> newTabState),
                                     activeTab = OtherTab newTabState
                                 }
                             ))
