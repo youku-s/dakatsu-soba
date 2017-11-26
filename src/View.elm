@@ -1291,7 +1291,9 @@ classesTab classes =
 
 otherTab : Tab -> Html Msg
 otherTab tab =
-    div [] [
+    div [
+        id tab.uuid
+    ] [
         div [class "section-title"] [text tab.title],
         let
             tabbody =
@@ -1328,7 +1330,10 @@ resourceTab tab =
                     in
                         tr (
                             (DragDrop.droppable RowDragDrop resource.position) ++ 
-                            (DragDrop.draggable RowDragDrop resource.uuid)
+                            (DragDrop.draggable RowDragDrop resource.uuid) ++
+                            [
+                                id resource.uuid
+                            ]
                         )
                         [
                             th [] [text (toString (index + 1))],
@@ -1348,7 +1353,7 @@ resourceTab tab =
                                             }
                                         in
                                             {m |
-                                                tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                                tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                                 activeTab = OtherTab newTabState
                                             }
                                         ))
@@ -1370,7 +1375,7 @@ resourceTab tab =
                                             }
                                         in
                                             {m |
-                                                tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                                tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                                 activeTab = OtherTab newTabState
                                             }
                                         ))
@@ -1399,7 +1404,7 @@ resourceTab tab =
                                             }
                                         in
                                             {m |
-                                                tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                                tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                                 activeTab = OtherTab newTabState
                                             }
                                         ))
@@ -1427,7 +1432,7 @@ resourceTab tab =
                                         in
                                             onClick (RemoveRow (\m -> {m |
                                                 activeTab = OtherTab newTabState,
-                                                tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
+                                                tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState)
                                             }))
                                     ] []
                             ],
@@ -1460,7 +1465,7 @@ resourceTab tab =
                                                     in
                                                     {m | 
                                                         activeTab = OtherTab newTabState,
-                                                        tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState)
+                                                        tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState)
                                                     }
                                                 )
                                                 ) uuidStringGenerator
@@ -1512,7 +1517,10 @@ maneuvaTab tab =
                 in
                     tr (
                         (DragDrop.droppable RowDragDrop item.position) ++ 
-                        (DragDrop.draggable RowDragDrop item.uuid)
+                        (DragDrop.draggable RowDragDrop item.uuid) ++
+                        [
+                            id item.uuid
+                        ]
                     )
                     [
                         th [] [text (toString (index + 1))],
@@ -1584,7 +1592,7 @@ maneuvaTab tab =
                                         }
                                     in
                                         {m |
-                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                             activeTab = OtherTab newTabState
                                         }
                                     ))
@@ -1614,7 +1622,7 @@ maneuvaTab tab =
                                         }
                                     in
                                         {m |
-                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                             activeTab = OtherTab newTabState
                                         }
                                     ))
@@ -1647,7 +1655,7 @@ maneuvaTab tab =
                                         }
                                     in
                                         {m |
-                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                             activeTab = OtherTab newTabState
                                         }
                                     ))
@@ -1686,7 +1694,7 @@ maneuvaTab tab =
                                         }
                                     in
                                         {m |
-                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                             activeTab = OtherTab newTabState
                                         }
                                     ))
@@ -1712,7 +1720,7 @@ maneuvaTab tab =
                                         }
                                     in
                                         {m |
-                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                             activeTab = OtherTab newTabState
                                         }
                                     ))
@@ -1750,7 +1758,7 @@ maneuvaTab tab =
                                         }
                                     in
                                         {m |
-                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                             activeTab = OtherTab newTabState
                                         }
                                     ))
@@ -1795,7 +1803,7 @@ maneuvaTab tab =
                                         }
                                     in
                                         {m |
-                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                             activeTab = OtherTab newTabState
                                         }
                                     ))
@@ -1830,7 +1838,7 @@ maneuvaTab tab =
                                         }
                                     in
                                         {m |
-                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                             activeTab = OtherTab newTabState
                                         }
                                     ))
@@ -1853,7 +1861,7 @@ maneuvaTab tab =
                                         }
                                     in
                                         {m |
-                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                             activeTab = OtherTab newTabState
                                         }
                                     ))
@@ -1875,7 +1883,7 @@ maneuvaTab tab =
                                         }
                                     in
                                         {m |
-                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                             activeTab = OtherTab newTabState
                                         }
                                     ))
@@ -1898,7 +1906,7 @@ maneuvaTab tab =
                                         }
                                     in
                                         {m |
-                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                             activeTab = OtherTab newTabState
                                         }
                                     ))
@@ -1928,7 +1936,7 @@ maneuvaTab tab =
                                         }
                                     in
                                         {m |
-                                            tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState),
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState),
                                             activeTab = OtherTab newTabState
                                         }
                                     ))
@@ -1956,7 +1964,7 @@ maneuvaTab tab =
                                     in
                                         onClick (RemoveRow (\m -> {m |
                                             activeTab = OtherTab newTabState,
-                                            tabs = Utils.updateOnWay m.tabs tab (\x -> newTabState)
+                                            tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState)
                                         }))
                                 ] []
                         ],
@@ -2004,7 +2012,7 @@ maneuvaTab tab =
                                                 in
                                                 {m | 
                                                     activeTab = OtherTab newTabState,
-                                                    tabs = Utils.updateOnWay m.tabs tab (\tb -> newTabState)
+                                                    tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState)
                                                 }
                                             )
                                             ) uuidStringGenerator
