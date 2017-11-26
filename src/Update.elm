@@ -219,6 +219,8 @@ update msg model =
                                 escape = \s -> s
                                     |> SExtra.replace "(" "<LPAREN>"
                                     |> SExtra.replace ")" "<RPAREN>"
+                                    |> SExtra.replace "[" "<MLPAREN>"
+                                    |> SExtra.replace "]" "<MRPAREN>"
                                     |> SExtra.replace "【" "<LLPAREN>"
                                     |> SExtra.replace "】" "<LRPAREN>"
                                     |> Regex.replace Regex.All (Regex.regex "<LLPAREN>([^<>]+)<LRPAREN>") (\match ->
@@ -248,6 +250,10 @@ update msg model =
                                 other =
                                     Regex.regex "<LPAREN>(\\d+)<RPAREN>([^<>]+)<BAR>([^<>]+)<LLPAREN>([^<>]+)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>([^<>]+)"
 
+                                hokanjyo =
+                                -- [脚]　　　　　 あし　　　　　　　　　　　　　　　　　　　: ジャッジ　 : 1　　　: 0　 : 妨害１
+                                    Regex.regex "<MLPAREN>([^<>]*)<MRPAREN>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)"
+
                                 proc = \s -> s 
                                     |> String.trim
                                     |> String.lines
@@ -256,6 +262,7 @@ update msg model =
                                             let
                                                 effectMatch = Regex.find Regex.All effect (escape line)
                                                 otherMatch = Regex.find Regex.All other (escape line)
+                                                hokanjyoMatch = Regex.find Regex.All hokanjyo (escape line)
 
                                                 strToInt = \s -> case String.toInt s of
                                                     Ok num -> Just num
@@ -308,6 +315,26 @@ update msg model =
                                                         "足" -> Leg -- 打ち間違え対策
                                                         _ -> OtherRegion
 
+                                                toRegion2 s =
+                                                    case String.trim s of
+                                                        "なし" -> NoRegion 
+                                                        "頭" -> Head
+                                                        "腕" -> Arm
+                                                        "胴" -> Body
+                                                        "脚" -> Leg
+                                                        "足" -> Leg -- 打ち間違え対策
+                                                        _ -> NoRegion
+
+                                                toManeuvaType2 s =
+                                                    case String.trim s of
+                                                        "なし" -> Part 
+                                                        "頭" -> Part
+                                                        "腕" -> Part
+                                                        "胴" -> Part
+                                                        "脚" -> Part
+                                                        "足" -> Part -- 打ち間違え対策
+                                                        _ -> Skill
+
                                                 otherToManeuva = \submatches -> case submatches of
                                                     malice :: region :: timing :: name :: cost :: range :: description :: [] ->
                                                         Just {
@@ -329,11 +356,35 @@ update msg model =
                                                             position = Position 0
                                                         }
                                                     _ -> Nothing
+                                    
+                                                hokanjyoToManeuva = \submatches -> case submatches of
+                                                    region :: name :: timing :: cost :: range :: description :: [] ->
+                                                        Just {
+                                                            uuid = "", 
+                                                            used = False,
+                                                            lost = False,
+                                                            act = Nothing,
+                                                            maneuvaType = Maybe.withDefault Part (Maybe.map toManeuvaType2 timing),
+                                                            malice = Nothing,
+                                                            favor = Nothing,
+                                                            category = "0",
+                                                            name = Maybe.withDefault "" (Maybe.map String.trim name),
+                                                            timing = Maybe.withDefault AutoAlways (Maybe.map toTiming timing),
+                                                            cost = Maybe.withDefault "" (Maybe.map String.trim cost),
+                                                            range = Maybe.withDefault "" (Maybe.map String.trim range),
+                                                            description = Maybe.withDefault "" (Maybe.map String.trim description),
+                                                            from = "",
+                                                            region = Maybe.withDefault NoRegion (Maybe.map toRegion2 region),
+                                                            position = Position 0
+                                                        }
+                                                    _ -> Nothing
                                             in
                                                 if List.isEmpty effectMatch |> not then
                                                     List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (effectToManeuva match.submatches))) effectMatch
                                                 else if List.isEmpty otherMatch |> not then
                                                     List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (otherToManeuva match.submatches))) otherMatch
+                                                else if List.isEmpty hokanjyoMatch |> not then
+                                                    List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (hokanjyoToManeuva match.submatches))) hokanjyoMatch
                                                 else
                                                     []
                                         )
@@ -357,7 +408,9 @@ update msg model =
                         activeTab = (OtherTab newTabState)
                     }
             in
-                newModelState ! (
+                (newModelState
+                    ,(
+                    Cmd.batch (
                         List.map
                             (\maneuva -> 
                                 generate (\uuid -> FormUpdated (\m -> 
@@ -382,8 +435,10 @@ update msg model =
                                     )
                                 ) uuidStringGenerator
                             )
-                        (case newTabState.tabType of
-                            ManeuvaTab tabData -> List.filter (\x -> String.isEmpty x.uuid) tabData.maneuvas
-                            _ -> []
+                            (case newTabState.tabType of
+                                ManeuvaTab tabData -> List.filter (\x -> String.isEmpty x.uuid) tabData.maneuvas
+                                _ -> []
+                            )
                         )
                     )
+                )

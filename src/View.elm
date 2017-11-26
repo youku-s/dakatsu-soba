@@ -1919,6 +1919,7 @@ maneuvaTab tab windowSize =
                                     input [
                                         type_ "text",
                                         value val,
+                                        size 30,
                                         onInput (\s -> FormUpdated (\m ->
                                         let 
                                             newTabState = {tab | tabType = case tab.tabType of
