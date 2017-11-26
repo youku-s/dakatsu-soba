@@ -2,6 +2,12 @@ module Models exposing (..)
 
 import Window exposing (Size)
 import Html5.DragDrop as DragDrop
+import Random.Pcg
+
+type alias Flags =
+    {
+        randomSeed: Int
+    }
 
 type alias Model =
     {
@@ -20,7 +26,8 @@ type alias Model =
         saveMode: SaveMode,
         showDeleteTabialog: Maybe Tab,
         windowSize: Size,
-        dragDrop : DragDrop.Model String Position
+        dragDrop : DragDrop.Model String Position,
+        seed: Random.Pcg.Seed
     }
 
 type Position

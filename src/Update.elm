@@ -251,8 +251,7 @@ update msg model =
                                     Regex.regex "<LPAREN>(\\d+)<RPAREN>([^<>]+)<BAR>([^<>]+)<LLPAREN>([^<>]+)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>([^<>]+)"
 
                                 hokanjyo =
-                                -- [脚]　　　　　 あし　　　　　　　　　　　　　　　　　　　: ジャッジ　 : 1　　　: 0　 : 妨害１
-                                    Regex.regex "<MLPAREN>([^<>]*)<MRPAREN>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)"
+                                    Regex.regex "<MLPAREN>([^<>]*)<MRPAREN>([^<>]+)<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)"
 
                                 proc = \s -> s 
                                     |> String.trim
