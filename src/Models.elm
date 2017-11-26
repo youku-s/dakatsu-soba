@@ -158,7 +158,11 @@ type alias Classes =
     }
 
 type TabType =
-    ManeuvaTab (List Maneuva) |
+    ManeuvaTab {
+        maneuvas: List Maneuva,
+        showAddManeuvaDialog: Bool,
+        dialogContent: Maybe String
+    } |
     ResourceTab (List Resource)
 
 type alias Tab =
@@ -193,7 +197,7 @@ type alias Maneuva =
     }
 
 type Region =
-    Head | Arm | Body | Leg | OtherRegion
+    NoRegion | Head | Arm | Body | Leg | OtherRegion
 
 type Timing =
     AutoAlways | AutoNeedsDeclearation | AutoOthers | Action | Judge | Damage | Rapid | BeforeBattle | BattleStart | TurnStart | CountStart

@@ -169,26 +169,31 @@ init =
                     {
                         uuid = "",
                         title = "マニューバ",
-                        tabType = ManeuvaTab [
+                        tabType = ManeuvaTab 
                             {
-                                uuid = "", 
-                                used = False,
-                                lost = False,
-                                act = Nothing,
-                                maneuvaType = Skill,
-                                malice = Nothing,
-                                favor = Nothing,
-                                category = "0",
-                                name = "",
-                                timing = AutoAlways,
-                                cost = "",
-                                range = "",
-                                description = "",
-                                from = "",
-                                region = Head,
-                                position = Position 0
-                            }
-                        ],
+                                dialogContent = Nothing,
+                                showAddManeuvaDialog = False,
+                                maneuvas = [
+                                    {
+                                        uuid = "", 
+                                        used = False,
+                                        lost = False,
+                                        act = Nothing,
+                                        maneuvaType = Skill,
+                                        malice = Nothing,
+                                        favor = Nothing,
+                                        category = "0",
+                                        name = "",
+                                        timing = AutoAlways,
+                                        cost = "",
+                                        range = "",
+                                        description = "",
+                                        from = "",
+                                        region = NoRegion,
+                                        position = Position 0
+                                    }
+                                ]
+                            },
                         isEditing = False
                     }
                 ],
@@ -260,14 +265,12 @@ init =
                                         Just tab -> Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb ->
                                             {tb | tabType = 
                                                 case tb.tabType of
-                                                    ManeuvaTab maneuvas ->
-                                                        ManeuvaTab (
-                                                            let 
-                                                                newManeuvas =
-                                                                    Utils.updateOnWayUseEq maneuvas (\x -> x.uuid == "") item (\ma -> {ma | uuid = uuid})
-                                                            in
-                                                                newManeuvas
-                                                        )
+                                                    ManeuvaTab tabData ->
+                                                        let
+                                                            newManeuvas =
+                                                                Utils.updateOnWayUseEq tabData.maneuvas (\x -> x.uuid == "") item (\ma -> {ma | uuid = uuid})
+                                                        in
+                                                            ManeuvaTab {tabData | maneuvas = newManeuvas}
                                                     _ -> tb.tabType
                                             }
                                         )
@@ -279,7 +282,7 @@ init =
                                 )
                             ) uuidStringGenerator
                         ) (case tab.tabType of
-                            ManeuvaTab items -> items
+                            ManeuvaTab tabData -> tabData.maneuvas
                             _ -> []
                         )
                     ) ++

@@ -1,11 +1,17 @@
 module Update exposing (..)
 
+import Random.Pcg exposing (generate)
 import Messages exposing (Msg(..))
 import Models exposing (..)
 import Utils exposing (..)
 import Task exposing (perform)
 import Window exposing (size)
 import Html5.DragDrop as DragDrop
+import Regex
+import String.Extra as SExtra
+import Maybe.FlatMap
+import List.FlatMap
+import Uuid.Barebones exposing (uuidStringGenerator)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -110,9 +116,9 @@ update msg model =
                         (\tb ->
                             {tb |
                                 tabType = case (result, tb.tabType) of
-                                    (Just (dragId, dropId), ManeuvaTab items) ->
+                                    (Just (dragId, dropId), ManeuvaTab {maneuvas, showAddManeuvaDialog}) ->
                                         let
-                                            item = List.head (List.filter (\x -> x.uuid == dragId) items) 
+                                            item = List.head (List.filter (\x -> x.uuid == dragId) maneuvas) 
                                         in
                                             case item of
                                                 Nothing -> tb.tabType
@@ -123,16 +129,18 @@ update msg model =
                                                         dst = unwrap dropId
 
                                                         targetMoved =
-                                                            Utils.move src dst items
+                                                            Utils.move src dst maneuvas
 
                                                         positionReNumbered =
                                                             Maybe.map (\ls -> List.map (\(i, x) -> {x | position = Position i}) (zipWithIndex ls)) targetMoved
                                                     in
                                                         case positionReNumbered of
                                                             Just is ->
-                                                                ManeuvaTab (
-                                                                    is
-                                                                )
+                                                                ManeuvaTab {
+                                                                    dialogContent = Nothing,
+                                                                    maneuvas = is,
+                                                                    showAddManeuvaDialog = False
+                                                                }
                                                             Nothing -> tb.tabType
                                     (Just (dragId, dropId), ResourceTab resources) ->
                                         let
@@ -184,6 +192,198 @@ update msg model =
                         _ -> {model | dragDrop = model_}
                     , Cmd.none
                 )
-                    
+        OpenManeuvaDialog tab ->
+            let
+                newTabState =
+                    case tab.tabType of
+                        ManeuvaTab tabData ->    
+                            {tab |
+                                tabType = ManeuvaTab {tabData | showAddManeuvaDialog = True}
+                            }
+                        _ -> tab
+            in    
+                (
+                    {model |
+                        tabs = Utils.updateOnWay model.tabs tab (\tb -> newTabState),
+                        activeTab = OtherTab newTabState
+                    },
+                    (Task.perform SetWindowSize Window.size)
+                )
+        CloseManeuvaDialog tab ->
+            let
+                newTabState =
+                    case tab.tabType of
+                        ManeuvaTab tabData ->
+                            let
+                                -- https://github.com/elm-lang/elm-compiler/issues/1618 対策
+                                escape = \s -> s
+                                    |> SExtra.replace "(" "<LPAREN>"
+                                    |> SExtra.replace ")" "<RPAREN>"
+                                    |> SExtra.replace "【" "<LLPAREN>"
+                                    |> SExtra.replace "】" "<LRPAREN>"
+                                    |> Regex.replace Regex.All (Regex.regex "<LLPAREN>([^<>]+)<LRPAREN>") (\match ->
+                                        match.match
+                                            |> SExtra.replace "：" "<ESCAPED_COLON>"
+                                            |> SExtra.replace ":" "<ESCAPED_COLON>"
+                                    )
+                                    |> SExtra.replace ":" "<COLON>"
+                                    |> SExtra.replace "：" "<COLON>"
+                                    |> SExtra.replace "｜" "<BAR>"
+                                    |> SExtra.replace "|" "<BAR>"
+                                    |> SExtra.replace " " ""
+                                    |> SExtra.replace "　" ""
+                                    |> SExtra.replace "<ESCAPED_COLON>" "："
 
+                                unescape = \s -> s
+                                    |> SExtra.replace "<LPAREN>" "("
+                                    |> SExtra.replace "<RPAREN>" ")"
+                                    |> SExtra.replace "<LLPAREN>" "【"
+                                    |> SExtra.replace "<LRPAREN>" "】"
+                                    |> SExtra.replace "<COLON>" "："
+                                    |> SExtra.replace "<BAR>" "｜"
+                                    
+                                effect =
+                                    Regex.regex "<LPAREN>(\\d+)<RPAREN>エフェクト<LLPAREN>([^<>]+)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>([^<>]+)"
 
+                                other =
+                                    Regex.regex "<LPAREN>(\\d+)<RPAREN>([^<>]+)<BAR>([^<>]+)<LLPAREN>([^<>]+)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>([^<>]+)"
+
+                                proc = \s -> s 
+                                    |> String.trim
+                                    |> String.lines
+                                    |> List.FlatMap.flatMap 
+                                        (\line ->
+                                            let
+                                                effectMatch = Regex.find Regex.All effect (escape line)
+                                                otherMatch = Regex.find Regex.All other (escape line)
+
+                                                strToInt = \s -> case String.toInt s of
+                                                    Ok num -> Just num
+                                                    _ -> Nothing
+
+                                                effectToManeuva = \submatches -> case submatches of
+                                                    malice :: name :: cost :: range :: description :: [] ->
+                                                        Just {
+                                                            uuid = "", 
+                                                            used = False,
+                                                            lost = False,
+                                                            act = Nothing,
+                                                            maneuvaType = Effect,
+                                                            malice = Maybe.FlatMap.flatMap strToInt (Maybe.map String.trim malice),
+                                                            favor = Nothing,
+                                                            category = "0",
+                                                            name = Maybe.withDefault "" (Maybe.map String.trim name),
+                                                            timing = AutoAlways,
+                                                            cost = Maybe.withDefault "" (Maybe.map String.trim cost),
+                                                            range = Maybe.withDefault "" (Maybe.map String.trim range),
+                                                            description = Maybe.withDefault "" (Maybe.map String.trim description),
+                                                            from = "",
+                                                            region = NoRegion,
+                                                            position = Position 0
+                                                        }
+                                                    _ -> Nothing
+
+                                                toTiming s =
+                                                    case String.trim s of
+                                                        "オート" -> AutoAlways
+                                                        "アクション" -> Action
+                                                        "ジャッジ" -> Judge
+                                                        "ダメージ" -> Damage
+                                                        "ラピッド" -> Rapid
+                                                        "ラピット" -> Rapid -- 打ち間違え対策
+                                                        _ -> AutoAlways
+
+                                                toManeuvaType s =
+                                                    case String.trim s of
+                                                        "アーカイブ" -> Archive
+                                                        _ -> Part
+
+                                                toRegion s =
+                                                    case String.trim s of
+                                                        "なし" -> NoRegion 
+                                                        "頭" -> Head
+                                                        "腕" -> Arm
+                                                        "胴" -> Body
+                                                        "脚" -> Leg
+                                                        "足" -> Leg -- 打ち間違え対策
+                                                        _ -> OtherRegion
+
+                                                otherToManeuva = \submatches -> case submatches of
+                                                    malice :: region :: timing :: name :: cost :: range :: description :: [] ->
+                                                        Just {
+                                                            uuid = "", 
+                                                            used = False,
+                                                            lost = False,
+                                                            act = Nothing,
+                                                            maneuvaType = Maybe.withDefault Part (Maybe.map toManeuvaType timing),
+                                                            malice = Maybe.FlatMap.flatMap strToInt (Maybe.map String.trim malice),
+                                                            favor = Nothing,
+                                                            category = "0",
+                                                            name = Maybe.withDefault "" (Maybe.map String.trim name),
+                                                            timing = Maybe.withDefault AutoAlways (Maybe.map toTiming timing),
+                                                            cost = Maybe.withDefault "" (Maybe.map String.trim cost),
+                                                            range = Maybe.withDefault "" (Maybe.map String.trim range),
+                                                            description = Maybe.withDefault "" (Maybe.map String.trim description),
+                                                            from = "",
+                                                            region = Maybe.withDefault NoRegion (Maybe.map toRegion region),
+                                                            position = Position 0
+                                                        }
+                                                    _ -> Nothing
+                                            in
+                                                if List.isEmpty effectMatch |> not then
+                                                    List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (effectToManeuva match.submatches))) effectMatch
+                                                else if List.isEmpty otherMatch |> not then
+                                                    List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (otherToManeuva match.submatches))) otherMatch
+                                                else
+                                                    []
+                                        )
+
+                                newManeuvas = 
+                                    Maybe.withDefault [] (Maybe.map proc tabData.dialogContent)
+                                
+                            in    
+                                {tab |
+                                    tabType = ManeuvaTab {
+                                        maneuvas = zipWithIndex (tabData.maneuvas ++ newManeuvas) |> List.map (\(i, x) -> {x | position = Position i}),
+                                        showAddManeuvaDialog = False,
+                                        dialogContent = Nothing
+                                    }
+                                }
+                        _ -> tab
+                
+                newModelState =
+                    {model |
+                        tabs = Utils.updateOnWay model.tabs tab (\tb -> newTabState),
+                        activeTab = (OtherTab newTabState)
+                    }
+            in
+                newModelState ! (
+                        List.map
+                            (\maneuva -> 
+                                generate (\uuid -> FormUpdated (\m -> 
+                                        let
+                                            currentTab = 
+                                                List.filter (\x -> x.uuid == tab.uuid) m.tabs
+                                                    |> List.head
+                                                    |> Maybe.withDefault tab
+                                            
+                                            newTabState2 = {currentTab | tabType = case currentTab.tabType of
+                                                ManeuvaTab tabData -> ManeuvaTab {
+                                                    tabData |
+                                                        maneuvas = Utils.updateOnWayUseEq tabData.maneuvas (\x -> x == maneuva) maneuva (\x -> {x | uuid = uuid})
+                                                }
+                                                _ -> tab.tabType
+                                            }
+                                        in
+                                            {m | 
+                                                activeTab = OtherTab newTabState2,
+                                                tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState2)
+                                            }
+                                    )
+                                ) uuidStringGenerator
+                            )
+                        (case newTabState.tabType of
+                            ManeuvaTab tabData -> List.filter (\x -> String.isEmpty x.uuid) tabData.maneuvas
+                            _ -> []
+                        )
+                    )

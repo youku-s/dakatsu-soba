@@ -21,4 +21,6 @@ type Msg =
     OpenDialog Tab |
     CloseDialog (Maybe Tab) |
     SetWindowSize Size |
-    RowDragDrop (DragDrop.Msg String Position)
+    RowDragDrop (DragDrop.Msg String Position) |
+    OpenManeuvaDialog Tab |
+    CloseManeuvaDialog Tab
