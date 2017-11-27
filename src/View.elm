@@ -1648,6 +1648,7 @@ maneuvaTab tab windowSize =
                                             Item -> "2"
                                             Effect -> "3"
                                             Archive -> "4"
+                                            Tag -> "5"
                                 in
                                     select [
                                         onInput (\s -> FormUpdated (\m ->
@@ -1662,6 +1663,7 @@ maneuvaTab tab windowSize =
                                                                 "2" -> Item
                                                                 "3" -> Effect
                                                                 "4" -> Archive
+                                                                "5" -> Tag
                                                                 _ -> Part
                                                             }
                                                         )                                                       
@@ -1679,7 +1681,8 @@ maneuvaTab tab windowSize =
                                         option [value "1", selected (val == "1")] [text "パーツ"],
                                         option [value "2", selected (val == "2")] [text "アイテム"],
                                         option [value "3", selected (val == "3")] [text "エフェクト"],
-                                        option [value "4", selected (val == "4")] [text "アーカイブ"]
+                                        option [value "4", selected (val == "4")] [text "アーカイブ"],
+                                        option [value "5", selected (val == "5")] [text "タグ"]
                                     ]
                             ],
                             td [] [

@@ -181,7 +181,7 @@ type alias Tab =
     }
 
 type ManeuvaType =
-    Skill | Part | Item | Effect | Archive
+    Skill | Part | Item | Effect | Archive | Tag
 
 type alias Maneuva =
     {

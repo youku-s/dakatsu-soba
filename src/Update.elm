@@ -236,6 +236,19 @@ update msg model =
                                     |> SExtra.replace "　" ""
                                     |> SExtra.replace "<ESCAPED_COLON>" "："
 
+                                escapeHokanjyo = \s -> s
+                                    |> SExtra.replace "[" "<MLPAREN>"
+                                    |> SExtra.replace "]" "<MRPAREN>"
+                                    |> Regex.replace Regex.All (Regex.regex "<LLPAREN>([^<>]+)<LRPAREN>") (\match ->
+                                        match.match
+                                            |> SExtra.replace "：" "<ESCAPED_COLON>"
+                                            |> SExtra.replace ":" "<ESCAPED_COLON>"
+                                    )
+                                    |> SExtra.replace ":" "<COLON>"
+                                    |> SExtra.replace "｜" "<BAR>"
+                                    |> SExtra.replace "|" "<BAR>"
+                                    |> SExtra.replace "<ESCAPED_COLON>" "："
+
                                 unescape = \s -> s
                                     |> SExtra.replace "<LPAREN>" "("
                                     |> SExtra.replace "<RPAREN>" ")"
@@ -251,7 +264,7 @@ update msg model =
                                     Regex.regex "<LPAREN>(\\d+)<RPAREN>([^<>]+)<BAR>([^<>]+)<LLPAREN>([^<>]+)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>([^<>]+)"
 
                                 hokanjyo =
-                                    Regex.regex "<MLPAREN>([^<>]*)<MRPAREN>([^<>]+)<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)"
+                                    Regex.regex "<MLPAREN>([^<>]*)<MRPAREN>\\s*([^\\s]+?)\\s*<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)"
 
                                 proc = \s -> s 
                                     |> String.trim
@@ -261,7 +274,7 @@ update msg model =
                                             let
                                                 effectMatch = Regex.find Regex.All effect (escape line)
                                                 otherMatch = Regex.find Regex.All other (escape line)
-                                                hokanjyoMatch = Regex.find Regex.All hokanjyo (escape line)
+                                                hokanjyoMatch = Regex.find Regex.All hokanjyo (escapeHokanjyo line)
 
                                                 strToInt = \s -> case String.toInt s of
                                                     Ok num -> Just num
@@ -326,12 +339,15 @@ update msg model =
 
                                                 toManeuvaType2 s =
                                                     case String.trim s of
-                                                        "なし" -> Part 
+                                                        "なし" -> Part
                                                         "頭" -> Part
                                                         "腕" -> Part
                                                         "胴" -> Part
                                                         "脚" -> Part
                                                         "足" -> Part -- 打ち間違え対策
+                                                        "ポジション" -> Skill
+                                                        "メインクラス" -> Skill
+                                                        "サブクラス" -> Skill
                                                         _ -> Skill
 
                                                 otherToManeuva = \submatches -> case submatches of
@@ -363,17 +379,17 @@ update msg model =
                                                             used = False,
                                                             lost = False,
                                                             act = Nothing,
-                                                            maneuvaType = Maybe.withDefault Part (Maybe.map toManeuvaType2 timing),
+                                                            maneuvaType = Maybe.withDefault Part (Maybe.map (\x -> x |> String.trim |> toManeuvaType2) region),
                                                             malice = Nothing,
                                                             favor = Nothing,
                                                             category = "0",
                                                             name = Maybe.withDefault "" (Maybe.map String.trim name),
-                                                            timing = Maybe.withDefault AutoAlways (Maybe.map toTiming timing),
+                                                            timing = Maybe.withDefault AutoAlways (Maybe.map (\x -> x |> String.trim |> toTiming) timing),
                                                             cost = Maybe.withDefault "" (Maybe.map String.trim cost),
                                                             range = Maybe.withDefault "" (Maybe.map String.trim range),
                                                             description = Maybe.withDefault "" (Maybe.map String.trim description),
                                                             from = "",
-                                                            region = Maybe.withDefault NoRegion (Maybe.map toRegion2 region),
+                                                            region = Maybe.withDefault NoRegion (Maybe.map (\x -> x |> String.trim |> toRegion2) region),
                                                             position = Position 0
                                                         }
                                                     _ -> Nothing
