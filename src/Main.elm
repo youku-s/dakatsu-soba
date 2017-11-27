@@ -415,9 +415,6 @@ init flags =
                 ,
             Cmd.none
         )
-        
-aaa : Int -> a -> (a -> b) -> List b
-aaa repeat init update =
     
                     -- -- 頑張ってUUIDで初期IDを振っている
             -- Cmd.batch (
