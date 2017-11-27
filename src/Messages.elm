@@ -20,8 +20,9 @@ type Msg =
     RemoveTag String |
     OpenDialog Tab |
     CloseDialog (Maybe Tab) |
-    SetWindowSize Size |
+    SetWindowSize DomSize |
     RowDragDrop (DragDrop.Msg String Position) |
     OpenManeuvaDialog Tab |
     CloseManeuvaDialog Tab |
-    ResetMessages Tab
+    ResetMessages Tab |
+    UpdateSize DomSize

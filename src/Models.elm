@@ -1,6 +1,5 @@
-module Models exposing (..)
+port module Models exposing (..)
 
-import Window exposing (Size)
 import Html5.DragDrop as DragDrop
 import Random.Pcg
 
@@ -25,7 +24,7 @@ type alias Model =
         appendMode: AppendMode,
         saveMode: SaveMode,
         showDeleteTabialog: Maybe Tab,
-        windowSize: Size,
+        windowSize: DomSize,
         dragDrop : DragDrop.Model String Position,
         seed: Random.Pcg.Seed
     }
@@ -209,3 +208,10 @@ type Region =
 
 type Timing =
     AutoAlways | AutoNeedsDeclearation | AutoOthers | Action | Judge | Damage | Rapid | BeforeBattle | BattleStart | TurnStart | CountStart
+
+port requestDomSize : String -> Cmd msg
+
+type alias DomSize =
+    { width: Float, height: Float }
+
+port getDomSize : (DomSize -> msg) -> Sub msg

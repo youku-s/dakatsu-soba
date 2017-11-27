@@ -5,7 +5,6 @@ import Messages exposing (Msg(..))
 import Models exposing (..)
 import Utils exposing (..)
 import Task exposing (perform)
-import Window exposing (size)
 import Html5.DragDrop as DragDrop
 import Regex
 import String.Extra as SExtra
@@ -70,7 +69,7 @@ update msg model =
             {model | tags = List.filter (\x -> x /= tagname) model.tags },
             Cmd.none
         )
-        OpenDialog tab -> ({model | showDeleteTabialog = Just tab}, (Task.perform SetWindowSize Window.size))
+        OpenDialog tab -> ({model | showDeleteTabialog = Just tab}, (requestDomSize "body"))
         CloseDialog tab ->
             let
                 uuid = case tab of
@@ -207,7 +206,7 @@ update msg model =
                         tabs = Utils.updateOnWay model.tabs tab (\tb -> newTabState),
                         activeTab = OtherTab newTabState
                     },
-                    (Task.perform SetWindowSize Window.size)
+                    (requestDomSize "body")
                 )
         CloseManeuvaDialog tab ->
             let
@@ -489,3 +488,6 @@ update msg model =
                     }
             in
                 (newModelState, Cmd.none)
+        
+        UpdateSize size ->
+            ({model | windowSize = size}, Cmd.none)

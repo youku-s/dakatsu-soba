@@ -366,10 +366,11 @@ init flags =
                 ),
             Cmd.none
         )
-    
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    getDomSize UpdateSize
 
 -- MAIN
 main : Program Flags Model Msg

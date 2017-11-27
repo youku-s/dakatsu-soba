@@ -10,7 +10,6 @@ import Random.Pcg exposing (generate)
 import Json.Decode
 import Uuid.Barebones exposing (uuidStringGenerator)
 import List.FlatMap exposing (..)
-import Window exposing (Size)
 import Html5.DragDrop as DragDrop
 
 view : Model -> Html Msg
@@ -96,11 +95,11 @@ view model =
         Nothing -> []
     ))
 
-createDialog : String -> Tab -> Size -> Html Msg
+createDialog : String -> Tab -> DomSize -> Html Msg
 createDialog content tab windowSize =
     div [] [
-        div [class "mask"] [],
-        div [class "dialog", style [("top", "10px"), ("left", String.append (toString (windowSize.width // 2 - 100)) "px")]] [
+        div [class "mask", style [("width", String.append (toString windowSize.width) "px"), ("height", String.append (toString windowSize.height) "px")]] [],
+        div [class "dialog", style [("top", "10px"), ("left", String.append (toString (windowSize.width / 2 - 100)) "px")]] [
             div [class "dialog-content"] [
                 span [] [text content]
             ],
@@ -1311,7 +1310,7 @@ classesTab classes =
         ] [text "追加"]
     ]
 
-otherTab : Tab -> Size -> Html Msg
+otherTab : Tab -> DomSize -> Html Msg
 otherTab tab windowSize =
     div [
         id tab.uuid
@@ -1503,7 +1502,7 @@ resourceTab tab =
         ]
 
 
-maneuvaTab : Tab -> Size -> Html Msg
+maneuvaTab : Tab -> DomSize -> Html Msg
 maneuvaTab tab windowSize =
     let
         (items, showAddManeuvaDialog) = case tab.tabType of
@@ -2159,11 +2158,11 @@ maneuvaTab tab windowSize =
                 []
         )
 
-createManeuvaDialog : Tab -> Size -> Html Msg
+createManeuvaDialog : Tab -> DomSize -> Html Msg
 createManeuvaDialog tab windowSize =
     div [] [
-        div [class "mask"] [],
-        div [class "dialog", style [("top", "10px"), ("left", String.append (toString (windowSize.width // 2 - 300)) "px")]] [
+        div [class "mask", style [("width", String.append (toString windowSize.width) "px"), ("height", String.append (toString windowSize.height) "px")]] [],
+        div [class "dialog", style [("top", "10px"), ("left", String.append (toString (windowSize.width / 2 - 300)) "px")]] [
             div [class "dialog-title"] [
                 text "マニューバ追加"
             ],
