@@ -2,20 +2,28 @@ module Utils exposing (..)
 
 import Random.Pcg exposing (Seed, step)
 import Uuid.Barebones exposing (uuidStringGenerator)
+import List.Extra
 
-zipWithUuid : Seed -> List a -> List (String, a, Seed)
+zipWithUuid : Seed -> List a -> (Seed, List (String, a))
 zipWithUuid seed list =
     let
         apply sd ls =
             case ls of
                 x :: xs ->
                     let
-                        (uuid, newSeed) = step uuidStringGenerator seed
+                        (uuid, newSeed) = step uuidStringGenerator sd
                     in
-                        (uuid, x, seed) :: zipWithUuid newSeed xs
+                        (uuid, x, newSeed) :: apply newSeed xs
                 [] -> []
+
+        zipped = apply seed list
+
+        lastSeed = 
+            case List.Extra.last zipped of
+                Just (_, _, sd) -> sd
+                _ -> seed
     in
-        List.map (\(uuid, elem, seed) -> (uuid, elem, seed)) (apply seed list)
+        (lastSeed, List.map (\(uuid, elem, seed) -> (uuid, elem)) zipped)
         
 -- i番目の要素をj番目の位置に移動する
 move : Int -> Int -> List a -> Maybe (List a)

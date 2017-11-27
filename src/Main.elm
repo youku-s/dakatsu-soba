@@ -223,282 +223,149 @@ init flags =
                             }
                     )
                 |> (\m  ->
-                    List.foldr 
-                        (\x a ->
-                            let
-                                (uuid, newSeed) = step uuidStringGenerator a.seed
-                                profile = a.profile
-                            in
-                                {
-                                    a |
-                                        seed = newSeed,
-                                        profile = {profile | memories = Utils.updateOnWay profile.memories x (\y -> {y | uuid = uuid})}
-                                }
-                        ) m m.profile.memories
+                    let
+                        (lastSeed, zipped) = Utils.zipWithUuid m.seed m.profile.memories
+                    in
+                        {
+                            m |
+                                seed = lastSeed,
+                                profile = {profile | memories = List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped }
+                        }                    
                 )
                 |> (\m  ->
-                    List.foldr 
-                        (\x a ->
-                            let
-                                (uuid, newSeed) = step uuidStringGenerator a.seed
-                            in
-                                {
-                                    a |
-                                        seed = newSeed,
-                                        profile = {profile | regrets = Utils.updateOnWay profile.regrets x (\y -> {y | uuid = uuid})}
-                                }
-                        ) m m.profile.regrets
+                    let
+                        (lastSeed, zipped) = Utils.zipWithUuid m.seed m.profile.regrets
+                    in
+                        {
+                            m |
+                                seed = lastSeed,
+                                profile = {profile | regrets = List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped }
+                        }                    
                 )
                 |> (\m  ->
-                    List.foldr 
-                        (\x a ->
-                            let
-                                (uuid, newSeed) = step uuidStringGenerator a.seed
-                            in
-                                {
-                                    a |
-                                        seed = newSeed,
-                                        profile = {profile | karmas = Utils.updateOnWay profile.karmas x (\y -> {y | uuid = uuid})}
-                                }
-                        ) m m.profile.karmas
+                    let
+                        (lastSeed, zipped) = Utils.zipWithUuid m.seed m.profile.karmas
+                    in
+                        {
+                            m |
+                                seed = lastSeed,
+                                profile = {profile | karmas = List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped }
+                        }                    
                 )
                 |> (\m  ->
-                    List.foldr 
-                        (\x a ->
-                            let
-                                (uuid, newSeed) = step uuidStringGenerator a.seed
-                            in
-                                {
-                                    a |
-                                        seed = newSeed,
-                                        classes = {classes | positions = Utils.updateOnWay classes.positions x (\y -> {y | uuid = uuid})}
-                                }
-                        ) m m.classes.positions
+                    let
+                        (lastSeed, zipped) = Utils.zipWithUuid m.seed m.classes.positions
+                    in
+                        {
+                            m |
+                                seed = lastSeed,
+                                classes = {classes | positions = List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped }
+                        }                    
                 )
                 |> (\m  ->
-                    List.foldr 
-                        (\x a ->
-                            let
-                                (uuid, newSeed) = step uuidStringGenerator a.seed
-                            in
-                                {
-                                    a |
-                                        seed = newSeed,
-                                        classes = {classes | subPositions = Utils.updateOnWay classes.subPositions x (\y -> {y | uuid = uuid})}
-                                }
-                        ) m m.classes.subPositions
+                    let
+                        (lastSeed, zipped) = Utils.zipWithUuid m.seed m.classes.subPositions
+                    in
+                        {
+                            m |
+                                seed = lastSeed,
+                                classes = {classes | subPositions = List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped }
+                        }                    
                 )
                 |> (\m  ->
-                    List.foldr 
-                        (\x a ->
-                            let
-                                (uuid, newSeed) = step uuidStringGenerator a.seed
-                            in
-                                {
-                                    a |
-                                        seed = newSeed,
-                                        classes = {classes | highTechs = Utils.updateOnWay classes.highTechs x (\y -> {y | uuid = uuid})}
-                                }
-                        ) m m.classes.highTechs
+                    let
+                        (lastSeed, zipped) = Utils.zipWithUuid m.seed m.classes.highTechs
+                    in
+                        {
+                            m |
+                                seed = lastSeed,
+                                classes = {classes | highTechs = List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped }
+                        }                    
                 )
                 |> (\m  ->
-                    List.foldr 
-                        (\x a ->
-                            let
-                                (uuid, newSeed) = step uuidStringGenerator a.seed
-                            in
-                                {
-                                    a |
-                                        seed = newSeed,
-                                        classes = {classes | classes = Utils.updateOnWay classes.classes x (\y -> {y | uuid = uuid})}
-                                }
-                        ) m m.classes.classes
+                    let
+                        (lastSeed, zipped) = Utils.zipWithUuid m.seed m.classes.classes
+                    in
+                        {
+                            m |
+                                seed = lastSeed,
+                                classes = {classes | classes = List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped }
+                        }                    
                 )
                 |> (\m  ->
-                    List.foldr 
-                        (\x a ->
-                            let
-                                (uuid, newSeed) = step uuidStringGenerator a.seed
-                            in
-                                {
-                                    a |
-                                        seed = newSeed,
-                                        classes = {classes | points = Utils.updateOnWay classes.points x (\y -> {y | uuid = uuid})}
-                                }
-                        ) m m.classes.points
+                    let
+                        (lastSeed, zipped) = Utils.zipWithUuid m.seed m.classes.points
+                    in
+                        {
+                            m |
+                                seed = lastSeed,
+                                classes = {classes | points = List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped }
+                        }                    
                 )
                 |> (\m  ->
-                    List.foldr 
-                        (\x a ->
-                            let
-                                (uuid, newSeed) = step uuidStringGenerator a.seed
-                            in
-                                {
-                                    a |
-                                        seed = newSeed,
-                                        classes = {classes | points = Utils.updateOnWay classes.points x (\y -> {y | uuid = uuid})}
-                                }
-                        ) m m.classes.points
+                    let
+                        (lastSeed, zipped) = Utils.zipWithUuid m.seed m.favors
+                    in
+                        {
+                            m |
+                                seed = lastSeed,
+                                favors = List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped
+                        }                    
                 )
                 |> (\m  ->
-                    List.foldr 
-                        (\x a ->
-                            let
-                                (uuid, newSeed) = step uuidStringGenerator a.seed
-                            in
-                                {
-                                    a |
-                                        seed = newSeed,
-                                        favors = Utils.updateOnWay model.favors x (\y -> {y | uuid = uuid})
-                                }
-                        ) m m.favors
+                    let
+                        (lastSeed, zipped) = Utils.zipWithUuid m.seed m.usedFavors
+                    in
+                        {
+                            m |
+                                seed = lastSeed,
+                                usedFavors = List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped
+                        }                    
                 )
                 |> (\m  ->
-                    List.foldr 
-                        (\x a ->
-                            let
-                                (uuid, newSeed) = step uuidStringGenerator a.seed
-                            in
-                                {
-                                    a |
-                                        seed = newSeed,
-                                        usedFavors = Utils.updateOnWay model.usedFavors x (\y -> {y | uuid = uuid})
-                                }
-                        ) m m.usedFavors
+                    let
+                        (lastSeed, zipped) = Utils.zipWithUuid m.seed m.tabs
+                    in
+                        {
+                            m |
+                                seed = lastSeed,
+                                tabs = List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped
+                        }                    
                 )
-                |> (\m ->
-                    List.foldr
-                        (\x a ->
-                            let
-                                maneuvas = 
-                                    case x.tabType of
-                                        ManeuvaTab tabData -> tabData.maneuvas
-                                        _ -> []
-
-                                (uuid, newSeed) = step uuidStringGenerator a.seed
-
-                                newModel = {
-                                    a |
-                                        seed = newSeed,
-                                        tabs = Utils.updateOnWay a.tabs x (\y -> {y | uuid = uuid})
-                                }
-                                _ = Debug.log "fdfdf" [newModel]
-                            in
-                                List.foldr (\y b ->
+                |> (\m  ->
+                    let
+                        newModelState =
+                            List.foldr
+                                (\tab newM ->
                                     let
-                                        (uuid2, newSeed2) = step uuidStringGenerator b.seed
-
-                                        newTabState =
-                                            {
-                                                x |
-                                                    tabType =
-                                                        case x.tabType of
-                                                            ManeuvaTab tabData ->
-                                                                ManeuvaTab {
-                                                                    tabData | 
-                                                                        maneuvas = Utils.updateOnWay tabData.maneuvas y (\c -> {
-                                                                            c |
-                                                                                uuid = uuid2
-                                                                        })
-                                                                }
-                                                            _ -> x.tabType
-                                            }
+                                        (lastSeed, newTabType) =
+                                            case tab.tabType of
+                                                ManeuvaTab tabData -> 
+                                                    let
+                                                        (lastSeed, zipped) = Utils.zipWithUuid newM.seed tabData.maneuvas
+                                                    in
+                                                        (
+                                                            lastSeed,
+                                                            ManeuvaTab {
+                                                                tabData |
+                                                                    maneuvas = List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped
+                                                            }
+                                                        )
+                                                _ -> (newM.seed, tab.tabType)
                                     in
-                                        {
-                                            b |
-                                                seed = newSeed2,
-                                                tabs = Utils.updateOnWay b.tabs x (\z -> newTabState)
+                                        { newM |
+                                            seed = lastSeed,
+                                            tabs = Utils.updateOnWay newM.tabs tab (\x -> {x | tabType = newTabType})
                                         }
-                                ) newModel maneuvas
-                        ) m m.tabs
-                )
-                ,
+                                )
+                                m
+                                m.tabs
+                    in
+                        newModelState
+                ),
             Cmd.none
         )
     
-                    -- -- 頑張ってUUIDで初期IDを振っている
-            -- Cmd.batch (
-            --     List.FlatMap.flatMap (\tab -> 
-            --         (
-            --             List.map (\item -> 
-            --                 generate (\uuid -> FormUpdated (\m ->
-            --                     let
-            --                         tabs = case List.head (List.reverse m.tabs) of
-            --                             Just tab -> Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb ->
-            --                                 {tb | tabType = 
-            --                                     case tb.tabType of
-            --                                         ManeuvaTab tabData ->
-            --                                             let
-            --                                                 newManeuvas =
-            --                                                     Utils.updateOnWayUseEq tabData.maneuvas (\x -> x.uuid == "") item (\ma -> {ma | uuid = uuid})
-            --                                             in
-            --                                                 ManeuvaTab {tabData | maneuvas = newManeuvas}
-            --                                         _ -> tb.tabType
-            --                                 }
-            --                             )
-            --                             Nothing -> []
-            --                     in
-            --                         {m | 
-            --                             tabs = tabs
-            --                         }
-            --                     )
-            --                 ) uuidStringGenerator
-            --             ) (case tab.tabType of
-            --                 ManeuvaTab tabData -> tabData.maneuvas
-            --                 _ -> []
-            --             )
-            --         ) ++
-            --         (
-            --             List.map (\resource -> 
-            --                 generate (\uuid -> FormUpdated (\m ->
-            --                     let
-            --                         tabs = case List.head (List.reverse m.tabs) of
-            --                             Just tab -> Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb ->
-            --                                 {tb | tabType = 
-            --                                     case tb.tabType of
-            --                                         ResourceTab resources ->
-            --                                             ResourceTab (
-            --                                                 let 
-            --                                                     newManeuvas =
-            --                                                         Utils.updateOnWayUseEq resources (\x -> x.uuid == "") resource (\ma -> {ma | uuid = uuid})
-            --                                                 in
-            --                                                     newManeuvas
-            --                                             )
-            --                                         _ -> tb.tabType
-            --                                 }
-            --                             )
-            --                             Nothing -> []
-            --                     in
-            --                         {m | 
-            --                             tabs = tabs
-            --                         }
-            --                     )
-            --                 ) uuidStringGenerator
-            --             ) (case tab.tabType of
-            --                 ResourceTab resources -> resources
-            --                 _ -> []
-            --             )
-            --         ) ++ 
-            --         [
-            --             generate (\x -> 
-            --                 FormUpdated (\m -> {m | tabs = Utils.updateOnWay model.tabs tab (\tb -> {tb | uuid = x})})
-            --             ) uuidStringGenerator
-            --         ]
-            --     ) model.tabs ++
-            --     List.map (\favor -> 
-            --         generate (\x -> 
-            --             FormUpdated (\m -> {m | favors = Utils.updateOnWay model.favors favor (\fv -> {fv | uuid = x})})
-            --         ) uuidStringGenerator
-            --     ) model.favors ++
-            --     List.map (\used -> 
-            --         generate (\x -> 
-            --             FormUpdated (\m -> {m | usedFavors = Utils.updateOnWay model.usedFavors used (\us -> {us | uuid = x})})
-            --         ) uuidStringGenerator
-            --     ) model.usedFavors ++
-            --     [(Task.perform SetWindowSize Window.size)]
-            -- )
-        -- )
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none

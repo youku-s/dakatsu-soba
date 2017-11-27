@@ -400,44 +400,45 @@ update msg model =
                                     }
                                 }
                         _ -> tab
-                
-                newModelState =
+            in
+                (
                     {model |
                         tabs = Utils.updateOnWay model.tabs tab (\tb -> newTabState),
                         activeTab = (OtherTab newTabState)
                     }
-            in
-                (newModelState
-                    ,(
-                    Cmd.batch (
-                        List.map
-                            (\maneuva -> 
-                                generate (\uuid -> FormUpdated (\m -> 
-                                        let
-                                            currentTab = 
-                                                List.filter (\x -> x.uuid == tab.uuid) m.tabs
-                                                    |> List.head
-                                                    |> Maybe.withDefault tab
-                                            
-                                            newTabState2 = {currentTab | tabType = case currentTab.tabType of
-                                                ManeuvaTab tabData -> ManeuvaTab {
-                                                    tabData |
-                                                        maneuvas = Utils.updateOnWayUseEq tabData.maneuvas (\x -> x == maneuva) maneuva (\x -> {x | uuid = uuid})
+                        |> (\m ->
+                            let
+                                newModelState =
+                                    List.foldr
+                                        (\tab newM ->
+                                            let
+                                                (lastSeed, newTabType) =
+                                                    case tab.tabType of
+                                                        ManeuvaTab tabData -> 
+                                                            let
+                                                                (lastSeed, zipped) = Utils.zipWithUuid newM.seed (List.filter (\x -> String.isEmpty x.uuid) tabData.maneuvas)
+                                                            in
+                                                                (
+                                                                    lastSeed,
+                                                                    ManeuvaTab {
+                                                                        tabData |
+                                                                            maneuvas = (List.filter (\x -> not (String.isEmpty x.uuid)) tabData.maneuvas) ++ List.map (\(uuid, elem) -> {elem | uuid = uuid}) zipped
+                                                                    }
+                                                                )
+                                                        _ -> (newM.seed, tab.tabType)
+                                                
+                                                newTabState = {tab | tabType = newTabType}
+                                            in
+                                                { newM |
+                                                    seed = lastSeed,
+                                                    activeTab = OtherTab newTabState,
+                                                    tabs = Utils.updateOnWay newM.tabs tab (\x -> newTabState)
                                                 }
-                                                _ -> tab.tabType
-                                            }
-                                        in
-                                            {m | 
-                                                activeTab = OtherTab newTabState2,
-                                                tabs = Utils.updateOnWayUseEq m.tabs (\x -> x.uuid == tab.uuid) tab (\tb -> newTabState2)
-                                            }
-                                    )
-                                ) uuidStringGenerator
-                            )
-                            (case newTabState.tabType of
-                                ManeuvaTab tabData -> List.filter (\x -> String.isEmpty x.uuid) tabData.maneuvas
-                                _ -> []
-                            )
-                        )
-                    )
+                                        )
+                                        m
+                                        m.tabs
+                            in
+                                newModelState
+                        ),
+                    Cmd.none
                 )
