@@ -448,7 +448,8 @@ favorsTab model =
                 tbody [] [
                     tr [] [
                         th [] [text "獲得寵愛点"],
-                        th [] [text "消費寵愛点"]
+                        th [] [text "消費寵愛点"],
+                        th [] [text "悪意合計"]
                     ],
                     tr [] [
                         td [] [
@@ -469,6 +470,16 @@ favorsTab model =
                                 input [
                                     type_ "number",
                                     value (toString (parts + skills + resources + points + others)),
+                                    readonly True
+                                ] []
+                        ],
+                        td [] [
+                            let
+                                malice = getMalice tabs
+                            in
+                                input [
+                                    type_ "number",
+                                    value (toString malice),
                                     readonly True
                                 ] []
                         ]
@@ -767,6 +778,17 @@ favorsTab model =
                 )
             ] [text "追加"]
         ]
+
+getMalice : List Tab -> Int
+getMalice tabs =
+    let
+        getMalice = \x -> case x.tabType of
+            ManeuvaTab tabData -> List.map 
+                (\item -> Maybe.withDefault 0 item.malice) tabData.maneuvas
+            _ -> []
+        total = List.sum (flatMap getMalice tabs)
+    in
+        List.sum (flatMap getMalice tabs)
 
 getSkillFavor : List Tab -> Int
 getSkillFavor tabs =
@@ -1489,6 +1511,24 @@ maneuvaTab tab windowSize =
             _ -> ([], False)
     in
         div [] (
+            (
+                if List.isEmpty tab.mismatches |> not then [
+                    div [class "mismatch"] (
+                        [
+                            div [style [("text-align", "right")]] [
+                                span [
+                                    class "ion-close-circled",
+                                    onClick (ResetMessages tab)
+                                ] []
+                            ],
+                            div [] [text "以下のマニューバのインポートに失敗しました。"]
+                        ] ++
+                        List.map (\mis -> 
+                            div [class "indent-1"] [text mis]
+                        ) tab.mismatches
+                    )
+                ] else []
+            ) ++
             [
                 table [] [
                     tbody [] ([
@@ -2325,7 +2365,8 @@ tabcontorls model =
                                     uuid = "",
                                     tabType = tabType,
                                     title = title,
-                                    isEditing = False
+                                    isEditing = False,
+                                    mismatches = []
                                 }
 
                                 newTabs = model.tabs ++ [newTabState]

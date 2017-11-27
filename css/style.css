@@ -117,3 +117,13 @@ table {
 .dialog-content {
     margin-bottom: 3px;
 }
+.mismatch {
+    margin-top: 5px;
+    background-color: #EE9999;
+    color: #EE0000;
+    border-radius: 5px;
+    padding: 5px;
+}
+.indent-1 {
+    padding-left: 10px;
+}

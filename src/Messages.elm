@@ -23,4 +23,5 @@ type Msg =
     SetWindowSize Size |
     RowDragDrop (DragDrop.Msg String Position) |
     OpenManeuvaDialog Tab |
-    CloseManeuvaDialog Tab
+    CloseManeuvaDialog Tab |
+    ResetMessages Tab

@@ -269,13 +269,17 @@ update msg model =
                                 proc = \s -> s 
                                     |> String.trim
                                     |> String.lines
-                                    |> List.FlatMap.flatMap 
+                                    |> List.map 
                                         (\line ->
                                             let
                                                 effectMatch = Regex.find Regex.All effect (escape line)
                                                 otherMatch = Regex.find Regex.All other (escape line)
                                                 hokanjyoMatch = Regex.find Regex.All hokanjyo (escapeHokanjyo line)
 
+                                                effectMismatch = if List.isEmpty effectMatch then Just line else Nothing
+                                                otherMismatch = if List.isEmpty otherMatch then Just line else Nothing
+                                                hokanjyoMismatch = if List.isEmpty hokanjyoMatch then Just line else Nothing
+                                                
                                                 strToInt = \s -> case String.toInt s of
                                                     Ok num -> Just num
                                                     _ -> Nothing
@@ -395,20 +399,33 @@ update msg model =
                                                     _ -> Nothing
                                             in
                                                 if List.isEmpty effectMatch |> not then
-                                                    List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (effectToManeuva match.submatches))) effectMatch
+                                                    (Nothing, List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (effectToManeuva match.submatches))) effectMatch)
                                                 else if List.isEmpty otherMatch |> not then
-                                                    List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (otherToManeuva match.submatches))) otherMatch
+                                                    (Nothing, List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (otherToManeuva match.submatches))) otherMatch)
                                                 else if List.isEmpty hokanjyoMatch |> not then
-                                                    List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (hokanjyoToManeuva match.submatches))) hokanjyoMatch
+                                                    (Nothing, List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (hokanjyoToManeuva match.submatches))) hokanjyoMatch)
                                                 else
-                                                    []
+                                                    (hokanjyoMismatch, [])
                                         )
+                                
+                                matchResults =
+                                    Maybe.withDefault [] (Maybe.map proc tabData.dialogContent)
 
                                 newManeuvas = 
-                                    Maybe.withDefault [] (Maybe.map proc tabData.dialogContent)
-                                
+                                    List.FlatMap.flatMap (\(x, ls) -> ls) matchResults
+
+                                mismatches = 
+                                    List.FlatMap.flatMap
+                                        (\(x, ls) -> case x of
+                                            Just str -> [str]
+                                            Nothing -> []
+                                        ) matchResults
+
+                                _ = Debug.log "" mismatches
+
                             in    
                                 {tab |
+                                    mismatches = mismatches,
                                     tabType = ManeuvaTab {
                                         maneuvas = zipWithIndex (tabData.maneuvas ++ newManeuvas) |> List.map (\(i, x) -> {x | position = Position i}),
                                         showAddManeuvaDialog = False,
@@ -458,3 +475,17 @@ update msg model =
                         ),
                     Cmd.none
                 )
+
+        ResetMessages tab ->
+            let
+                newTabState =
+                    {tab | mismatches = []}
+
+                newModelState =
+                    {
+                        model |
+                            activeTab = OtherTab newTabState,
+                            tabs = Utils.updateOnWay model.tabs tab (\x -> newTabState)
+                    }
+            in
+                (newModelState, Cmd.none)

@@ -177,7 +177,8 @@ type alias Tab =
         uuid: String,
         tabType: TabType,
         title: String,
-        isEditing: Bool
+        isEditing: Bool,
+        mismatches: List String
     }
 
 type ManeuvaType =

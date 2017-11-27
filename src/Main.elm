@@ -195,7 +195,8 @@ init flags =
                                     }
                                 ]
                             },
-                        isEditing = False
+                        isEditing = False,
+                        mismatches = []
                     }
                 ],
                 appendMode = AppendManeuva,
