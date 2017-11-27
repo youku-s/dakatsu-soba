@@ -1,5 +1,30 @@
 module Utils exposing (..)
 
+import Random.Pcg exposing (Seed, step)
+import Uuid.Barebones exposing (uuidStringGenerator)
+import List.Extra
+
+zipWithUuid : Seed -> List a -> (Seed, List (String, a))
+zipWithUuid seed list =
+    let
+        apply sd ls =
+            case ls of
+                x :: xs ->
+                    let
+                        (uuid, newSeed) = step uuidStringGenerator sd
+                    in
+                        (uuid, x, newSeed) :: apply newSeed xs
+                [] -> []
+
+        zipped = apply seed list
+
+        lastSeed = 
+            case List.Extra.last zipped of
+                Just (_, _, sd) -> sd
+                _ -> seed
+    in
+        (lastSeed, List.map (\(uuid, elem, seed) -> (uuid, elem)) zipped)
+        
 -- i番目の要素をj番目の位置に移動する
 move : Int -> Int -> List a -> Maybe (List a)
 move src dst ls =
