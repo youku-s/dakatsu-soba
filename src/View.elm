@@ -26,7 +26,9 @@ view model =
                     ] []
                 ],
                 div [] [
-                    button [] [text "保存"]
+                    button [
+                        onClick Save
+                    ] [text "保存"]
                 ],
                 div [] [
                     input [
@@ -51,6 +53,18 @@ view model =
                         onInput (\s -> FormUpdated (\m -> {m | saveMode = CloneSheet}))
                     ] [],
                     span [] [text "シートをコピーする"]
+                ],
+                div [] [
+                    input [
+                        type_ "radio",
+                        name "save-option",
+                        checked (case model.saveMode of
+                            DeleteSheet -> True
+                            _ -> False
+                        ),
+                        onInput (\s -> FormUpdated (\m -> {m | saveMode = DeleteSheet}))
+                    ] [],
+                    span [] [text "シートを削除する"]
                 ],
                 div [] [
                     input [

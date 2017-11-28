@@ -18,6 +18,7 @@ init flags =
     let
         model = 
             {
+                config = flags.config,
                 uuid = "",
                 isPrivate = False,
                 password = Nothing,

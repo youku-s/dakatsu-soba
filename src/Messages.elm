@@ -25,4 +25,7 @@ type Msg =
     OpenManeuvaDialog Tab |
     CloseManeuvaDialog Tab |
     ResetMessages Tab |
-    UpdateSize DomSize
+    UpdateSize DomSize |
+    Save |
+    Delete |
+    Clone

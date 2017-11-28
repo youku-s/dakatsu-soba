@@ -5,7 +5,8 @@ import Random.Pcg
 
 type alias Flags =
     {
-        randomSeed: Int
+        randomSeed: Int,
+        config: Config
     }
 
 type alias Model =
@@ -26,7 +27,16 @@ type alias Model =
         showDeleteTabialog: Maybe Tab,
         windowSize: DomSize,
         dragDrop : DragDrop.Model String Position,
-        seed: Random.Pcg.Seed
+        seed: Random.Pcg.Seed,
+        config: Config
+    }
+
+type alias Config =
+    {
+        saveUrl: String,
+        cloneUrl: String,
+        deleteUrl: String,
+        outputUrl: String
     }
 
 type Position
@@ -45,7 +55,7 @@ type AppendMode =
     AppendManeuva | AppendResource
 
 type SaveMode =
-    UpdateSheet | CloneSheet
+    UpdateSheet | CloneSheet | DeleteSheet
 
 type ActiveTab =
     ProfileTab | FavorsTab | ClassesTab | OtherTab Tab

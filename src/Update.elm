@@ -1,16 +1,16 @@
 module Update exposing (..)
 
-import Random.Pcg exposing (generate)
 import Messages exposing (Msg(..))
 import Models exposing (..)
 import Utils exposing (..)
-import Task exposing (perform)
 import Html5.DragDrop as DragDrop
 import Regex
 import String.Extra as SExtra
 import Maybe.FlatMap
 import List.FlatMap
-import Uuid.Barebones exposing (uuidStringGenerator)
+import Http
+import Json.Decode as Decode
+import Json.Encode as Encode
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -253,6 +253,8 @@ update msg model =
                                     |> SExtra.replace "<RPAREN>" ")"
                                     |> SExtra.replace "<LLPAREN>" "【"
                                     |> SExtra.replace "<LRPAREN>" "】"
+                                    |> SExtra.replace "<MLPAREN>" "["
+                                    |> SExtra.replace "<MRPAREN>" "]"
                                     |> SExtra.replace "<COLON>" "："
                                     |> SExtra.replace "<BAR>" "｜"
                                     
@@ -294,11 +296,11 @@ update msg model =
                                                             malice = Maybe.FlatMap.flatMap strToInt (Maybe.map String.trim malice),
                                                             favor = Nothing,
                                                             category = "0",
-                                                            name = Maybe.withDefault "" (Maybe.map String.trim name),
+                                                            name = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) name),
                                                             timing = AutoAlways,
-                                                            cost = Maybe.withDefault "" (Maybe.map String.trim cost),
-                                                            range = Maybe.withDefault "" (Maybe.map String.trim range),
-                                                            description = Maybe.withDefault "" (Maybe.map String.trim description),
+                                                            cost = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) cost),
+                                                            range = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) range),
+                                                            description = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) description),
                                                             from = "",
                                                             region = NoRegion,
                                                             position = Position 0
@@ -364,11 +366,11 @@ update msg model =
                                                             malice = Maybe.FlatMap.flatMap strToInt (Maybe.map String.trim malice),
                                                             favor = Nothing,
                                                             category = "0",
-                                                            name = Maybe.withDefault "" (Maybe.map String.trim name),
+                                                            name = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) name),
                                                             timing = Maybe.withDefault AutoAlways (Maybe.map toTiming timing),
-                                                            cost = Maybe.withDefault "" (Maybe.map String.trim cost),
-                                                            range = Maybe.withDefault "" (Maybe.map String.trim range),
-                                                            description = Maybe.withDefault "" (Maybe.map String.trim description),
+                                                            cost = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) cost),
+                                                            range = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) range),
+                                                            description = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) description),
                                                             from = "",
                                                             region = Maybe.withDefault NoRegion (Maybe.map toRegion region),
                                                             position = Position 0
@@ -386,11 +388,11 @@ update msg model =
                                                             malice = Nothing,
                                                             favor = Nothing,
                                                             category = "0",
-                                                            name = Maybe.withDefault "" (Maybe.map String.trim name),
+                                                            name = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) name),
                                                             timing = Maybe.withDefault AutoAlways (Maybe.map (\x -> x |> String.trim |> toTiming) timing),
-                                                            cost = Maybe.withDefault "" (Maybe.map String.trim cost),
-                                                            range = Maybe.withDefault "" (Maybe.map String.trim range),
-                                                            description = Maybe.withDefault "" (Maybe.map String.trim description),
+                                                            cost = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) cost),
+                                                            range = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) range),
+                                                            description = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) description),
                                                             from = "",
                                                             region = Maybe.withDefault NoRegion (Maybe.map (\x -> x |> String.trim |> toRegion2) region),
                                                             position = Position 0
@@ -419,9 +421,6 @@ update msg model =
                                             Just str -> [str]
                                             Nothing -> []
                                         ) matchResults
-
-                                _ = Debug.log "" mismatches
-
                             in    
                                 {tab |
                                     mismatches = mismatches,
@@ -491,3 +490,54 @@ update msg model =
         
         UpdateSize size ->
             ({model | windowSize = size}, Cmd.none)
+
+        Save ->
+            let
+                profileToValue p =
+                    Encode.object
+                        []
+
+                favorToValue f =
+                    Encode.object
+                        []
+
+                usedFavorToValue f =
+                    Encode.object
+                        []
+
+                classesToValue c =
+                    Encode.object
+                        []
+
+                tabToValue t =
+                    Encode.object
+                        []
+
+                modelToValue m =
+                    Encode.object
+                        [
+                            ("uuid", Encode.string m.uuid),
+                            ("isPrivate", Encode.bool m.isPrivate),
+                            ("password", Encode.string (Maybe.withDefault "" m.password)),
+                            ("tags", Encode.list (List.map Encode.string m.tags)),
+                            ("profile", profileToValue m.profile),
+                            ("favors", Encode.list (List.map favorToValue m.favors)),
+                            ("usedFavors", Encode.list (List.map usedFavorToValue m.usedFavors)),
+                            ("classes", classesToValue m.classes),
+                            ("tabs", Encode.list (List.map tabToValue m.tabs))
+                        ]
+
+                request =
+                    Http.post model.config.saveUrl (modelToValue model |> Http.jsonBody) Decode.string
+
+                -- TODO エラー処理
+                onResponse request =
+                    NoOp
+            in
+                (model, Http.send onResponse request)
+
+        Delete ->
+            (model, Cmd.none)
+
+        Clone ->
+            (model, Cmd.none)   
