@@ -493,32 +493,240 @@ update msg model =
 
         Save ->
             let
+                -- Dynamoは空文字列エントリを許してくれないので、空文字列をスペースに変換する必要がある
+                strToValue s =
+                    if s == "" then Encode.null else Encode.string s
+
+                intToValue i =
+                    if i == 0 then Encode.null else Encode.int i
+
+                placeToString p =
+                    case p of
+                        Purgatory -> "Purgatory"
+                        Garden -> "Garden"
+                        Paradise -> "Paradise"
+
+                memoryToValue me =
+                    Encode.object  
+                        [
+                            ("uuid", me.uuid |> strToValue),
+                            ("name", me.name |> strToValue),
+                            ("description", me.description |> strToValue)
+                        ]
+
+                regretToValue r =
+                    Encode.object
+                        [
+                            ("uuid", r.uuid |> strToValue),
+                            ("target", r.target |> strToValue),
+                            ("name", r.name |> strToValue),
+                            ("currentVal", r.currentVal |> Encode.int),
+                            ("maxVal", r.maxVal |> Encode.int),
+                            ("negative", r.negative |> strToValue),
+                            ("description", r.description |> strToValue)
+                        ]
+                
+                karmaToString k =
+                    Encode.object
+                        [
+                            ("uuid", k.uuid |> strToValue),
+                            ("achieved", k.achieved |> Encode.bool),
+                            ("name", k.name |> strToValue),
+                            ("description", k.description |> strToValue)
+                        ]
+
                 profileToValue p =
                     Encode.object
-                        []
+                        [
+                            ("name", p.name |> strToValue),
+                            ("race", p.race |> strToValue),
+                            ("age", p.age |> strToValue),
+                            ("place", p.place |> placeToString |> Encode.string),
+                            ("height", p.height |> strToValue),
+                            ("weight", p.weight |> strToValue),
+                            ("implication", p.implication |> strToValue),
+                            ("hair", p.hair |> strToValue),
+                            ("eye", p.eye |> strToValue),
+                            ("skin", p.skin |> strToValue),
+                            ("memo", p.memo |> strToValue),
+                            ("memories", Encode.list (List.map memoryToValue p.memories)),
+                            ("regrets", Encode.list (List.map regretToValue p.regrets)),
+                            ("karmas", Encode.list (List.map karmaToString p.karmas))
+                        ]
 
                 favorToValue f =
                     Encode.object
-                        []
+                        [
+                            ("uuid", f.uuid |> strToValue),
+                            ("personal", (Maybe.withDefault 0 f.personal) |> intToValue),
+                            ("battle", (Maybe.withDefault 0 f.battle) |> intToValue),
+                            ("memo", f.memo |> strToValue)
+                        ]
 
                 usedFavorToValue f =
                     Encode.object
-                        []
+                        [
+                            ("uuid", f.uuid |> strToValue),
+                            ("purpose", f.purpose |> strToValue),
+                            ("favor", f.favor |> Encode.int),
+                            ("memo", f.memo |> strToValue)
+                        ]
+
+                positionToValue p =
+                    Encode.object
+                        [
+                            ("uuid", p.uuid |> strToValue),
+                            ("name", p.name |> strToValue)
+                        ]
+
+                subPositionToValue p =
+                    Encode.object
+                        [
+                            ("uuid", p.uuid |> strToValue),
+                            ("name", p.name |> strToValue)
+                        ]
+
+                highTechToValue h =
+                    Encode.object
+                        [
+                            ("uuid", h.uuid |> strToValue),
+                            ("name", h.name |> strToValue),
+                            ("favor", (Maybe.withDefault 0 h.favor) |> intToValue)
+                        ]
+
+                categoryToString c =
+                    case c of
+                        MainClass -> "MainClass"
+                        SubClass -> "SubClass"
+                        SecondClass -> "SecondClass"
+                        ThirdClass -> "ThirdClass"
+                        ThirdPointFiveClass -> "ThirdPointFiveClass"
+                        HighSociety -> "HighSociety"
+                        OtherClass -> "OtherClass"
+
+                classToValue c =
+                    Encode.object
+                        [
+                            ("uuid", c.uuid |> strToValue),
+                            ("category", c.category |> categoryToString |> Encode.string),
+                            ("from", c.from |> strToValue),
+                            ("name", c.name |> strToValue),
+                            ("number", c.number |> intToValue)
+                        ]
+
+                pointToValue p =
+                    Encode.object
+                        [
+                            ("uuid", p.uuid |> strToValue),
+                            ("name", p.name |> strToValue),
+                            ("busou", (Maybe.withDefault 0 p.busou) |> intToValue),
+                            ("heni", (Maybe.withDefault 0 p.heni) |> intToValue),
+                            ("kaizou", (Maybe.withDefault 0 p.heni) |> intToValue),
+                            ("favor", (Maybe.withDefault 0 p.favor) |> intToValue)
+                        ]
 
                 classesToValue c =
                     Encode.object
-                        []
+                        [
+                            ("positions", Encode.list (List.map positionToValue c.positions)),
+                            ("subPositions", Encode.list (List.map subPositionToValue c.subPositions)),
+                            ("highTechs", Encode.list (List.map highTechToValue c.highTechs)),
+                            ("classes", Encode.list (List.map classToValue c.classes)),
+                            ("points", Encode.list (List.map pointToValue c.points))
+                        ]
+                    
+                maneuvaTypeToStr ma =
+                    case ma of
+                        Skill -> "Skill"
+                        Part -> "Part"
+                        Item -> "Item"
+                        Effect -> "Effect"
+                        Archive -> "Archive"
+                        Tag -> "Tag"
+
+                regionToStr re =
+                    case re of
+                        NoRegion -> "NoRegion"
+                        Head -> "Head"
+                        Arm -> "Arm"
+                        Body -> "Body"
+                        Leg -> "Leg"
+                        OtherRegion -> "OtherRegion"
+
+                timingToStr ti =
+                    case ti of
+                        AutoAlways -> "AutoAlways"
+                        AutoNeedsDeclearation -> "AutoNeedsDeclearation"
+                        AutoOthers -> "AutoOthers"
+                        Action -> "Action"
+                        Judge -> "Judge"
+                        Damage -> "Damage"
+                        Rapid -> "Rapid"
+                        BeforeBattle -> "BeforeBattle"
+                        BattleStart -> "BattleStart"
+                        TurnStart -> "TurnStart"
+                        CountStart -> "CountStart"
+
+                posToValue p =
+                    case p of
+                        Position num -> num |> Encode.int
+
+                maneuvaToValue ma =
+                    Encode.object
+                        [
+                            ("uuid", ma.uuid |> strToValue),
+                            ("used", ma.used |> Encode.bool),
+                            ("lost", ma.lost |> Encode.bool),
+                            ("act", (Maybe.withDefault 0 ma.act) |> intToValue),
+                            ("malice", (Maybe.withDefault 0 ma.malice) |> intToValue),
+                            ("favor", (Maybe.withDefault 0 ma.favor) |> intToValue),
+                            ("maneuvaType", ma.maneuvaType |> maneuvaTypeToStr |> Encode.string),
+                            ("category", ma.category |> strToValue),
+                            ("name", ma.name |> strToValue),
+                            ("timing", ma.timing |> timingToStr |> Encode.string),
+                            ("cost", ma.cost |> strToValue),
+                            ("range", ma.range |> strToValue),
+                            ("description", ma.description |> strToValue),
+                            ("from", ma.from |> strToValue),
+                            ("region", ma.region |> regionToStr |> Encode.string),
+                            ("position", ma.position |> posToValue)
+                        ]
+
+                resourceToValue re =
+                    Encode.object
+                        [
+                            ("uuid", re.uuid |> strToValue),
+                            ("name", re.name |> strToValue),
+                            ("description", re.description |> strToValue),
+                            ("favor", (Maybe.withDefault 0 re.favor) |> intToValue),
+                            ("position", re.position |> posToValue)
+                        ]
+
+                tabTypeToItems tt =
+                    case tt of
+                        ManeuvaTab data -> Encode.list (List.map maneuvaToValue data.maneuvas)
+                        ResourceTab items -> Encode.list (List.map resourceToValue items)
+
+                tabTypeToStr t =
+                    case t of
+                        ManeuvaTab _ -> "ManeuvaTab"
+                        ResourceTab _ -> "ResourceTab"
 
                 tabToValue t =
                     Encode.object
-                        []
+                        [
+                            ("uuid", t.uuid |> strToValue),
+                            ("title", t.title |> strToValue),
+                            ("tabType", t.tabType |> tabTypeToStr |> Encode.string),
+                            ("items", t.tabType |> tabTypeToItems)
+                        ]
 
                 modelToValue m =
                     Encode.object
                         [
                             ("uuid", Encode.string m.uuid),
                             ("isPrivate", Encode.bool m.isPrivate),
-                            ("password", Encode.string (Maybe.withDefault " " m.password)),
+                            ("password", (Maybe.withDefault "" m.password) |> strToValue),
                             ("tags", Encode.list (List.map Encode.string m.tags)),
                             ("profile", profileToValue m.profile),
                             ("favors", Encode.list (List.map favorToValue m.favors)),
@@ -543,7 +751,7 @@ update msg model =
 
 
                 request =
-                    post model.config.saveUrl (modelToValue model |> Http.jsonBody)
+                    post model.config.saveUrl (model |> modelToValue |> Http.jsonBody)
 
                 -- TODO エラー処理
                 onResponse request =
