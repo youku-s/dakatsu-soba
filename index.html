@@ -9,7 +9,7 @@ body { font-family: calibri, helvetica, arial, sans-serif; }</style>
 </head>
 <body>
 <script type="text/javascript">
-    var app = Elm.Main.fullscreen({ randomSeed: Math.floor(Math.random()*0xFFFFFFFF) });
+    var app = Elm.Main.fullscreen({ randomSeed: Math.floor(Math.random()*0xFFFFFFFF), config: config });
 
     app.ports.requestDomSize.subscribe(function(str) {
         var html = document.querySelector(str);

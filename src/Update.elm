@@ -262,7 +262,7 @@ update msg model =
                                     Regex.regex "<LPAREN>(\\d+)<RPAREN>エフェクト<LLPAREN>([^<>]+)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>([^<>]+)"
 
                                 other =
-                                    Regex.regex "<LPAREN>(\\d+)<RPAREN>([^<>]+)<BAR>([^<>]+)<LLPAREN>([^<>]+)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>([^<>]+)"
+                                    Regex.regex "<LPAREN>(\\d+)<RPAREN>([^<>]+)<BAR>([^<>]+)<LLPAREN>(.+?)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>([^<>]+)"
 
                                 hokanjyo =
                                     Regex.regex "<MLPAREN>([^<>]*)<MRPAREN>\\s*([^\\s]+?)\\s*<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)"
@@ -518,7 +518,7 @@ update msg model =
                         [
                             ("uuid", Encode.string m.uuid),
                             ("isPrivate", Encode.bool m.isPrivate),
-                            ("password", Encode.string (Maybe.withDefault "" m.password)),
+                            ("password", Encode.string (Maybe.withDefault " " m.password)),
                             ("tags", Encode.list (List.map Encode.string m.tags)),
                             ("profile", profileToValue m.profile),
                             ("favors", Encode.list (List.map favorToValue m.favors)),
@@ -527,8 +527,23 @@ update msg model =
                             ("tabs", Encode.list (List.map tabToValue m.tabs))
                         ]
 
+                post url body =
+                    Http.request
+                        {
+                            method = "POST",
+                            headers = [
+                                (Http.header "Content-Type" "application/json")
+                            ],
+                            url = url,
+                            body = body,
+                            expect = Http.expectStringResponse (\_ -> Ok ()),
+                            timeout = Nothing,
+                            withCredentials = False
+                        }
+
+
                 request =
-                    Http.post model.config.saveUrl (modelToValue model |> Http.jsonBody) Decode.string
+                    post model.config.saveUrl (modelToValue model |> Http.jsonBody)
 
                 -- TODO エラー処理
                 onResponse request =
