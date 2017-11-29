@@ -1,8 +1,8 @@
 module Messages exposing (..)
 
 import Models exposing (..)
-import Window exposing (Size)
 import Html5.DragDrop as DragDrop
+import Navigation exposing (Location)
 
 type Msg =
     NoOp |
@@ -28,4 +28,6 @@ type Msg =
     UpdateSize DomSize |
     Save |
     Delete |
-    Clone
+    Clone |
+    OnLocationChange Location |
+    LoadDataFromJson String    

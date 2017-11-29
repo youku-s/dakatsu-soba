@@ -14,6 +14,29 @@ import Html5.DragDrop as DragDrop
 
 view : Model -> Html Msg
 view model =
+    div []
+        [ page model ]
+
+page : Model -> Html Msg
+page model =
+    case model.route of
+        NewDetail ->
+            detailPage model
+
+        Detail id ->
+            detailPage model
+
+        NotFoundRoute ->
+            notFoundView
+
+notFoundView : Html msg
+notFoundView =
+    div []
+        [ text "Not found"
+        ]
+
+detailPage : Model -> Html Msg
+detailPage model =
     body [] ([
         div [class "content"]
         [

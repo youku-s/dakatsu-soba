@@ -3,6 +3,11 @@ port module Models exposing (..)
 import Html5.DragDrop as DragDrop
 import Random.Pcg
 
+type Route
+    = NewDetail
+    | Detail String
+    | NotFoundRoute
+
 type alias Flags =
     {
         randomSeed: Int,
@@ -28,14 +33,15 @@ type alias Model =
         windowSize: DomSize,
         dragDrop : DragDrop.Model String Position,
         seed: Random.Pcg.Seed,
-        config: Config
+        config: Config,
+        route : Route
     }
 
 type alias Config =
     {
         saveUrl: String,
         cloneUrl: String,
-        deleteUrl: String,
+        detailUrl: String,
         outputUrl: String
     }
 

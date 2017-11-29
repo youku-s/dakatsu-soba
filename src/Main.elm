@@ -1,23 +1,22 @@
 module Main exposing (..)
 
 import Random.Pcg exposing (generate, initialSeed, Seed, step)
-import Html exposing (Html, div, text, programWithFlags)
 import Messages exposing (Msg(..))
 import Models exposing (..)
 import Update exposing (update)
 import View exposing (view)
 import Utils exposing (updateOnWay)
-import List.FlatMap exposing (..)
 import Uuid.Barebones exposing (uuidStringGenerator)
-import Window exposing (..)
-import Task
 import Html5.DragDrop as DragDrop
+import Navigation exposing (Location, programWithFlags)
+import Routing
 
-init : Flags -> ( Model, Cmd Msg )
-init flags =
+init : Flags -> Location -> ( Model, Cmd Msg )
+init flags location =
     let
         model = 
             {
+                route = Routing.parseLocation location,
                 config = flags.config,
                 uuid = "",
                 isPrivate = False,
@@ -376,10 +375,9 @@ subscriptions model =
 -- MAIN
 main : Program Flags Model Msg
 main =
-    programWithFlags
-        {
-            init = init,
-            view = view,
-            update = update,
-            subscriptions = subscriptions
+    Navigation.programWithFlags OnLocationChange
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
         }

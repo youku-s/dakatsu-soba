@@ -11,6 +11,7 @@ import List.FlatMap
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
+import Routing exposing (parseLocation)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -493,7 +494,7 @@ update msg model =
 
         Save ->
             let
-                -- Dynamoは空文字列エントリを許してくれないので、空文字列をスペースに変換する必要がある
+                -- Dynamoは空文字列エントリを許してくれないので、空文字列をnullに変換する必要がある
                 strToValue s =
                     if s == "" then Encode.null else Encode.string s
 
@@ -760,7 +761,240 @@ update msg model =
                 (model, Http.send onResponse request)
 
         Delete ->
+            -- TODO 実装する
             (model, Cmd.none)
 
         Clone ->
-            (model, Cmd.none)   
+            -- TODO 実装する
+            (model, Cmd.none)
+
+        OnLocationChange location ->
+            let
+                newRoute =
+                    parseLocation location
+                
+                loadDataCmd route =
+                    case route of
+                        Detail uuid ->
+                            let
+                                cmd = 
+                                    Http.get
+                                        (String.append model.config.detailUrl (String.append "/" model.uuid))
+                                        Decode.string
+                                        
+                                onResponse request =
+                                    case request of
+                                        Ok json -> LoadDataFromJson json
+                                        Err err ->
+                                            let
+                                                _ = Debug.log "fail" err
+                                            in
+                                                NoOp
+                            in
+                                Http.send onResponse cmd
+                        _ -> Cmd.none
+            in
+                ( { model | route = newRoute }, loadDataCmd newRoute )
+
+        LoadDataFromJson json ->
+            let
+                newModelState =
+                    {
+                        model |
+                        uuid = (Decode.decodeString (Decode.at ["uuid"] Decode.string) json) |> (Result.withDefault ""),
+                        isPrivate = (Decode.decodeString (Decode.at ["isPrivate"] Decode.bool) json) |> (Result.withDefault False),
+                        tags = (Decode.decodeString (Decode.at ["tags"] (Decode.list Decode.string)) json) |> (Result.withDefault []),
+                        profile = {
+                            name = (Decode.decodeString (Decode.at ["profile", "name"] Decode.string) json) |> (Result.withDefault ""),
+                            race = (Decode.decodeString (Decode.at ["profile", "race"] Decode.string) json) |> (Result.withDefault ""),
+                            age = (Decode.decodeString (Decode.at ["profile", "age"] Decode.string) json) |> (Result.withDefault ""),
+                            place = Purgatory,
+                                -- let
+                                --     decodePlace str =
+                                --         (Decode.decodeString (Decode.at ["profile", "age"] Decode.string) json) |> (Result.withDefault "")
+                                -- in
+                                --     (Decode.decodeString (Decode.at ["profile", "age"] Decode.string) json) |> (Result.withDefault ""),
+                            height = (Decode.decodeString (Decode.at ["profile", "height"] Decode.string) json) |> (Result.withDefault ""),
+                            weight = (Decode.decodeString (Decode.at ["profile", "weight"] Decode.string) json) |> (Result.withDefault ""),
+                            implication = (Decode.decodeString (Decode.at ["profile", "implication"] Decode.string) json) |> (Result.withDefault ""),
+                            hair = (Decode.decodeString (Decode.at ["profile", "hair"] Decode.string) json) |> (Result.withDefault ""),
+                            eye = (Decode.decodeString (Decode.at ["profile", "eye"] Decode.string) json) |> (Result.withDefault ""),
+                            skin = (Decode.decodeString (Decode.at ["profile", "skin"] Decode.string) json) |> (Result.withDefault ""),
+                            memo = (Decode.decodeString (Decode.at ["profile", "memo"] Decode.string) json) |> (Result.withDefault ""),
+                            memories = 
+                                let
+                                    toMemory str =
+                                        {
+                                            uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) json) |> (Result.withDefault ""),
+                                            name = (Decode.decodeString (Decode.field "name" Decode.string) json) |> (Result.withDefault ""),
+                                            description = (Decode.decodeString (Decode.field "description" Decode.string) json) |> (Result.withDefault "")
+                                        }
+
+                                    decodeMemory =
+                                        (Decode.list Decode.string) |> (Decode.map (List.map toMemory))
+                                in
+                                    (Decode.decodeString (Decode.at ["profile", "memories"] decodeMemory) json) |> (Result.withDefault []),
+                            regrets = [],
+                                -- let
+                                --     toRegret str =
+                                --         {
+                                --             target = (Decode.decodeString (Decode.field "target" Decode.string) json) |> (Result.withDefault ""),
+                                --             name = (Decode.decodeString (Decode.field "name" Decode.string) json) |> (Result.withDefault ""),
+                                --             currentVal = (Decode.decodeString (Decode.field "currentVal" Decode.int) json) |>  Result.toMaybe,
+                                --             maxVal = (Decode.decodeString (Decode.field "maxVal" Decode.int) json) |>  Result.toMaybe,
+                                --             negative = (Decode.decodeString (Decode.field "negative" Decode.string) json) |> (Result.withDefault ""),
+                                --             description = (Decode.decodeString (Decode.field "description" Decode.string) json) |> (Result.withDefault "")
+                                --         }
+
+                                --     decodeRegret =
+                                --         (Decode.list Decode.string) |> (Decode.map (List.map toRegret))
+                                -- in
+                                --     (Decode.decodeString (Decode.at ["profile", "regrets"] decodeRegret) json) |> (Result.withDefault []),
+                            karmas = 
+                                let
+                                    toKarma str =
+                                        {
+                                            uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) json) |> (Result.withDefault ""),
+                                            achieved = (Decode.decodeString (Decode.field "achieved" Decode.bool) json) |> (Result.withDefault False),
+                                            name = (Decode.decodeString (Decode.field "name" Decode.string) json) |> (Result.withDefault ""),
+                                            description = (Decode.decodeString (Decode.field "description" Decode.string) json) |> (Result.withDefault "")
+                                        }
+
+                                    decodeKarma =
+                                        (Decode.list Decode.string) |> (Decode.map (List.map toKarma))
+                                in
+                                    (Decode.decodeString (Decode.at ["profile", "karmas"] decodeKarma) json) |> (Result.withDefault [])
+                        },
+                        classes = {
+                            positions = [
+                                {
+                                    uuid = "",
+                                    name = ""
+                                }
+                            ],
+                            subPositions = [
+                                {
+                                    uuid = "",
+                                    name = ""
+                                }
+                            ],
+                            highTechs = [
+                                {
+                                    uuid = "",
+                                    name = "",
+                                    favor = Nothing
+                                }
+                            ],
+                            classes = [
+                                {
+                                    uuid = "",
+                                    category = MainClass,
+                                    from = "初期",
+                                    name = "",
+                                    number = 1
+                                },
+                                {
+                                    uuid = "",
+                                    category = SubClass,
+                                    from = "初期",
+                                    name = "",
+                                    number = 1
+                                }
+                            ],
+                            points = [
+                                {
+                                    uuid = "",
+                                    name = "",
+                                    busou = Nothing,
+                                    heni = Nothing,
+                                    kaizou = Nothing,
+                                    favor = Nothing
+                                },
+                                {
+                                    uuid = "",
+                                    name = "",
+                                    busou = Nothing,
+                                    heni = Nothing,
+                                    kaizou = Nothing,
+                                    favor = Nothing
+                                },
+                                {
+                                    uuid = "",
+                                    name = "ボーナス",
+                                    busou = Nothing,
+                                    heni = Nothing,
+                                    kaizou = Nothing,
+                                    favor = Nothing
+                                }
+                            ]
+                        },
+                        favors = [
+                            {
+                                uuid = "",
+                                battle = Nothing,
+                                personal = Nothing,
+                                memo = ""
+                            },
+                            {
+                                uuid = "",
+                                battle = Nothing,
+                                personal = Nothing,
+                                memo = ""
+                            },
+                            {
+                                uuid = "",
+                                battle = Nothing,
+                                personal = Nothing,
+                                memo = ""
+                            }
+                        ],
+                        usedFavors = [
+                            {
+                                uuid = "",
+                                purpose = "",
+                                favor = 0,
+                                memo = ""
+                            },
+                            {
+                                uuid = "",
+                                purpose = "",
+                                favor = 0,
+                                memo = ""
+                            }
+                        ],
+                        tabs = [
+                            {
+                                uuid = "",
+                                title = "マニューバ",
+                                tabType = ManeuvaTab 
+                                    {
+                                        dialogContent = Nothing,
+                                        showAddManeuvaDialog = False,
+                                        maneuvas = [
+                                            {
+                                                uuid = "", 
+                                                used = False,
+                                                lost = False,
+                                                act = Nothing,
+                                                maneuvaType = Skill,
+                                                malice = Nothing,
+                                                favor = Nothing,
+                                                category = "0",
+                                                name = "",
+                                                timing = AutoAlways,
+                                                cost = "",
+                                                range = "",
+                                                description = "",
+                                                from = "",
+                                                region = NoRegion,
+                                                position = Position 0
+                                            }
+                                        ]
+                                    },
+                                isEditing = False,
+                                mismatches = []
+                            }
+                        ]
+                    }
+            in
+                (newModelState, Cmd.none)
