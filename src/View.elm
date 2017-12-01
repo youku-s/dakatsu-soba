@@ -502,10 +502,11 @@ favorsTab model =
                                 resources = getResourceFavor tabs
                                 points = getPointFavor model
                                 others = getOtherFavor model
+                                usedFavors = getUsedFavor model.usedFavors
                             in
                                 input [
                                     type_ "number",
-                                    value (toString (parts + skills + resources + points + others)),
+                                    value (toString (parts + skills + resources + points + others + usedFavors)),
                                     readonly True
                                 ] []
                         ],
@@ -871,6 +872,9 @@ getPointFavor model =
 getOtherFavor : Model -> Int
 getOtherFavor model =
     List.sum (List.map (\x -> Maybe.withDefault 0 x.favor) model.classes.highTechs)
+
+getUsedFavor usedFavors =
+    List.sum (List.map .favor usedFavors)
 
 classesTab : Classes -> Html Msg
 classesTab classes =

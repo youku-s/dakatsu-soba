@@ -12,6 +12,7 @@ import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Routing exposing (parseLocation)
+import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded, resolve)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -797,336 +798,243 @@ update msg model =
 
         LoadDataFromJson json ->
             let
-                _ = Debug.log "dfdfddd" [Decode.decodeString (Decode.field "profile" Decode.value) json]
+                toPlace str =
+                    case str of
+                        "Purgatory" -> Purgatory
+                        "Garden" -> Garden 
+                        "Paradise" -> Paradise
+                        _ -> Purgatory
+
+                decodePlace =
+                    Decode.string |> (Decode.map toPlace)
+
+                decodeMemory =
+                    decode Memory
+                        |> required "uuid" Decode.string
+                        |> optional "name" Decode.string ""
+                        |> optional "description" Decode.string ""
+
+                decodeRegret =
+                    decode Regret
+                        |> required "uuid" Decode.string
+                        |> optional "target" Decode.string ""
+                        |> optional "name" Decode.string ""
+                        |> optional "currentVal" Decode.int 0
+                        |> optional "maxVal" Decode.int 0
+                        |> optional "negative" Decode.string ""
+                        |> optional "description" Decode.string ""
+
+                decodeKarma =
+                    decode Karma
+                        |> required "uuid" Decode.string
+                        |> optional "achieved" Decode.bool False
+                        |> optional "name" Decode.string ""
+                        |> optional "description" Decode.string ""
+
+                decodeProfile =
+                    decode Profile
+                        |> optional "name" Decode.string ""
+                        |> optional "race" Decode.string ""
+                        |> optional "age" Decode.string ""
+                        |> optional "place" decodePlace Purgatory
+                        |> optional "height" Decode.string ""
+                        |> optional "weight" Decode.string ""
+                        |> optional "implication" Decode.string ""
+                        |> optional "hair" Decode.string ""
+                        |> optional "eye" Decode.string ""
+                        |> optional "skin" Decode.string ""
+                        |> optional "memo" Decode.string ""
+                        |> optional "memories" (Decode.list decodeMemory) []
+                        |> optional "regrets" (Decode.list decodeRegret) []
+                        |> optional "karmas" (Decode.list decodeKarma) []
+
+                decodePositionDetail =
+                    decode PositionDetail
+                        |> required "uuid" Decode.string
+                        |> optional "name" Decode.string ""
+
+                decodeSubPosition =
+                    decode SubPositionDetail
+                        |> required "uuid" Decode.string
+                        |> optional "name" Decode.string ""
+
+                decodeHighTech =
+                    decode HighTechDetail
+                        |> required "uuid" Decode.string
+                        |> optional "name" Decode.string ""
+                        |> optional "favor" (Decode.maybe Decode.int) Nothing
+
+                toCategory str =
+                    case str of
+                        "MainClass" -> MainClass
+                        "SubClass" -> SubClass 
+                        "SecondClass" -> SecondClass
+                        "ThirdClass" -> ThirdClass
+                        "ThirdPointFiveClass" -> ThirdPointFiveClass
+                        "HighSociety" -> HighSociety
+                        "OtherClass" -> OtherClass
+                        _ -> MainClass
+
+                decodeClassDetail =
+                    decode ClassDetail
+                        |> required "uuid" Decode.string
+                        |> optional "category" (Decode.string |> (Decode.map toCategory)) MainClass
+                        |> optional "name" Decode.string ""
+                        |> optional "from" Decode.string ""
+                        |> optional "number" Decode.int 0
+
+                decodePoint =
+                    decode Point
+                        |> required "uuid" Decode.string
+                        |> optional "name" Decode.string ""
+                        |> optional "busou" (Decode.maybe Decode.int) Nothing
+                        |> optional "heni" (Decode.maybe Decode.int) Nothing
+                        |> optional "kaizou" (Decode.maybe Decode.int) Nothing
+                        |> optional "favor" (Decode.maybe Decode.int) Nothing
+
+                decodeClasses =
+                    decode Classes
+                        |> optional "positions" (Decode.list decodePositionDetail) []
+                        |> optional "subPositions" (Decode.list decodeSubPosition) []
+                        |> optional "highTechs" (Decode.list decodeHighTech) []
+                        |> optional "classes" (Decode.list decodeClassDetail) []
+                        |> optional "points" (Decode.list decodePoint) []
+
+                decodeFavor =
+                    decode Favor
+                        |> required "uuid" Decode.string
+                        |> optional "personal" (Decode.maybe Decode.int) Nothing
+                        |> optional "battle" (Decode.maybe Decode.int) Nothing
+                        |> optional "memo" Decode.string ""
+
+                decodeUsedFavor =
+                    decode UsedFavor
+                        |> required "uuid" Decode.string
+                        |> optional "purpose" Decode.string ""
+                        |> optional "favor" Decode.int 0
+                        |> optional "memo" Decode.string ""
+
+                toManeuvaType str =
+                    case str of
+                        "Skill" -> Skill
+                        "Part" -> Part
+                        "Item" -> Item
+                        "Effect" -> Effect
+                        "Archive" -> Archive
+                        "Tag" -> Tag
+                        _ -> Skill
+
+                toRegion str =
+                    case str of
+                        "NoRegion" -> NoRegion
+                        "Head" -> Head
+                        "Arm" -> Arm
+                        "Body" -> Body
+                        "Leg" -> Leg
+                        "OtherRegion" -> OtherRegion
+                        _ -> NoRegion
+
+                toTiming str =
+                    case str of
+                        "AutoAlways" -> AutoAlways
+                        "AutoNeedsDeclearation" -> AutoNeedsDeclearation
+                        "AutoOthers" -> AutoOthers
+                        "Action" -> Action
+                        "Judge" -> Judge
+                        "Damage" -> Damage
+                        "Rapid" -> Rapid
+                        "BeforeBattle" -> BeforeBattle
+                        "BattleStart" -> BattleStart
+                        "TurnStart" -> TurnStart
+                        "CountStart" -> CountStart
+                        _ -> AutoAlways
+
+                decodeManeuva =
+                    decode Maneuva
+                        |> required "uuid" Decode.string
+                        |> optional "used" Decode.bool False
+                        |> optional "lost" Decode.bool False
+                        |> optional "act" (Decode.maybe Decode.int) Nothing
+                        |> optional "malice" (Decode.maybe Decode.int) Nothing
+                        |> optional "favor" (Decode.maybe Decode.int) Nothing
+                        |> optional "maneuvaType" (Decode.string |> (Decode.map toManeuvaType)) Skill
+                        |> optional "category" Decode.string "0"
+                        |> optional "name" Decode.string ""
+                        |> optional "timing" (Decode.string |> (Decode.map toTiming)) AutoAlways
+                        |> optional "cost" Decode.string ""
+                        |> optional "range" Decode.string ""
+                        |> optional "description" Decode.string ""
+                        |> optional "from" Decode.string ""
+                        |> optional "region" (Decode.string |> (Decode.map toRegion)) NoRegion
+                        |> required "position" (Decode.int |> (Decode.map Position))
+
+                decodeManeuvaDetail =
+                    decode ManeuvaTabDetail
+                        |> required "maneuvas" (Decode.list decodeManeuva)
+                        |> hardcoded False
+                        |> hardcoded Nothing
+                        
+                decodeResource =
+                    decode Resource
+                        |> required "uuid" Decode.string
+                        |> optional "name" Decode.string ""
+                        |> optional "description" Decode.string ""
+                        |> optional "favor" (Decode.maybe Decode.int) Nothing
+                        |> required "position" (Decode.int |> (Decode.map Position))
+
+                decodeTabType =
+                    Decode.andThen (\tabType ->
+                            case tabType of
+                                "ManeuvaTab" -> decodeManeuvaDetail |> (Decode.map ManeuvaTab)
+                                "ResourceTab" -> (Decode.list decodeResource) |> (Decode.map ResourceTab)
+                                _ -> decodeManeuvaDetail |> (Decode.map ManeuvaTab)
+                        )
+                
+                toDecoder uuid tabType maneuvas resources title isEditing mismatches =
+                    case tabType of 
+                        "ManeuvaTab" -> Decode.succeed({
+                            uuid = uuid,
+                            tabType = ManeuvaTab {
+                                maneuvas = maneuvas,
+                                showAddManeuvaDialog = False,
+                                dialogContent = Nothing
+                            },
+                            title = title,
+                            isEditing = isEditing,
+                            mismatches = mismatches
+                        })
+                        "ResourceTab" -> Decode.succeed({
+                            uuid = uuid,
+                            tabType = ResourceTab resources,
+                            title = title,
+                            isEditing = isEditing,
+                            mismatches = mismatches
+                        })
+                        _ -> Decode.fail "JSONからのキャラクターシート復元に失敗しました"
+                
+                decodeTab : Decode.Decoder Tab
+                decodeTab =
+                    decode toDecoder
+                        |> required "uuid" Decode.string
+                        |> required "tabType" Decode.string 
+                        |> optional "items" (Decode.list decodeManeuva) []
+                        |> optional "items" (Decode.list decodeResource) []
+                        |> optional "title" Decode.string ""
+                        |> hardcoded False -- isEditing
+                        |> hardcoded [] -- mismatches
+                        |> resolve
+
                 newModelState =
                     {
                         model |
-                        uuid = (Decode.decodeString (Decode.at ["uuid"] Decode.string) json) |> (Result.withDefault ""),
-                        isPrivate = (Decode.decodeString (Decode.at ["isPrivate"] Decode.bool) json) |> (Result.withDefault False),
-                        tags = (Decode.decodeString (Decode.at ["tags"] (Decode.list Decode.string)) json) |> (Result.withDefault []),
-                        profile = {
-                            name = (Decode.decodeString (Decode.at ["profile", "name"] Decode.string) json) |> (Result.withDefault ""),
-                            race = (Decode.decodeString (Decode.at ["profile", "race"] Decode.string) json) |> (Result.withDefault ""),
-                            age = (Decode.decodeString (Decode.at ["profile", "age"] Decode.string) json) |> (Result.withDefault ""),
-                            place =
-                                let
-                                    toPlace str =
-                                        case str of
-                                            "Purgatory" -> Purgatory
-                                            "Garden" -> Garden 
-                                            "Paradise" -> Paradise
-                                            _ -> Purgatory
-
-                                    decodePlace =
-                                        Decode.string |> (Decode.map toPlace)
-                                in
-                                    (Decode.decodeString (Decode.at ["profile", "place"] decodePlace) json) |> (Result.withDefault Purgatory),                                    
-                            height = (Decode.decodeString (Decode.at ["profile", "height"] Decode.string) json) |> (Result.withDefault ""),
-                            weight = (Decode.decodeString (Decode.at ["profile", "weight"] Decode.string) json) |> (Result.withDefault ""),
-                            implication = (Decode.decodeString (Decode.at ["profile", "implication"] Decode.string) json) |> (Result.withDefault ""),
-                            hair = (Decode.decodeString (Decode.at ["profile", "hair"] Decode.string) json) |> (Result.withDefault ""),
-                            eye = (Decode.decodeString (Decode.at ["profile", "eye"] Decode.string) json) |> (Result.withDefault ""),
-                            skin = (Decode.decodeString (Decode.at ["profile", "skin"] Decode.string) json) |> (Result.withDefault ""),
-                            memo = (Decode.decodeString (Decode.at ["profile", "memo"] Decode.string) json) |> (Result.withDefault ""),
-                            memories = 
-                                let
-                                    toMemory str =
-                                        {
-                                            uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) str) |> (Result.withDefault ""),
-                                            name = (Decode.decodeString (Decode.field "name" Decode.string) str) |> (Result.withDefault ""),
-                                            description = (Decode.decodeString (Decode.field "description" Decode.string) str) |> (Result.withDefault "")
-                                        }
-
-                                    decodeMemory =
-                                        (Decode.list Decode.string) |> (Decode.map (List.map toMemory))
-                                in
-                                    (Decode.decodeString (Decode.at ["profile", "memories"] decodeMemory) json) |> (Result.withDefault []),
-                            regrets =
-                                let
-                                    toRegret str =
-                                        {
-                                            uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) str) |> (Result.withDefault ""),
-                                            target = (Decode.decodeString (Decode.field "target" Decode.string) str) |> (Result.withDefault ""),
-                                            name = (Decode.decodeString (Decode.field "name" Decode.string) str) |> (Result.withDefault ""),
-                                            currentVal = (Decode.decodeString (Decode.field "currentVal" Decode.int) str) |> (Result.withDefault 0),
-                                            maxVal = (Decode.decodeString (Decode.field "maxVal" Decode.int) str) |> (Result.withDefault 0),
-                                            negative = (Decode.decodeString (Decode.field "negative" Decode.string) str) |> (Result.withDefault ""),
-                                            description = (Decode.decodeString (Decode.field "description" Decode.string) str) |> (Result.withDefault "")
-                                        }
-
-                                    decodeRegret =
-                                        (Decode.list Decode.string) |> (Decode.map (List.map toRegret))
-                                in
-                                    (Decode.decodeString (Decode.at ["profile", "regrets"] decodeRegret) json) |> (Result.withDefault []),
-                            karmas = 
-                                let
-                                    toKarma str =
-                                        {
-                                            uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) str) |> (Result.withDefault ""),
-                                            achieved = (Decode.decodeString (Decode.field "achieved" Decode.bool) str) |> (Result.withDefault False),
-                                            name = (Decode.decodeString (Decode.field "name" Decode.string) str) |> (Result.withDefault ""),
-                                            description = (Decode.decodeString (Decode.field "description" Decode.string) str) |> (Result.withDefault "")
-                                        }
-
-                                    decodeKarma =
-                                        (Decode.list Decode.string) |> (Decode.map (List.map toKarma))
-                                in
-                                    (Decode.decodeString (Decode.at ["profile", "karmas"] decodeKarma) json) |> (Result.withDefault [])
-                        },
-                        classes = {
-                            positions =
-                                let
-                                    toPosition str =
-                                        {
-                                            uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) str) |> (Result.withDefault ""),
-                                            name = (Decode.decodeString (Decode.field "name" Decode.string) str) |> (Result.withDefault "")
-                                        }
-
-                                    decodePosition =
-                                        (Decode.list Decode.string) |> (Decode.map (List.map toPosition))
-
-                                in
-                                    (Decode.decodeString (Decode.at ["classes", "positions"] decodePosition) json) |> (Result.withDefault []),
-                            subPositions =
-                                let
-                                    toSubPositions str =
-                                        {
-                                            uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) str) |> (Result.withDefault ""),
-                                            name = (Decode.decodeString (Decode.field "name" Decode.string) str) |> (Result.withDefault "")
-                                        }
-
-                                    decodeSubPosition =
-                                        (Decode.list Decode.string) |> (Decode.map (List.map toSubPositions))
-
-                                in
-                                    (Decode.decodeString (Decode.at ["classes", "subPositions"] decodeSubPosition) json) |> (Result.withDefault []),
-                            highTechs =
-                                let
-                                    toHighTech str =
-                                        {
-                                            uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) str) |> (Result.withDefault ""),
-                                            name = (Decode.decodeString (Decode.field "name" Decode.string) str) |> (Result.withDefault ""),
-                                            favor = (Decode.decodeString (Decode.field "favor" Decode.int) str) |> Result.toMaybe
-                                        }
-
-                                    decodeHighTech =
-                                        (Decode.list Decode.string) |> (Decode.map (List.map toHighTech))
-
-                                in
-                                    (Decode.decodeString (Decode.at ["classes", "highTechs"] decodeHighTech) json) |> (Result.withDefault []),
-                            classes =
-                                let
-                                    toCategory str =
-                                        case str of
-                                            "MainClass" -> MainClass
-                                            "SubClass" -> SubClass 
-                                            "SecondClass" -> SecondClass
-                                            "ThirdClass" -> ThirdClass
-                                            "ThirdPointFiveClass" -> ThirdPointFiveClass
-                                            "HighSociety" -> HighSociety
-                                            "OtherClass" -> OtherClass
-                                            _ -> MainClass
-
-                                    toClasses str =
-                                        {
-                                            uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) str) |> (Result.withDefault ""),
-                                            category = (Decode.decodeString (Decode.field "category" Decode.string) str) |> (Result.map toCategory) |> (Result.withDefault MainClass),
-                                            from = (Decode.decodeString (Decode.field "from" Decode.string) str) |> (Result.withDefault ""),
-                                            name = (Decode.decodeString (Decode.field "name" Decode.string) str) |> (Result.withDefault ""),
-                                            number = (Decode.decodeString (Decode.field "number" Decode.int) str) |> (Result.withDefault 0)
-                                        }
-
-                                    decodeClasses =
-                                        (Decode.list Decode.string) |> (Decode.map (List.map toClasses))
-
-                                in
-                                    (Decode.decodeString (Decode.at ["classes", "classes"] decodeClasses) json) |> (Result.withDefault []),
-                            points =
-                                let
-                                    toPoints str =
-                                        {
-                                            uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) str) |> (Result.withDefault ""),
-                                            name = (Decode.decodeString (Decode.field "name" Decode.string) str) |> (Result.withDefault ""),
-                                            busou = (Decode.decodeString (Decode.field "busou" Decode.int) str) |> Result.toMaybe,
-                                            heni = (Decode.decodeString (Decode.field "heni" Decode.int) str) |> Result.toMaybe,
-                                            kaizou = (Decode.decodeString (Decode.field "kaizou" Decode.int) str) |> Result.toMaybe,
-                                            favor = (Decode.decodeString (Decode.field "favor" Decode.int) str) |> Result.toMaybe
-                                        }
-
-                                    decodePoints =
-                                        (Decode.list Decode.string) |> (Decode.map (List.map toPoints))
-
-                                in
-                                    (Decode.decodeString (Decode.at ["classes", "points"] decodePoints) json) |> (Result.withDefault [])
-                        },
-                        favors =
-                                let
-                                    toFavor str =
-                                        {
-                                            uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) str) |> (Result.withDefault ""),
-                                            personal = (Decode.decodeString (Decode.field "personal" Decode.int) str) |> Result.toMaybe,
-                                            battle = (Decode.decodeString (Decode.field "battle" Decode.int) str) |> Result.toMaybe,
-                                            memo = (Decode.decodeString (Decode.field "memo" Decode.string) str) |> (Result.withDefault "")
-                                        }
-
-                                    decodeFavor =
-                                        (Decode.list Decode.string) |> (Decode.map (List.map toFavor))
-
-                                in
-                                    (Decode.decodeString (Decode.at ["classes", "favors"] decodeFavor) json) |> (Result.withDefault []),
-                        usedFavors =
-                                let
-                                    toUsedFavor str =
-                                        {
-                                            uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) str) |> (Result.withDefault ""),
-                                            purpose = (Decode.decodeString (Decode.field "purpose" Decode.string) str) |> (Result.withDefault ""),
-                                            memo = (Decode.decodeString (Decode.field "memo" Decode.string) str) |> (Result.withDefault ""),
-                                            favor = (Decode.decodeString (Decode.field "favor" Decode.int) str) |> (Result.withDefault 0)
-                                        }
-
-                                    decodeUsedFavor =
-                                        (Decode.list Decode.string) |> (Decode.map (List.map toUsedFavor))
-                                in
-                                    (Decode.decodeString (Decode.at ["classes", "usedFavors"] decodeUsedFavor) json) |> (Result.withDefault []),
-                        tabs =
-                            let
-                                decodeManeuva =
-                                    (Decode.list Decode.string) |> (Decode.map (List.map toManeuva))
-
-                                toManeuvaType str =
-                                    case str of
-                                        "Skill" -> Skill
-                                        "Part" -> Part
-                                        "Item" -> Item
-                                        "Effect" -> Effect
-                                        "Archive" -> Archive
-                                        "Tag" -> Tag
-                                        _ -> Skill
-
-                                toRegion str =
-                                    case str of
-                                        "NoRegion" -> NoRegion
-                                        "Head" -> Head
-                                        "Arm" -> Arm
-                                        "Body" -> Body
-                                        "Leg" -> Leg
-                                        "OtherRegion" -> OtherRegion
-                                        _ -> NoRegion
-
-                                toTiming str =
-                                    case str of
-                                        "AutoAlways" -> AutoAlways
-                                        "AutoNeedsDeclearation" -> AutoNeedsDeclearation
-                                        "AutoOthers" -> AutoOthers
-                                        "Action" -> Action
-                                        "Judge" -> Judge
-                                        "Damage" -> Damage
-                                        "Rapid" -> Rapid
-                                        "BeforeBattle" -> BeforeBattle
-                                        "BattleStart" -> BattleStart
-                                        "TurnStart" -> TurnStart
-                                        "CountStart" -> CountStart
-                                        _ -> AutoAlways
-
-                                toPosition i =
-                                    case i of
-                                        Ok num -> Position num
-                                        Err _ -> Position 0
-
-                                toManeuva str =
-                                    {
-                                        uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) str) |> (Result.withDefault ""), 
-                                        used = (Decode.decodeString (Decode.field "used" Decode.bool) str) |> (Result.withDefault False),
-                                        lost = (Decode.decodeString (Decode.field "lost" Decode.bool) str) |> (Result.withDefault False),
-                                        act = (Decode.decodeString (Decode.field "act" Decode.int) str) |> Result.toMaybe,
-                                        maneuvaType = (Decode.decodeString (Decode.field "maneuvaType" Decode.string) str) |> (Result.map toManeuvaType) |> (Result.withDefault Skill),
-                                        malice = (Decode.decodeString (Decode.field "malice" Decode.int) str) |> Result.toMaybe,
-                                        favor = (Decode.decodeString (Decode.field "favor" Decode.int) str) |> Result.toMaybe,
-                                        category = (Decode.decodeString (Decode.field "category" Decode.string) str) |> (Result.withDefault "0"),
-                                        name = (Decode.decodeString (Decode.field "name" Decode.string) str) |> (Result.withDefault ""),
-                                        timing = (Decode.decodeString (Decode.field "timing" Decode.string) str) |> (Result.map toTiming) |> (Result.withDefault AutoAlways),
-                                        cost = (Decode.decodeString (Decode.field "cost" Decode.string) str) |> (Result.withDefault ""),
-                                        range = (Decode.decodeString (Decode.field "range" Decode.string) str) |> (Result.withDefault ""),
-                                        description = (Decode.decodeString (Decode.field "description" Decode.string) str) |> (Result.withDefault ""),
-                                        from = (Decode.decodeString (Decode.field "from" Decode.string) str) |> (Result.withDefault ""),
-                                        region = (Decode.decodeString (Decode.field "region" Decode.string) str) |> (Result.map toRegion) |> (Result.withDefault NoRegion),
-                                        position = (Decode.decodeString (Decode.field "position" Decode.int) str) |> toPosition
-                                    }
-
-                                toManeuvaData str =
-                                    ManeuvaTab 
-                                        {
-                                            dialogContent = Nothing,
-                                            showAddManeuvaDialog = False,
-                                            maneuvas = (Decode.decodeString (Decode.field "items" decodeManeuva) str) |> (Result.withDefault [])
-                                        }
-                                
-                                toResource str =
-                                    ResourceTab [
-                                        {
-                                            uuid = "",
-                                            name = "",
-                                            description = "",
-                                            favor = Just 0,
-                                            position = Position 0
-                                        }
-                                    ]
-
-                                decodeTabType =
-                                    (Decode.at ["tabs"] Decode.string)
-                                        |> Decode.andThen (\tabType ->
-                                            case tabType of
-                                                "ManeuvaTab" -> decodeManeuvaData
-                                                "ResourceTab" -> Decode.string |> (Decode.map toResource)
-                                                _ -> decodeManeuvaData
-                                        )
-
-                                decodeManeuvaData =
-                                    Decode.string |> (Decode.map toManeuvaData)
-
-                                defaultTabType =
-                                    ManeuvaTab 
-                                        {
-                                            dialogContent = Nothing,
-                                            showAddManeuvaDialog = False,
-                                            maneuvas = [
-                                                {
-                                                    uuid = "", 
-                                                    used = False,
-                                                    lost = False,
-                                                    act = Nothing,
-                                                    maneuvaType = Skill,
-                                                    malice = Nothing,
-                                                    favor = Nothing,
-                                                    category = "0",
-                                                    name = "",
-                                                    timing = AutoAlways,
-                                                    cost = "",
-                                                    range = "",
-                                                    description = "",
-                                                    from = "",
-                                                    region = NoRegion,
-                                                    position = Position 0
-                                                }
-                                            ]
-                                        }
-
-                                toTab str =
-                                    {
-                                        uuid = (Decode.decodeString (Decode.at ["tabs", "uuid"] Decode.string) json) |> (Result.withDefault ""),
-                                        title = (Decode.decodeString (Decode.at ["tabs", "title"] Decode.string) json) |> (Result.withDefault ""),
-                                        tabType = (Decode.decodeString (Decode.at ["tabs", "tabType"] decodeTabType) json) |> (Result.withDefault defaultTabType),
-                                        isEditing = False,
-                                        mismatches = []
-                                    }
-                    
-                                decodeTab =
-                                    (Decode.list Decode.string) |> (Decode.map (List.map toTab))
-
-                            in
-                                (Decode.decodeString (Decode.at ["tabs"] decodeTab) json) |> (Result.withDefault [])
+                        uuid = (Decode.decodeString (Decode.field "uuid" Decode.string) json) |> (Result.withDefault ""),
+                        isPrivate = (Decode.decodeString (Decode.field "isPrivate" Decode.bool) json) |> (Result.withDefault False),
+                        tags = (Decode.decodeString (Decode.field "tags" (Decode.list Decode.string)) json) |> (Result.withDefault []),
+                        profile = (Decode.decodeString (Decode.field "profile" decodeProfile) json) |> (Result.withDefault model.profile),
+                        classes = (Decode.decodeString (Decode.field "classes" decodeClasses) json) |> (Result.withDefault model.classes),
+                        favors = (Decode.decodeString (Decode.field "favors" (Decode.list decodeFavor)) json) |> (Result.withDefault []),
+                        usedFavors = (Decode.decodeString (Decode.field "usedFavors" (Decode.list decodeUsedFavor)) json) |> (Result.withDefault []),
+                        tabs = (Decode.decodeString (Decode.field "tabs" (Decode.list decodeTab)) json) |> (Result.withDefault [])
                     }
-                dfdfd = Debug.log "" [newModelState]
-
             in
                 (newModelState, Cmd.none)

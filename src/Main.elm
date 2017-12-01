@@ -208,8 +208,6 @@ init flags location =
                 },
                 dragDrop = DragDrop.init
             }
-        profile = model.profile
-        classes = model.classes
     in
         (
             model
@@ -226,6 +224,7 @@ init flags location =
                 |> (\m  ->
                     let
                         (lastSeed, zipped) = Utils.zipWithUuid m.seed m.profile.memories
+                        profile = m.profile
                     in
                         {
                             m |
@@ -236,6 +235,7 @@ init flags location =
                 |> (\m  ->
                     let
                         (lastSeed, zipped) = Utils.zipWithUuid m.seed m.profile.regrets
+                        profile = m.profile
                     in
                         {
                             m |
@@ -246,6 +246,7 @@ init flags location =
                 |> (\m  ->
                     let
                         (lastSeed, zipped) = Utils.zipWithUuid m.seed m.profile.karmas
+                        profile = m.profile
                     in
                         {
                             m |
@@ -256,6 +257,7 @@ init flags location =
                 |> (\m  ->
                     let
                         (lastSeed, zipped) = Utils.zipWithUuid m.seed m.classes.positions
+                        classes = m.classes
                     in
                         {
                             m |
@@ -266,6 +268,7 @@ init flags location =
                 |> (\m  ->
                     let
                         (lastSeed, zipped) = Utils.zipWithUuid m.seed m.classes.subPositions
+                        classes = m.classes
                     in
                         {
                             m |
@@ -276,6 +279,7 @@ init flags location =
                 |> (\m  ->
                     let
                         (lastSeed, zipped) = Utils.zipWithUuid m.seed m.classes.highTechs
+                        classes = m.classes
                     in
                         {
                             m |
@@ -286,6 +290,7 @@ init flags location =
                 |> (\m  ->
                     let
                         (lastSeed, zipped) = Utils.zipWithUuid m.seed m.classes.classes
+                        classes = m.classes
                     in
                         {
                             m |
@@ -296,6 +301,7 @@ init flags location =
                 |> (\m  ->
                     let
                         (lastSeed, zipped) = Utils.zipWithUuid m.seed m.classes.points
+                        classes = m.classes
                     in
                         {
                             m |

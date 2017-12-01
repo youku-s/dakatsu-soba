@@ -179,12 +179,15 @@ type alias Classes =
         points: List Point
     }
 
-type TabType =
-    ManeuvaTab {
+type alias ManeuvaTabDetail =
+    {
         maneuvas: List Maneuva,
         showAddManeuvaDialog: Bool,
         dialogContent: Maybe String
-    } |
+    }
+
+type TabType =
+    ManeuvaTab ManeuvaTabDetail |
     ResourceTab (List Resource)
 
 type alias Tab =
