@@ -5,3 +5,5 @@
 /index.js
 /index.min.js
 /config.js
+/lambda/node_modules/
+*.zip
