@@ -127,3 +127,17 @@ table {
 .indent-1 {
     padding-left: 10px;
 }
+.success {
+    margin-top: 5px;
+    background-color: #99EE99;
+    color: #009900;
+    border-radius: 5px;
+    padding: 5px;
+}
+.error {
+    margin-top: 5px;
+    background-color: #EE9999;
+    color: #EE0000;
+    border-radius: 5px;
+    padding: 5px;
+}

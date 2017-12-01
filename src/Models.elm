@@ -2,6 +2,7 @@ port module Models exposing (..)
 
 import Html5.DragDrop as DragDrop
 import Random.Pcg
+import Navigation exposing (Location)
 
 type Route
     = NewDetail
@@ -13,6 +14,9 @@ type alias Flags =
         randomSeed: Int,
         config: Config
     }
+
+type alias ResultMessage =
+    Result (List String) (List String)
 
 type alias Model =
     {
@@ -34,7 +38,9 @@ type alias Model =
         dragDrop : DragDrop.Model String Position,
         seed: Random.Pcg.Seed,
         config: Config,
-        route : Route
+        route : Route, 
+        result: Maybe ResultMessage,
+        location: Location
     }
 
 type alias Config =

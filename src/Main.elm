@@ -10,13 +10,15 @@ import Uuid.Barebones exposing (uuidStringGenerator)
 import Html5.DragDrop as DragDrop
 import Navigation exposing (Location, programWithFlags)
 import Routing
+import Task
 
 init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
+        route = Routing.parseLocation location
         model = 
             {
-                route = Routing.parseLocation location,
+                route = route,
                 config = flags.config,
                 uuid = "",
                 isPrivate = False,
@@ -206,8 +208,14 @@ init flags location =
                     width = 0,
                     height = 0
                 },
-                dragDrop = DragDrop.init
+                dragDrop = DragDrop.init,
+                result = Nothing,
+                location = location
             }
+        cmd =
+            case route of
+                Detail _ -> Task.perform OnLocationChange (Task.succeed location)
+                _ -> Cmd.none 
     in
         (
             model
@@ -370,7 +378,7 @@ init flags location =
                     in
                         newModelState
                 ),
-            Cmd.none
+            cmd
         )
 
 

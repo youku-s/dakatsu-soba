@@ -116,14 +116,15 @@ detailPage model =
                 ],
                 div [class "tags"] (List.map (\t -> span [class "tag"] [text t, span [class "ion-close-circled", onClick (RemoveTag t)] []]) model.tags)
             ],
-            div [class "right"] [
+            div [class "right"] 
+            [
                 ul [class "tabcontrol"] (tabcontorls model),
                 div [class "tabbody"] [
                     case model.activeTab of
-                        ProfileTab -> profileTab model.profile
+                        ProfileTab -> profileTab model.profile model.result
                         FavorsTab -> favorsTab model
-                        ClassesTab -> classesTab model.classes
-                        OtherTab tab -> otherTab tab model.windowSize
+                        ClassesTab -> classesTab model.classes model.result
+                        OtherTab tab -> otherTab tab model.windowSize model.result
                 ]
             ]
         ]
@@ -131,6 +132,33 @@ detailPage model =
         Just tab -> [createDialog "このタブを削除してもよろしいですか？" tab model.windowSize]
         Nothing -> []
     ))
+
+createResultArea : Maybe ResultMessage -> Html Msg
+createResultArea result =
+    case result of
+        Just (Ok message) ->
+            div [class "success"] (
+                ([
+                    div [style [("text-align", "right")]] [
+                        span [
+                            class "ion-close-circled",
+                            onClick HideResult
+                        ] []
+                    ]
+                ] ++ List.map (\m -> div [] [text m]) message) 
+            )
+        Just (Err errMessage) ->
+            div [class "error"] (
+                ([
+                    div [style [("text-align", "right")]] [
+                        span [
+                            class "ion-close-circled",
+                            onClick HideResult
+                        ] []
+                    ]
+                ] ++ List.map (\m -> div [] [text m]) errMessage) 
+            )
+        Nothing -> div [] []
 
 createDialog : String -> Tab -> DomSize -> Html Msg
 createDialog content tab windowSize =
@@ -157,9 +185,10 @@ onKeyPress : (Int -> msg) -> Attribute msg
 onKeyPress tagger =
   on "keypress" (Json.Decode.map tagger keyCode)
 
-profileTab : Profile -> Html Msg
-profileTab profile =
+profileTab : Profile -> Maybe ResultMessage -> Html Msg
+profileTab profile result =
     div [] [
+        createResultArea result,
         div [class "section-title"] [text "パーソナル"],
         table [] [
             tbody [] [
@@ -479,6 +508,7 @@ favorsTab model =
         highTechs = model.classes.highTechs
     in
         div [] [
+            createResultArea model.result,
             div [class "section-title"] [text "寵愛点サマリー"],
             table [] [
                 tbody [] [
@@ -873,12 +903,14 @@ getOtherFavor : Model -> Int
 getOtherFavor model =
     List.sum (List.map (\x -> Maybe.withDefault 0 x.favor) model.classes.highTechs)
 
+getUsedFavor : List UsedFavor -> Int
 getUsedFavor usedFavors =
     List.sum (List.map .favor usedFavors)
 
-classesTab : Classes -> Html Msg
-classesTab classes =
+classesTab : Classes -> Maybe ResultMessage -> Html Msg
+classesTab classes result =
     div [] [
+        createResultArea result,
         div [class "section-title"] [text "ポジション"],
         div [class "position"] [
             table [style[("width", "190px")]] [
@@ -1351,11 +1383,12 @@ classesTab classes =
         ] [text "追加"]
     ]
 
-otherTab : Tab -> DomSize -> Html Msg
-otherTab tab windowSize =
+otherTab : Tab -> DomSize -> Maybe ResultMessage -> Html Msg
+otherTab tab windowSize result =
     div [
         id tab.uuid
     ] [
+        createResultArea result,
         div [class "section-title"] [text tab.title],
         let
             tabbody =

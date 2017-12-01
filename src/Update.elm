@@ -13,6 +13,7 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Routing exposing (parseLocation)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded, resolve)
+import Navigation
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -755,11 +756,18 @@ update msg model =
                 request =
                     post model.config.saveUrl (model |> modelToValue |> Http.jsonBody)
 
-                -- TODO エラー処理
-                onResponse request =
-                    NoOp
+                newUrl =
+                    String.concat [model.location.href, "#detail/", model.uuid]
+
+                onResponse response =
+                    case response of
+                        Ok _ -> OnLoad (Just newUrl) (Ok ["保存に成功しました。", (String.concat ["あなたのキャラクターシートのURLは [", newUrl, "] です。"])])
+                        Err _ -> OnLoad Nothing (Err ["保存に失敗しました。時間をおいて、もう一度保存を試してみてください。"])
             in
-                (model, Http.send onResponse request)
+                (
+                    model,
+                    Http.send onResponse request
+                )
 
         Delete ->
             -- TODO 実装する
@@ -1038,3 +1046,21 @@ update msg model =
                     }
             in
                 (newModelState, Cmd.none)
+
+        ShowResult message ->
+            ({model | result = Just message}, Cmd.none)
+        
+        HideResult ->
+            ({model | result = Nothing}, Cmd.none)
+
+        OnLoad newUrl message ->
+            let
+                cmd =
+                    case newUrl of
+                        Just url -> Navigation.newUrl url
+                        Nothing -> Cmd.none
+            in
+                (
+                    {model | result = Just message },
+                    cmd
+                )

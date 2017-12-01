@@ -30,4 +30,7 @@ type Msg =
     Delete |
     Clone |
     OnLocationChange Location |
-    LoadDataFromJson String    
+    LoadDataFromJson String |
+    ShowResult ResultMessage |
+    HideResult |
+    OnLoad (Maybe String) ResultMessage
