@@ -757,7 +757,7 @@ update msg model =
                     post model.config.saveUrl (model |> modelToValue |> Http.jsonBody)
 
                 newUrl =
-                    String.concat [model.location.href, "#detail/", model.uuid]
+                    if String.contains model.location.href "detail" then model.location.href else String.concat [model.location.href, "#detail/", model.uuid]
 
                 onResponse response =
                     case response of
