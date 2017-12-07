@@ -185,6 +185,10 @@ onKeyPress : (Int -> msg) -> Attribute msg
 onKeyPress tagger =
   on "keypress" (Json.Decode.map tagger keyCode)
 
+onChange : (String -> msg) -> Attribute msg
+onChange tagger =
+  on "change" (Json.Decode.map tagger targetValue)
+
 profileTab : Profile -> Maybe ResultMessage -> Html Msg
 profileTab profile result =
     div [] [
@@ -195,17 +199,17 @@ profileTab profile result =
                 tr [] [
                     th [colspan 2] [text "キャラクター名"],
                     td [colspan 4] [
-                        input [size 55, type_ "text", value profile.name, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | name = s}}))] []
+                        input [size 55, type_ "text", value profile.name, onChange (\s -> FormUpdated (\m -> {m | profile = {profile | name = s}}))] []
                     ]
                 ],
                 tr [] [
                     th [] [text "種族"],
                     td [] [
-                        input [size 16, type_ "text", value profile.race, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | race = s}}))] []
+                        input [size 16, type_ "text", value profile.race, onChange (\s -> FormUpdated (\m -> {m | profile = {profile | race = s}}))] []
                     ],
                     th [] [text "享年"],
                     td [] [
-                        input [size 16, type_ "text", value profile.age, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | age = s}}))] []
+                        input [size 16, type_ "text", value profile.age, onChange (\s -> FormUpdated (\m -> {m | profile = {profile | age = s}}))] []
                     ],
                     th [] [text "初期配置"],
                     td [] [
@@ -239,29 +243,29 @@ profileTab profile result =
                 tr [] [
                     th [] [text "身長"],
                     td [] [
-                        input [size 16, type_ "text", value profile.height, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | height = s}}))] []
+                        input [size 16, type_ "text", value profile.height, onChange (\s -> FormUpdated (\m -> {m | profile = {profile | height = s}}))] []
                     ],
                     th [] [text "体重"],
                     td [] [
-                        input [size 16, type_ "text", value profile.weight, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | weight = s}}))] []
+                        input [size 16, type_ "text", value profile.weight, onChange (\s -> FormUpdated (\m -> {m | profile = {profile | weight = s}}))] []
                     ],
                     th [] [text "暗示"],
                     td [] [
-                        input [size 16, type_ "text", value profile.implication, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | implication = s}}))] []
+                        input [size 16, type_ "text", value profile.implication, onChange (\s -> FormUpdated (\m -> {m | profile = {profile | implication = s}}))] []
                     ]
                 ],
                 tr [] [
                     th [] [text "髪の色"],
                     td [] [
-                        input [size 16, type_ "text", value profile.hair, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | hair = s}}))] []
+                        input [size 16, type_ "text", value profile.hair, onChange (\s -> FormUpdated (\m -> {m | profile = {profile | hair = s}}))] []
                     ],
                     th [] [text "瞳の色"],
                     td [] [
-                        input [size 16, type_ "text", value profile.eye, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | eye = s}}))] []
+                        input [size 16, type_ "text", value profile.eye, onChange (\s -> FormUpdated (\m -> {m | profile = {profile | eye = s}}))] []
                     ],
                     th [] [text "肌の色"],
                     td [] [
-                        input [size 16, type_ "text", value profile.skin, onInput (\s -> FormUpdated (\m -> {m | profile = {profile | skin = s}}))] []
+                        input [size 16, type_ "text", value profile.skin, onChange (\s -> FormUpdated (\m -> {m | profile = {profile | skin = s}}))] []
                     ]
                 ]
             ]
@@ -280,14 +284,14 @@ profileTab profile result =
                         input [
                             type_ "text",
                             value memory.name,
-                            onInput (\s -> FormUpdated (\m -> {m | profile = {profile | memories = Utils.updateOnWay profile.memories memory (\mem -> {mem | name = s})}}))
+                            onChange (\s -> FormUpdated (\m -> {m | profile = {profile | memories = Utils.updateOnWay profile.memories memory (\mem -> {mem | name = s})}}))
                         ] []
                     ],
                     td [] [
                         input [
                             type_ "text",
                             value memory.description,
-                            onInput (\s -> FormUpdated (\m -> {m | profile = {profile | memories = Utils.updateOnWay profile.memories memory (\mem -> {mem | description = s})}}))
+                            onChange (\s -> FormUpdated (\m -> {m | profile = {profile | memories = Utils.updateOnWay profile.memories memory (\mem -> {mem | description = s})}}))
                         ] []
                     ],
                     td [] [
@@ -343,14 +347,14 @@ profileTab profile result =
                             input [
                                 type_ "text",
                                 value regret.target,
-                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | target = s})}}))
+                                onChange (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | target = s})}}))
                             ] []
                         ],
                         td [] [
                             input [
                                 type_ "text",
                                 value regret.name,
-                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | name = s})}}))
+                                onChange (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | name = s})}}))
                             ] []
                         ],
                         td [] [
@@ -359,7 +363,7 @@ profileTab profile result =
                                 Html.Attributes.min "0",
                                 Html.Attributes.max (toString regret.maxVal),
                                 value (toString regret.currentVal),
-                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | currentVal = Result.withDefault 0 (String.toInt s)})}}))
+                                onChange (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | currentVal = Result.withDefault 0 (String.toInt s)})}}))
                             ] []
                         ],
                         td [] [
@@ -367,21 +371,21 @@ profileTab profile result =
                                 type_ "number",
                                 Html.Attributes.min "4",
                                 value (toString regret.maxVal),
-                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | maxVal = Result.withDefault 0 (String.toInt s)})}}))
+                                onChange (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | maxVal = Result.withDefault 0 (String.toInt s)})}}))
                             ] []
                         ],
                         td [] [
                             input [
                                 type_ "text",
                                 value regret.negative,
-                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | negative = s})}}))
+                                onChange (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | negative = s})}}))
                             ] []
                         ],
                         td [] [
                             input [
                                 type_ "text",
                                 value regret.description,
-                                onInput (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | description = s})}}))
+                                onChange (\s -> FormUpdated (\m -> {m | profile = {profile | regrets = Utils.updateOnWay profile.regrets regret (\reg -> {reg | description = s})}}))
                             ] []
                         ],
                         td [] [
@@ -445,14 +449,14 @@ profileTab profile result =
                         input [
                             type_ "text",
                             value karma.name,
-                            onInput (\s -> FormUpdated (\m -> {m | profile = {profile | karmas = Utils.updateOnWay profile.karmas karma (\kar -> {kar | name = s})}}))
+                            onChange (\s -> FormUpdated (\m -> {m | profile = {profile | karmas = Utils.updateOnWay profile.karmas karma (\kar -> {kar | name = s})}}))
                         ] []
                     ],
                     td [] [
                         input [
                             type_ "text",
                             value karma.description,
-                            onInput (\s -> FormUpdated (\m -> {m | profile = {profile | karmas = Utils.updateOnWay profile.karmas karma (\kar -> {kar | description = s})}}))
+                            onChange (\s -> FormUpdated (\m -> {m | profile = {profile | karmas = Utils.updateOnWay profile.karmas karma (\kar -> {kar | description = s})}}))
                         ] []
                     ],
                     td [] [
@@ -609,7 +613,7 @@ favorsTab model =
                             input [
                                 type_ "text",
                                 value favor.memo,
-                                onInput (\s -> FormUpdated (\m -> {m | favors = Utils.updateOnWay favors favor (\x -> {favor | memo = s})}))
+                                onChange (\s -> FormUpdated (\m -> {m | favors = Utils.updateOnWay favors favor (\x -> {favor | memo = s})}))
                             ] []
                         ],
                         td [] [
@@ -789,7 +793,7 @@ favorsTab model =
                             input [
                                 type_ "text",
                                 value used.purpose,
-                                onInput (\s -> FormUpdated (\m -> {m | usedFavors = Utils.updateOnWay usedFavors used (\x -> {used | purpose = s})}))
+                                onChange (\s -> FormUpdated (\m -> {m | usedFavors = Utils.updateOnWay usedFavors used (\x -> {used | purpose = s})}))
                             ] []
                         ],
                         td [] [
@@ -808,7 +812,7 @@ favorsTab model =
                             input [
                                 type_ "text",
                                 value used.memo,
-                                onInput (\s -> FormUpdated (\m -> {m | usedFavors = Utils.updateOnWay usedFavors used (\x -> {used | memo = s})}))
+                                onChange (\s -> FormUpdated (\m -> {m | usedFavors = Utils.updateOnWay usedFavors used (\x -> {used | memo = s})}))
                             ] []
                         ],
                         td [] [
@@ -926,7 +930,7 @@ classesTab classes result =
                             input [
                                 type_ "text",
                                 value position.name,
-                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | positions = Utils.updateOnWay classes.positions position (\x -> {position | name = s})}}))
+                                onChange (\s -> FormUpdated (\m -> {m | classes = {classes | positions = Utils.updateOnWay classes.positions position (\x -> {position | name = s})}}))
                             ] []
                         ],
                         td [] [
@@ -977,7 +981,7 @@ classesTab classes result =
                             input [
                                 type_ "text",
                                 value subPosition.name,
-                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | subPositions = Utils.updateOnWay classes.subPositions subPosition (\x -> {subPosition | name = s})}}))
+                                onChange (\s -> FormUpdated (\m -> {m | classes = {classes | subPositions = Utils.updateOnWay classes.subPositions subPosition (\x -> {subPosition | name = s})}}))
                             ] []
                         ],
                         td [] [
@@ -1027,7 +1031,7 @@ classesTab classes result =
                             input [
                                 type_ "text",
                                 value highTech.name,
-                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | highTechs = Utils.updateOnWay classes.highTechs highTech (\x -> {highTech | name = s})}}))
+                                onChange (\s -> FormUpdated (\m -> {m | classes = {classes | highTechs = Utils.updateOnWay classes.highTechs highTech (\x -> {highTech | name = s})}}))
                             ] []
                         ],
                         td [] [
@@ -1148,14 +1152,14 @@ classesTab classes result =
                             input [
                                 type_ "text",
                                 value clazz.from,
-                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | classes = Utils.updateOnWay classes.classes clazz (\cls -> {cls | from = s})}}))
+                                onChange (\s -> FormUpdated (\m -> {m | classes = {classes | classes = Utils.updateOnWay classes.classes clazz (\cls -> {cls | from = s})}}))
                             ] []
                         ],
                         td [] [
                             input [
                                 type_ "text",
                                 value clazz.name,
-                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | classes = Utils.updateOnWay classes.classes clazz (\cls -> {cls | name = s})}}))
+                                onChange (\s -> FormUpdated (\m -> {m | classes = {classes | classes = Utils.updateOnWay classes.classes clazz (\cls -> {cls | name = s})}}))
                             ] []
                         ],
                         td [] [
@@ -1220,7 +1224,7 @@ classesTab classes result =
                             input [
                                 type_ "text",
                                 value point.name,
-                                onInput (\s -> FormUpdated (\m -> {m | classes = {classes | points = Utils.updateOnWay classes.points point (\x -> {point | name = s})}}))
+                                onChange (\s -> FormUpdated (\m -> {m | classes = {classes | points = Utils.updateOnWay classes.points point (\x -> {point | name = s})}}))
                             ] []
                         ],
                         td [] [
@@ -1439,7 +1443,7 @@ resourceTab tab =
                                     input [
                                         type_ "text",
                                         value val,
-                                        onInput (\s -> FormUpdated (\m ->
+                                        onChange (\s -> FormUpdated (\m ->
                                         let 
                                             newTabState = {tab | tabType = case tab.tabType of
                                                 ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\x -> 
@@ -1461,7 +1465,7 @@ resourceTab tab =
                                     input [
                                         type_ "text",
                                         value val,
-                                        onInput (\s -> FormUpdated (\m ->
+                                        onChange (\s -> FormUpdated (\m ->
                                         let 
                                             newTabState = {tab | tabType = case tab.tabType of
                                                 ResourceTab resources -> ResourceTab (Utils.updateOnWay resources resource (\x -> 
@@ -1891,7 +1895,7 @@ maneuvaTab tab windowSize =
                                     input [
                                         type_ "text",
                                         value val,
-                                        onInput (\s -> FormUpdated (\m ->
+                                        onChange (\s -> FormUpdated (\m ->
                                         let 
                                             newTabState = {tab | tabType = case tab.tabType of
                                                 ManeuvaTab tabData ->
@@ -1980,7 +1984,7 @@ maneuvaTab tab windowSize =
                                         type_ "text",
                                         value val,
                                         size 4,
-                                        onInput (\s -> FormUpdated (\m ->
+                                        onChange (\s -> FormUpdated (\m ->
                                         let 
                                             newTabState = {tab | tabType = case tab.tabType of
                                                 ManeuvaTab tabData -> 
@@ -2008,7 +2012,7 @@ maneuvaTab tab windowSize =
                                         type_ "text",
                                         value val,
                                         size 4,
-                                        onInput (\s -> FormUpdated (\m ->
+                                        onChange (\s -> FormUpdated (\m ->
                                         let 
                                             newTabState = {tab | tabType = case tab.tabType of
                                                 ManeuvaTab tabData -> 
@@ -2036,7 +2040,7 @@ maneuvaTab tab windowSize =
                                         type_ "text",
                                         value val,
                                         size 30,
-                                        onInput (\s -> FormUpdated (\m ->
+                                        onChange (\s -> FormUpdated (\m ->
                                         let 
                                             newTabState = {tab | tabType = case tab.tabType of
                                                 ManeuvaTab tabData -> 
@@ -2064,7 +2068,7 @@ maneuvaTab tab windowSize =
                                         type_ "text",
                                         value val,
                                         size 10,
-                                        onInput (\s -> FormUpdated (\m ->
+                                        onChange (\s -> FormUpdated (\m ->
                                         let 
                                             newTabState = {tab | tabType = case tab.tabType of
                                                 ManeuvaTab tabData -> 
