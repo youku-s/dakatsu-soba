@@ -626,7 +626,7 @@ update msg model =
                             ("name", p.name |> strToValue),
                             ("busou", (Maybe.withDefault 0 p.busou) |> intToValue),
                             ("heni", (Maybe.withDefault 0 p.heni) |> intToValue),
-                            ("kaizou", (Maybe.withDefault 0 p.heni) |> intToValue),
+                            ("kaizou", (Maybe.withDefault 0 p.kaizou) |> intToValue),
                             ("favor", (Maybe.withDefault 0 p.favor) |> intToValue)
                         ]
 
@@ -902,7 +902,7 @@ update msg model =
                             ("name", p.name |> strToValue),
                             ("busou", (Maybe.withDefault 0 p.busou) |> intToValue),
                             ("heni", (Maybe.withDefault 0 p.heni) |> intToValue),
-                            ("kaizou", (Maybe.withDefault 0 p.heni) |> intToValue),
+                            ("kaizou", (Maybe.withDefault 0 p.kaizou) |> intToValue),
                             ("favor", (Maybe.withDefault 0 p.favor) |> intToValue)
                         ]
 
@@ -1179,8 +1179,8 @@ update msg model =
                     decode ClassDetail
                         |> required "uuid" Decode.string
                         |> optional "category" (Decode.string |> (Decode.map toCategory)) MainClass
-                        |> optional "name" Decode.string ""
                         |> optional "from" Decode.string ""
+                        |> optional "name" Decode.string ""
                         |> optional "number" Decode.int 0
 
                 decodePoint =
