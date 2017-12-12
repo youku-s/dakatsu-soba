@@ -1,7 +1,7 @@
 module View exposing (..)
 
 import Html exposing (..)
-import Html.Events exposing (onInput, onClick, onCheck, onSubmit, onWithOptions, targetValue, on, keyCode)
+import Html.Events exposing (onInput, onClick, onCheck, onSubmit, onWithOptions, targetValue, on, keyCode, onWithOptions, defaultOptions)
 import Html.Attributes exposing (..)
 import Messages exposing (Msg(..))
 import Models exposing (..)
@@ -45,7 +45,7 @@ detailPage model =
                 div [] [
                     input [
                         type_ "password",
-                        onInput (\s -> FormUpdated (\m -> {m | password = if String.isEmpty s then Nothing else Just s}))
+                        onChange (\s -> FormUpdated (\m -> {m | password = if String.isEmpty s then Nothing else Just s}))
                     ] []
                 ],
                 div [] [
@@ -99,7 +99,17 @@ detailPage model =
                 ],
                 div [class "section-title"] [text "出力"],
                 div [] [
-                    button [] [text "Text出力"]
+                    Html.form [
+                        onSubmitDefaultOpt Output,
+                        method "POST",
+                        action model.config.outputUrl,
+                        target "_blank"
+                    ] [
+                        input [type_ "hidden", name "query", value model.outputQuery] [],
+                        button [
+                            type_ "submit"
+                        ] [text "Text出力"]
+                    ]
                 ],
                 div [class "section-title"] [text "タグ"],
                 div [] [
@@ -132,6 +142,10 @@ detailPage model =
         Just tab -> [createDialog "このタブを削除してもよろしいですか？" tab model.windowSize]
         Nothing -> []
     ))
+
+onSubmitDefaultOpt : msg -> Attribute msg
+onSubmitDefaultOpt message =
+  onWithOptions "submit" defaultOptions (Json.Decode.succeed message)
 
 createResultArea : Maybe ResultMessage -> Html Msg
 createResultArea result =
@@ -2251,7 +2265,7 @@ createManeuvaDialog tab windowSize =
                 textarea [
                     cols 100,
                     rows 10,
-                    onInput (\s -> FormUpdated (\m ->
+                    onChange (\s -> FormUpdated (\m ->
                     let 
                         newTabState = {tab | tabType = case tab.tabType of
                             ManeuvaTab tabData -> 
@@ -2309,7 +2323,7 @@ tabToLi model currentTab =
                         type_ "text",
                         value currentTab.title,
                         size 10,
-                        onInput (\s -> FormUpdated (\m ->
+                        onChange (\s -> FormUpdated (\m ->
                             let 
                                 newTabState = {currentTab | title = s}
                             in

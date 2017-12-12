@@ -40,7 +40,8 @@ type alias Model =
         config: Config,
         route : Route, 
         result: Maybe ResultMessage,
-        location: Location
+        location: Location,
+        outputQuery: String
     }
 
 type alias Config =

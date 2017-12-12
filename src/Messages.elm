@@ -29,6 +29,7 @@ type Msg =
     Save |
     Delete |
     Clone |
+    Output |
     OnLocationChange Location |
     LoadDataFromJson String |
     ShowResult ResultMessage |

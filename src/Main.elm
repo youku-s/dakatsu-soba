@@ -210,7 +210,8 @@ init flags location =
                 },
                 dragDrop = DragDrop.init,
                 result = Nothing,
-                location = location
+                location = location,
+                outputQuery = ""
             }
         cmd =
             case route of

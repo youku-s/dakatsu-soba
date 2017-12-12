@@ -4,6 +4,6 @@
 /css/ionicons.min.css
 /index.js
 /index.min.js
-/config.js
+js/config.js
 /lambda/node_modules/
 *.zip
