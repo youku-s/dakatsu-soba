@@ -1,7 +1,7 @@
 module View exposing (..)
 
 import Html exposing (..)
-import Html.Events exposing (onInput, onClick, onCheck, onSubmit, onWithOptions, targetValue, on, keyCode, onWithOptions, defaultOptions)
+import Html.Events exposing (onInput, onClick, onCheck, onSubmit, onWithOptions, targetValue, on, keyCode, onWithOptions, defaultOptions, onMouseDown)
 import Html.Attributes exposing (..)
 import Messages exposing (Msg(..))
 import Models exposing (..)
@@ -100,14 +100,14 @@ detailPage model =
                 div [class "section-title"] [text "出力"],
                 div [] [
                     Html.form [
-                        onSubmitDefaultOpt Output,
                         method "POST",
                         action model.config.outputUrl,
                         target "_blank"
                     ] [
                         input [type_ "hidden", name "query", value model.outputQuery] [],
                         button [
-                            type_ "submit"
+                            type_ "submit",
+                            onMouseDown Output
                         ] [text "Text出力"]
                     ]
                 ],
