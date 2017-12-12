@@ -230,7 +230,7 @@ type alias Maneuva =
     }
 
 type Region =
-    NoRegion | Head | Arm | Body | Leg | OtherRegion
+    NoRegion | Head | Arm | Body | Leg | Girl | OtherRegion 
 
 type Timing =
     AutoAlways | AutoNeedsDeclearation | AutoOthers | Action | Judge | Damage | Rapid | BeforeBattle | BattleStart | TurnStart | CountStart

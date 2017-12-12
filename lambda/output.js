@@ -102,5 +102,26 @@ exports.handler = function (event, context, callback) {
     output += table(points, config).replace(/\n\n/gi, '\n');
     output += '\r\n';
 
+    json.tabs.forEach(t => {
+        output += '■ ' + t.title + '\r\n';
+        if (t.tabType == 'ManeuvaTab') {
+            var maneuvas = [];
+            maneuvas.push(['悪意', '部位', 'カテゴリー', '種別', 'マニューバ', 'タイミング', 'コスト', '射程', '効果']);
+            t.items.forEach(i => {
+                maneuvas.push([i.malice, emptyToSpace(i.region), emptyToSpace(i.maneuvaType), emptyToSpace(i.category), emptyToSpace(i.name), emptyToSpace(i.timing), emptyToSpace(i.cost), emptyToSpace(i.range), emptyToSpace(i.description)]);
+            });
+            output += table(maneuvas, config).replace(/\n\n/gi, '\n');
+            output += '\r\n';
+        } else if (t.tabType == 'ResourceTab') {
+            var resources = [];
+            resources.push(['名前', '説明']);
+            t.items.forEach(i => {
+                resources.push([emptyToSpace(i.name), emptyToSpace(i.description)]);
+            });
+            output += table(resources, config).replace(/\n\n/gi, '\n');
+            output += '\r\n';
+        }
+    });
+
     callback(null, output);
 };

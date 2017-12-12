@@ -1825,6 +1825,7 @@ maneuvaTab tab windowSize =
                                             Arm -> "2"
                                             Body -> "3"
                                             Leg -> "4"
+                                            Girl -> "6"
                                             OtherRegion -> "5"
                                 in
                                     select [
@@ -1840,6 +1841,7 @@ maneuvaTab tab windowSize =
                                                                 "2" -> Arm
                                                                 "3" -> Body
                                                                 "4" -> Leg
+                                                                "6" -> Girl
                                                                 "5" -> OtherRegion
                                                                 _ -> NoRegion
                                                             }

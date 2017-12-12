@@ -333,6 +333,7 @@ update msg model =
                                                         "胴" -> Body
                                                         "脚" -> Leg
                                                         "足" -> Leg -- 打ち間違え対策
+                                                        "少女" -> Girl
                                                         _ -> OtherRegion
 
                                                 toRegion2 s =
@@ -343,6 +344,7 @@ update msg model =
                                                         "胴" -> Body
                                                         "脚" -> Leg
                                                         "足" -> Leg -- 打ち間違え対策
+                                                        "少女" -> Girl
                                                         _ -> NoRegion
 
                                                 toManeuvaType2 s =
@@ -654,6 +656,7 @@ update msg model =
                         Arm -> "Arm"
                         Body -> "Body"
                         Leg -> "Leg"
+                        Girl -> "Girl"
                         OtherRegion -> "OtherRegion"
 
                 timingToStr ti =
@@ -929,6 +932,7 @@ update msg model =
                         Arm -> "腕"
                         Body -> "胴"
                         Leg -> "脚"
+                        Girl -> "少女"
                         OtherRegion -> "その他"
 
                 timingToStr ti =
@@ -948,6 +952,25 @@ update msg model =
                 posToValue p =
                     case p of
                         Position num -> num |> Encode.int
+                
+                maCategoryToStr c =
+                    case c of
+                        "0" -> "通常技"
+                        "1" -> "必殺技"
+                        "2" -> "行動値"
+                        "3" -> "支援"
+                        "4" -> "妨害"
+                        "5" -> "防御"
+                        "6" -> "移動"
+                        "7" -> "打ち消し"
+                        "8" -> "無効"
+                        "9" -> "効果なし"
+                        "10" -> "耐性"
+                        "11" -> "再使用"
+                        "12" -> "対話"
+                        "13" -> "行動出目"
+                        "14" -> "攻撃出目"
+                        _ -> "通常技"
 
                 maneuvaToValue ma =
                     Encode.object
@@ -959,7 +982,7 @@ update msg model =
                             ("malice", (Maybe.withDefault 0 ma.malice) |> intToValue),
                             ("favor", (Maybe.withDefault 0 ma.favor) |> intToValue),
                             ("maneuvaType", ma.maneuvaType |> maneuvaTypeToStr |> Encode.string),
-                            ("category", ma.category |> strToValue),
+                            ("category", ma.category |> maCategoryToStr |> Encode.string),
                             ("name", ma.name |> strToValue),
                             ("timing", ma.timing |> timingToStr |> Encode.string),
                             ("cost", ma.cost |> strToValue),
