@@ -864,12 +864,12 @@ favorsTab model =
             ] [text "追加"]
         ]
 
-getMalice : List Tab -> Int
+getMalice : List Tab -> Float
 getMalice tabs =
     let
         getMalice = \x -> case x.tabType of
             ManeuvaTab tabData -> List.map 
-                (\item -> Maybe.withDefault 0 item.malice) tabData.maneuvas
+                (\item -> Maybe.withDefault 0.0 item.malice) tabData.maneuvas
             _ -> []
         total = List.sum (flatMap getMalice tabs)
     in
@@ -1714,17 +1714,16 @@ maneuvaTab tab windowSize =
                                             Nothing -> ""
                                 in
                                     input [
-                                        class "num",
-                                        type_ "number",
+                                        type_ "text",
+                                        size 4,
                                         value val,
-                                        Html.Attributes.min "0",
-                                        onInput (\s -> FormUpdated (\m ->
+                                        onChange (\s -> FormUpdated (\m ->
                                         let 
                                             newTabState = {tab | tabType = case tab.tabType of
                                                 ManeuvaTab tabData ->
                                                     ManeuvaTab {tabData |
                                                         maneuvas = Utils.updateOnWay tabData.maneuvas item (\x -> {x | malice = 
-                                                            case String.toInt s of
+                                                            case String.toFloat s of
                                                                 Ok num -> Just num
                                                                 _ -> Nothing})
                                                     }
@@ -1861,7 +1860,8 @@ maneuvaTab tab windowSize =
                                         option [value "2", selected (val == "2")] [text "腕"],
                                         option [value "3", selected (val == "3")] [text "胴"],
                                         option [value "4", selected (val == "4")] [text "脚"],
-                                        option [value "5", selected (val == "5")] [text "その他"]
+                                        option [value "5", selected (val == "5")] [text "その他"],
+                                        option [value "6", selected (val == "6")] [text "少女"]
                                     ]
                             ],
                             td [] [

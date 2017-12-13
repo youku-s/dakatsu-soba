@@ -250,6 +250,7 @@ update msg model =
                                     |> SExtra.replace "｜" "<BAR>"
                                     |> SExtra.replace "|" "<BAR>"
                                     |> SExtra.replace "<ESCAPED_COLON>" "："
+                                    |> SExtra.replace "　" " "
 
                                 unescape = \s -> s
                                     |> SExtra.replace "<LPAREN>" "("
@@ -262,13 +263,13 @@ update msg model =
                                     |> SExtra.replace "<BAR>" "｜"
                                     
                                 effect =
-                                    Regex.regex "<LPAREN>(\\d+)<RPAREN>エフェクト<LLPAREN>([^<>]+)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>([^<>]+)"
+                                    Regex.regex "<LPAREN>(.+)<RPAREN>エフェクト<LLPAREN>([^<>]+)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>(.+)"
 
                                 other =
-                                    Regex.regex "<LPAREN>(\\d+)<RPAREN>([^<>]+)<BAR>([^<>]+)<LLPAREN>(.+?)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>([^<>]+)"
+                                    Regex.regex "<LPAREN>(.+)<RPAREN>([^<>]+)<BAR>([^<>]+)<LLPAREN>(.+?)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>(.+)"
 
                                 hokanjyo =
-                                    Regex.regex "<MLPAREN>([^<>]*)<MRPAREN>\\s*([^\\s]+?)\\s*<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)<COLON>([^<>]*)"
+                                    Regex.regex "<MLPAREN>([^<>]*)<MRPAREN>\\s(.*?)\\s<COLON>\\s*([^<>]*)\\s*<COLON>\\s*([^<>]*)\\s*<COLON>\\s*([^<>]*)\\s*<COLON>\\s*(.*)"
 
                                 proc = \s -> s 
                                     |> String.trim
@@ -288,6 +289,10 @@ update msg model =
                                                     Ok num -> Just num
                                                     _ -> Nothing
 
+                                                strToFloat = \s -> case String.toFloat s of
+                                                    Ok num -> Just num
+                                                    _ -> Nothing
+
                                                 effectToManeuva = \submatches -> case submatches of
                                                     malice :: name :: cost :: range :: description :: [] ->
                                                         Just {
@@ -296,7 +301,7 @@ update msg model =
                                                             lost = False,
                                                             act = Nothing,
                                                             maneuvaType = Effect,
-                                                            malice = Maybe.FlatMap.flatMap strToInt (Maybe.map String.trim malice),
+                                                            malice = Maybe.FlatMap.flatMap strToFloat (Maybe.map String.trim malice),
                                                             favor = Nothing,
                                                             category = "0",
                                                             name = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) name),
@@ -368,7 +373,7 @@ update msg model =
                                                             lost = False,
                                                             act = Nothing,
                                                             maneuvaType = Maybe.withDefault Part (Maybe.map toManeuvaType timing),
-                                                            malice = Maybe.FlatMap.flatMap strToInt (Maybe.map String.trim malice),
+                                                            malice = Maybe.FlatMap.flatMap strToFloat (Maybe.map String.trim malice),
                                                             favor = Nothing,
                                                             category = "0",
                                                             name = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) name),
@@ -781,6 +786,9 @@ update msg model =
                 intToValue i =
                     Encode.int i
 
+                floatToValue i =
+                    Encode.float i
+
                 placeToString p =
                     case p of
                         Purgatory -> "煉獄"
@@ -979,7 +987,7 @@ update msg model =
                             ("used", ma.used |> Encode.bool),
                             ("lost", ma.lost |> Encode.bool),
                             ("act", (Maybe.withDefault 0 ma.act) |> intToValue),
-                            ("malice", (Maybe.withDefault 0 ma.malice) |> intToValue),
+                            ("malice", (Maybe.withDefault 0.0 ma.malice) |> floatToValue),
                             ("favor", (Maybe.withDefault 0 ma.favor) |> intToValue),
                             ("maneuvaType", ma.maneuvaType |> maneuvaTypeToStr |> Encode.string),
                             ("category", ma.category |> maCategoryToStr |> Encode.string),
@@ -1255,7 +1263,7 @@ update msg model =
                         |> optional "used" Decode.bool False
                         |> optional "lost" Decode.bool False
                         |> optional "act" (Decode.maybe Decode.int) Nothing
-                        |> optional "malice" (Decode.maybe Decode.int) Nothing
+                        |> optional "malice" (Decode.maybe Decode.float) Nothing
                         |> optional "favor" (Decode.maybe Decode.int) Nothing
                         |> optional "maneuvaType" (Decode.string |> (Decode.map toManeuvaType)) Skill
                         |> optional "category" Decode.string "0"

@@ -215,7 +215,7 @@ type alias Maneuva =
         used: Bool, -- 使用済み
         lost: Bool, -- 破損済み
         act: Maybe Int, -- 行動値
-        malice: Maybe Int, -- 悪意
+        malice: Maybe Float, -- 悪意
         favor: Maybe Int,  -- 寵愛
         maneuvaType: ManeuvaType, -- マニューバタイプ
         category: String, -- カテゴリ
