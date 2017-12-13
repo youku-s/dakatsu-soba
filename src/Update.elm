@@ -360,6 +360,7 @@ update msg model =
                                                         "胴" -> Part
                                                         "脚" -> Part
                                                         "足" -> Part -- 打ち間違え対策
+                                                        "少女" -> Part
                                                         "ポジション" -> Skill
                                                         "メインクラス" -> Skill
                                                         "サブクラス" -> Skill
@@ -472,15 +473,37 @@ update msg model =
                                             in
                                                 { newM |
                                                     seed = lastSeed,
-                                                    activeTab = OtherTab newTabState,
-                                                    tabs = Utils.updateOnWay newM.tabs tab (\x -> newTabState)
+                                                    tabs = Utils.updateOnWay newM.tabs tab (\x -> newTabState),
+                                                    activeTab = OtherTab newTabState
                                                 }
                                         )
                                         m
-                                        m.tabs
+                                        (List.filter (\x -> x.uuid == newTabState.uuid) m.tabs)
                             in
                                 newModelState
                         ),
+                    Cmd.none
+                )
+
+        CancelManeuvaDialog tab ->
+            let
+                newTabState =
+                    case tab.tabType of
+                        ManeuvaTab tabData ->
+                                {tab |
+                                    tabType = ManeuvaTab {
+                                        maneuvas = tabData.maneuvas,
+                                        showAddManeuvaDialog = False,
+                                        dialogContent = Nothing
+                                    }
+                                }
+                        _ -> tab
+            in
+                (
+                    {model |
+                        tabs = Utils.updateOnWay model.tabs tab (\tb -> newTabState),
+                        activeTab = (OtherTab newTabState)
+                    },
                     Cmd.none
                 )
 

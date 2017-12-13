@@ -24,6 +24,7 @@ type Msg =
     RowDragDrop (DragDrop.Msg String Position) |
     OpenManeuvaDialog Tab |
     CloseManeuvaDialog Tab |
+    CancelManeuvaDialog Tab |
     ResetMessages Tab |
     UpdateSize DomSize |
     Save |

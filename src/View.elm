@@ -2291,7 +2291,7 @@ createManeuvaDialog tab windowSize =
                 ] [text "OK"],
                 button [
                     type_ "button",
-                    onClickNoBubble (CloseManeuvaDialog tab)
+                    onClickNoBubble (CancelManeuvaDialog tab)
                 ] [text "Cancel"]
             ]
         ]        
