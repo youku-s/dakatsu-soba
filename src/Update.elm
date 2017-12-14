@@ -271,6 +271,12 @@ update msg model =
                                 hokanjyo =
                                     Regex.regex "<MLPAREN>([^<>]*)<MRPAREN>\\s(.*?)\\s<COLON>\\s*([^<>]*)\\s*<COLON>\\s*([^<>]*)\\s*<COLON>\\s*([^<>]*)\\s*<COLON>\\s*(.*)"
 
+                                skill =
+                                    Regex.regex "^<MLPAREN>(.+)<MRPAREN>([^/<>]+)/([^/<>]+)/([^<>]+)<COLON>(.+)"
+
+                                part =
+                                    Regex.regex "^([^<>]+)<MLPAREN>(.+)<MRPAREN>([^/<>]+)/([^/<>]+)/([^<>]+)<COLON>(.+)"
+
                                 proc = \s -> s 
                                     |> String.trim
                                     |> String.lines
@@ -280,11 +286,15 @@ update msg model =
                                                 effectMatch = Regex.find Regex.All effect (escape line)
                                                 otherMatch = Regex.find Regex.All other (escape line)
                                                 hokanjyoMatch = Regex.find Regex.All hokanjyo (escapeHokanjyo line)
+                                                skillMatch = Regex.find Regex.All skill (escape line)
+                                                partMatch = Regex.find Regex.All part (escape line)
 
                                                 effectMismatch = if List.isEmpty effectMatch then Just line else Nothing
                                                 otherMismatch = if List.isEmpty otherMatch then Just line else Nothing
                                                 hokanjyoMismatch = if List.isEmpty hokanjyoMatch then Just line else Nothing
-                                                
+                                                skillMismatch = if List.isEmpty skillMatch then Just line else Nothing
+                                                partMismatch = if List.isEmpty partMatch then Just line else Nothing
+
                                                 strToInt = \s -> case String.toInt s of
                                                     Ok num -> Just num
                                                     _ -> Nothing
@@ -409,6 +419,50 @@ update msg model =
                                                             position = Position 0
                                                         }
                                                     _ -> Nothing
+
+                                                skillToManeuva = \submatches -> case submatches of
+                                                    name :: timing :: cost :: range :: description :: [] ->
+                                                        Just {
+                                                            uuid = "", 
+                                                            used = False,
+                                                            lost = False,
+                                                            act = Nothing,
+                                                            maneuvaType = Skill,
+                                                            malice = Nothing,
+                                                            favor = Nothing,
+                                                            category = "0",
+                                                            name = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) name),
+                                                            timing = Maybe.withDefault AutoAlways (Maybe.map (\x -> x |> String.trim |> toTiming) timing),
+                                                            cost = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) cost),
+                                                            range = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) range),
+                                                            description = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) description),
+                                                            from = "",
+                                                            region = NoRegion,
+                                                            position = Position 0
+                                                        }
+                                                    _ -> Nothing
+
+                                                partToManeuva = \submatches -> case submatches of
+                                                    region :: name :: timing :: cost :: range :: description :: [] ->
+                                                        Just {
+                                                            uuid = "", 
+                                                            used = False,
+                                                            lost = False,
+                                                            act = Nothing,
+                                                            maneuvaType = Part,
+                                                            malice = Nothing,
+                                                            favor = Nothing,
+                                                            category = "0",
+                                                            name = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) name),
+                                                            timing = Maybe.withDefault AutoAlways (Maybe.map (\x -> x |> String.trim |> toTiming) timing),
+                                                            cost = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) cost),
+                                                            range = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) range),
+                                                            description = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) description),
+                                                            from = "",
+                                                            region = Maybe.withDefault NoRegion (Maybe.map toRegion region),
+                                                            position = Position 0
+                                                        }
+                                                    _ -> Nothing
                                             in
                                                 if List.isEmpty effectMatch |> not then
                                                     (Nothing, List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (effectToManeuva match.submatches))) effectMatch)
@@ -416,6 +470,10 @@ update msg model =
                                                     (Nothing, List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (otherToManeuva match.submatches))) otherMatch)
                                                 else if List.isEmpty hokanjyoMatch |> not then
                                                     (Nothing, List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (hokanjyoToManeuva match.submatches))) hokanjyoMatch)
+                                                else if List.isEmpty skillMatch |> not then
+                                                    (Nothing, List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (skillToManeuva match.submatches))) skillMatch)
+                                                else if List.isEmpty partMatch |> not then
+                                                    (Nothing, List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (partToManeuva match.submatches))) partMatch)
                                                 else
                                                     (hokanjyoMismatch, [])
                                         )
@@ -1321,7 +1379,7 @@ update msg model =
                                 _ -> decodeManeuvaDetail |> (Decode.map ManeuvaTab)
                         )
                 
-                toDecoder uuid tabType maneuvas resources title isEditing mismatches =
+                toDecoder uuid tabType maneuvas resources title isEditing mismatches isLimited =
                     case tabType of 
                         "ManeuvaTab" -> Decode.succeed({
                             uuid = uuid,
@@ -1332,14 +1390,16 @@ update msg model =
                             },
                             title = title,
                             isEditing = isEditing,
-                            mismatches = mismatches
+                            mismatches = mismatches,
+                            isLimited = isLimited
                         })
                         "ResourceTab" -> Decode.succeed({
                             uuid = uuid,
                             tabType = ResourceTab resources,
                             title = title,
                             isEditing = isEditing,
-                            mismatches = mismatches
+                            mismatches = mismatches,
+                            isLimited = isLimited
                         })
                         _ -> Decode.fail "JSONからのキャラクターシート復元に失敗しました"
                 
@@ -1353,6 +1413,7 @@ update msg model =
                         |> optional "title" Decode.string ""
                         |> hardcoded False -- isEditing
                         |> hardcoded [] -- mismatches
+                        |> hardcoded False -- isLimited
                         |> resolve
 
                 newModelState =
@@ -1386,4 +1447,19 @@ update msg model =
                 (
                     {model | result = Just message },
                     cmd
+                )
+
+        ToggleManeuvaTab tab ->
+            let
+                newTabState =
+                    {tab |
+                        isLimited = not tab.isLimited
+                    }
+            in
+                (
+                    {model |
+                        tabs = Utils.updateOnWay model.tabs tab (\tb -> newTabState),
+                        activeTab = (OtherTab newTabState)
+                    },
+                    Cmd.none
                 )

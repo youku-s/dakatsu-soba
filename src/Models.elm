@@ -203,7 +203,8 @@ type alias Tab =
         tabType: TabType,
         title: String,
         isEditing: Bool,
-        mismatches: List String
+        mismatches: List String,
+        isLimited: Bool
     }
 
 type ManeuvaType =

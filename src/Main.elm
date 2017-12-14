@@ -198,7 +198,8 @@ init flags location =
                                 ]
                             },
                         isEditing = False,
-                        mismatches = []
+                        mismatches = [],
+                        isLimited = False
                     }
                 ],
                 appendMode = AppendManeuva,

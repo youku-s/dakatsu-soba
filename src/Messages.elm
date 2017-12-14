@@ -35,4 +35,5 @@ type Msg =
     LoadDataFromJson String |
     ShowResult ResultMessage |
     HideResult |
-    OnLoad (Maybe String) ResultMessage
+    OnLoad (Maybe String) ResultMessage |
+    ToggleManeuvaTab Tab
