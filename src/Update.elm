@@ -263,19 +263,19 @@ update msg model =
                                     |> SExtra.replace "<BAR>" "｜"
                                     
                                 effect =
-                                    Regex.regex "<LPAREN>(.+)<RPAREN>エフェクト<LLPAREN>([^<>]+)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>(.+)"
+                                    Regex.regex "^<LPAREN>(.+)<RPAREN>エフェクト<LLPAREN>([^<>]+)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>(.+)$"
 
                                 other =
-                                    Regex.regex "<LPAREN>(.+)<RPAREN>([^<>]+)<BAR>([^<>]+)<LLPAREN>(.+?)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>(.+)"
+                                    Regex.regex "^<LPAREN>(.+)<RPAREN>([^<>]+)<BAR>([^<>]+)<LLPAREN>(.+?)<LRPAREN>([^/<>]+)/([^<>]+)<COLON>(.+)$"
 
                                 hokanjyo =
-                                    Regex.regex "<MLPAREN>([^<>]*)<MRPAREN>\\s(.*?)\\s<COLON>\\s*([^<>]*)\\s*<COLON>\\s*([^<>]*)\\s*<COLON>\\s*([^<>]*)\\s*<COLON>\\s*(.*)"
+                                    Regex.regex "^<MLPAREN>([^<>]*)<MRPAREN>\\s(.*?)\\s<COLON>\\s*([^<>]*)\\s*<COLON>\\s*([^<>]*)\\s*<COLON>\\s*([^<>]*)\\s*<COLON>\\s*(.*)$"
 
                                 skill =
-                                    Regex.regex "^<MLPAREN>(.+)<MRPAREN>([^/<>]+)/([^/<>]+)/([^<>]+)<COLON>(.+)"
+                                    Regex.regex "^<MLPAREN>(.+)<MRPAREN>([^/<>]+)/([^/<>]+)/([^<>]+)<COLON>(.+)$"
 
                                 part =
-                                    Regex.regex "^([^<>]+)<MLPAREN>(.+)<MRPAREN>([^/<>]+)/([^/<>]+)/([^<>]+)<COLON>(.+)"
+                                    Regex.regex "^([^<>]+)<MLPAREN>(.+)<MRPAREN>([^/<>]+)/([^/<>]+)/([^<>]+)<COLON>(.+)$"
 
                                 proc = \s -> s 
                                     |> String.trim
