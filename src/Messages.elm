@@ -36,4 +36,5 @@ type Msg =
     ShowResult ResultMessage |
     HideResult |
     OnLoad (Maybe String) ResultMessage |
-    ToggleManeuvaTab Tab
+    ToggleManeuvaTab Tab |
+    PageChange Tab Int

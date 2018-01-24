@@ -141,3 +141,17 @@ table {
     border-radius: 5px;
     padding: 5px;
 }
+.page {
+    margin: 10px;
+    padding: 5px;
+    background-color: #CCCCCC;
+    border-radius: 3px;
+    font-size: 16px;
+    color: #3333FF;    
+}
+.current-page {
+    color: #000000;
+}
+.pagenation {
+    line-height: 3em;
+}

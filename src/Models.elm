@@ -204,7 +204,8 @@ type alias Tab =
         title: String,
         isEditing: Bool,
         mismatches: List String,
-        isLimited: Bool
+        isLimited: Bool,
+        currentPage: Int
     }
 
 type ManeuvaType =

@@ -1379,7 +1379,7 @@ update msg model =
                                 _ -> decodeManeuvaDetail |> (Decode.map ManeuvaTab)
                         )
                 
-                toDecoder uuid tabType maneuvas resources title isEditing mismatches isLimited =
+                toDecoder uuid tabType maneuvas resources title isEditing mismatches isLimited currentPage =
                     case tabType of 
                         "ManeuvaTab" -> Decode.succeed({
                             uuid = uuid,
@@ -1391,7 +1391,8 @@ update msg model =
                             title = title,
                             isEditing = isEditing,
                             mismatches = mismatches,
-                            isLimited = isLimited
+                            isLimited = isLimited,
+                            currentPage = currentPage
                         })
                         "ResourceTab" -> Decode.succeed({
                             uuid = uuid,
@@ -1399,7 +1400,8 @@ update msg model =
                             title = title,
                             isEditing = isEditing,
                             mismatches = mismatches,
-                            isLimited = isLimited
+                            isLimited = isLimited,
+                            currentPage = currentPage
                         })
                         _ -> Decode.fail "JSONからのキャラクターシート復元に失敗しました"
                 
@@ -1414,6 +1416,7 @@ update msg model =
                         |> hardcoded False -- isEditing
                         |> hardcoded [] -- mismatches
                         |> hardcoded False -- isLimited
+                        |> hardcoded 0 -- currentPage
                         |> resolve
 
                 newModelState =
@@ -1454,6 +1457,20 @@ update msg model =
                 newTabState =
                     {tab |
                         isLimited = not tab.isLimited
+                    }
+            in
+                (
+                    {model |
+                        tabs = Utils.updateOnWay model.tabs tab (\tb -> newTabState),
+                        activeTab = (OtherTab newTabState)
+                    },
+                    Cmd.none
+                )
+        PageChange tab pageNum ->
+            let
+                newTabState =
+                    {tab |
+                        currentPage = pageNum
                     }
             in
                 (

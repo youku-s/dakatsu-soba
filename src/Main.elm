@@ -199,7 +199,8 @@ init flags location =
                             },
                         isEditing = False,
                         mismatches = [],
-                        isLimited = False
+                        isLimited = False,
+                        currentPage = 0
                     }
                 ],
                 appendMode = AppendManeuva,

@@ -1602,6 +1602,20 @@ maneuvaTab tab windowSize =
             _ -> ([], False)
         
         tabF = if tab.isLimited then maneuvaLimitedTab else maneuvaFullTab
+
+        itemSize = List.length items
+
+        maxPageNum = itemSize // 100
+
+        currentPage = tab.currentPage
+
+        makePagenationItem num =
+            if tab.currentPage == num then
+                span [class "page current-page"] [text (toString (num + 1))]
+            else
+                span [class "page", onClick (PageChange tab num)] [text (toString (num + 1))]
+
+        limitedList = List.take 100 (List.drop (currentPage * 100) items)
     in
         div [] (
             (
@@ -1622,20 +1636,26 @@ maneuvaTab tab windowSize =
                     )
                 ] else []
             ) ++ [
-                button [
-                    onClick (OpenManeuvaDialog tab)
-                ] [text "マニューバをインポートする"],
-                button [
-                    onClick (ToggleManeuvaTab tab)
-                ] [text "表示モードを切り替える"]
-            ]++ (tabF items tab) ++
+                div [] [
+                    button [
+                        onClick (OpenManeuvaDialog tab)
+                    ] [text "マニューバをインポートする"],
+                    button [
+                        onClick (ToggleManeuvaTab tab)
+                    ] [text "表示モードを切り替える"]
+                ],
+                div [class "pagenation"] (List.map makePagenationItem (List.range 0 maxPageNum))
+            ]++ (tabF limitedList tab) ++
             [
-                button [
-                    onClick (OpenManeuvaDialog tab)
-                ] [text "マニューバをインポートする"],
-                button [
-                    onClick (ToggleManeuvaTab tab)
-                ] [text "表示モードを切り替える"]
+                div [class "pagenation"] (List.map makePagenationItem (List.range 0 maxPageNum)),
+                div [] [
+                    button [
+                        onClick (OpenManeuvaDialog tab)
+                    ] [text "マニューバをインポートする"],
+                    button [
+                        onClick (ToggleManeuvaTab tab)
+                    ] [text "表示モードを切り替える"]
+                ]
             ] ++
             if showAddManeuvaDialog then 
                 [
@@ -2874,7 +2894,8 @@ tabcontorls model =
                                     title = title,
                                     isEditing = False,
                                     mismatches = [],
-                                    isLimited = False
+                                    isLimited = False,
+                                    currentPage = 0
                                 }
 
                                 newTabs = model.tabs ++ [newTabState]
