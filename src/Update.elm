@@ -252,6 +252,10 @@ update msg model =
                                     |> SExtra.replace "<ESCAPED_COLON>" "："
                                     |> SExtra.replace "　" " "
 
+                                escapeSelf = \s -> s
+                                    |> SExtra.replace " : " "<COLON>"
+                                    |> SExtra.replace "　" " "
+
                                 unescape = \s -> s
                                     |> SExtra.replace "<LPAREN>" "("
                                     |> SExtra.replace "<RPAREN>" ")"
@@ -277,6 +281,9 @@ update msg model =
                                 part =
                                     Regex.regex "^([^<>]+)<MLPAREN>(.+)<MRPAREN>([^/<>]+)/([^/<>]+)/([^<>]+)<COLON>(.+)$"
 
+                                self = 
+                                    Regex.regex "^(.+)<COLON>(.+)<COLON>(.+)<COLON>(.+)<COLON>(.+)<COLON>(.+)<COLON>(.+)<COLON>(.+)<COLON>(.*)$"
+
                                 proc = \s -> s 
                                     |> String.trim
                                     |> String.lines
@@ -288,12 +295,14 @@ update msg model =
                                                 hokanjyoMatch = Regex.find Regex.All hokanjyo (escapeHokanjyo line)
                                                 skillMatch = Regex.find Regex.All skill (escape line)
                                                 partMatch = Regex.find Regex.All part (escape line)
+                                                selfMatch = Regex.find Regex.All self (escapeSelf line)
 
                                                 effectMismatch = if List.isEmpty effectMatch then Just line else Nothing
                                                 otherMismatch = if List.isEmpty otherMatch then Just line else Nothing
                                                 hokanjyoMismatch = if List.isEmpty hokanjyoMatch then Just line else Nothing
                                                 skillMismatch = if List.isEmpty skillMatch then Just line else Nothing
                                                 partMismatch = if List.isEmpty partMatch then Just line else Nothing
+                                                selfMismatch = if List.isEmpty selfMatch then Just line else Nothing
 
                                                 strToInt = \s -> case String.toInt s of
                                                     Ok num -> Just num
@@ -339,7 +348,7 @@ update msg model =
                                                     case String.trim s of
                                                         "アーカイブ" -> Archive
                                                         _ -> Part
-
+                                                        
                                                 toRegion s =
                                                     case String.trim s of
                                                         "なし" -> NoRegion 
@@ -375,6 +384,50 @@ update msg model =
                                                         "メインクラス" -> Skill
                                                         "サブクラス" -> Skill
                                                         _ -> Skill
+
+                                                toManeuvaType3 s =
+                                                    case String.trim s of
+                                                        "アーカイブ" -> Archive
+                                                        "スキル" -> Skill
+                                                        "アイテム" -> Item
+                                                        "パーツ" -> Part
+                                                        "エフェクト" -> Effect
+                                                        "タグ" -> Tag
+                                                        _ -> Part
+
+                                                toCategory s =
+                                                    case String.trim s of
+                                                        "通常技" -> "0"
+                                                        "必殺技" -> "1"
+                                                        "行動値" -> "2"
+                                                        "支援" -> "3"
+                                                        "妨害" -> "4"
+                                                        "防御" -> "5"
+                                                        "移動" -> "6"
+                                                        "打ち消し" -> "7"
+                                                        "無効" -> "8"
+                                                        "効果なし" -> "9"
+                                                        "耐性" -> "10"
+                                                        "再使用" -> "11"
+                                                        "対話" -> "12"
+                                                        "行動出目" -> "13"
+                                                        "攻撃出目" -> "14"
+                                                        _ -> "0"
+
+                                                toTiming2 s =
+                                                    case String.trim s of
+                                                        "オート(常時)" -> AutoAlways
+                                                        "オート(宣言)" -> AutoNeedsDeclearation
+                                                        "オート(その他)" -> AutoOthers
+                                                        "アクション" -> Action
+                                                        "ジャッジ" -> Judge
+                                                        "ダメージ" -> Damage
+                                                        "ラピッド" -> Rapid
+                                                        "戦闘開始前" -> BeforeBattle
+                                                        "戦闘開始時" -> BattleStart
+                                                        "ターン開始" -> TurnStart
+                                                        "カウント開始" -> CountStart
+                                                        _ -> AutoAlways
 
                                                 otherToManeuva = \submatches -> case submatches of
                                                     malice :: region :: timing :: name :: cost :: range :: description :: [] ->
@@ -463,6 +516,28 @@ update msg model =
                                                             position = Position 0
                                                         }
                                                     _ -> Nothing
+
+                                                selfToManeuva = \submatches -> case submatches of
+                                                    malice :: region :: maneuvaType :: category :: name :: timing :: cost :: range :: description :: [] ->
+                                                        Just {
+                                                            uuid = "", 
+                                                            used = False,
+                                                            lost = False,
+                                                            act = Nothing,
+                                                            maneuvaType = Maybe.withDefault Part (Maybe.map toManeuvaType3 maneuvaType),
+                                                            malice = Maybe.FlatMap.flatMap strToFloat (Maybe.map String.trim malice),
+                                                            favor = Nothing,
+                                                            category = Maybe.withDefault "0" (Maybe.map toCategory category),
+                                                            name = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) name),
+                                                            timing = Maybe.withDefault AutoAlways (Maybe.map toTiming2 timing),
+                                                            cost = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) cost),
+                                                            range = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) range),
+                                                            description = Maybe.withDefault "" (Maybe.map (\x -> x |> String.trim |> unescape) description),
+                                                            from = "",
+                                                            region = Maybe.withDefault NoRegion (Maybe.map toRegion2 region),
+                                                            position = Position 0
+                                                        }
+                                                    _ -> Nothing
                                             in
                                                 if List.isEmpty effectMatch |> not then
                                                     (Nothing, List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (effectToManeuva match.submatches))) effectMatch)
@@ -474,6 +549,8 @@ update msg model =
                                                     (Nothing, List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (skillToManeuva match.submatches))) skillMatch)
                                                 else if List.isEmpty partMatch |> not then
                                                     (Nothing, List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (partToManeuva match.submatches))) partMatch)
+                                                else if List.isEmpty selfMatch |> not then
+                                                    (Nothing, List.FlatMap.flatMap (\match -> Maybe.withDefault [] (Maybe.map (\x -> [x]) (selfToManeuva match.submatches))) selfMatch)
                                                 else
                                                     (hokanjyoMismatch, [])
                                         )
