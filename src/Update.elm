@@ -922,8 +922,14 @@ update msg model =
                 request =
                     post model.config.saveUrl (model |> modelToValue |> Http.jsonBody)
 
+                detailMatch s =
+                    Regex.find Regex.All (Regex.regex ".+/#detail/.+") s
+                
                 newUrl =
-                    if String.contains "detail" model.location.href then model.location.href else String.concat [model.location.href, "#detail/", model.uuid]
+                    if (not (List.isEmpty (detailMatch model.location.href))) then
+                        model.location.href
+                    else
+                        String.concat [model.location.href, "#detail/", model.uuid]
 
                 onResponse response =
                     case response of
