@@ -947,7 +947,7 @@ getManeuvaAct tabs =
             ManeuvaTab tabData -> List.map (\item -> Maybe.withDefault 0 item.act) tabData.maneuvas
             _ -> []
     in
-        List.sum (flatMap getActs tabs)
+        List.sum (flatMap getActs tabs) + 6
 
 classesTab : Classes -> Maybe ResultMessage -> Html Msg
 classesTab classes result =

@@ -36,8 +36,19 @@ exports.handler = function (event, context, callback) {
     output += 'キャラクター名：' + json.profile.name + '\r\n';
     output += '種族：' + json.profile.race + '\r\n';
     output += '享年：' + json.profile.age + '\r\n';
+    output += '暗示：' + json.profile.implication + '\r\n';
     output += '身長：' + json.profile.height + '\t体重：' + json.profile.weight + '\r\n';
     output += '髪の色：' + json.profile.hair + '\t瞳の色：' + json.profile.eye + '\t肌の色：' + json.profile.skin + '\r\n';
+    var acts = json.tabs.reduce(function(acc1, tab) {
+        if (tab.tabType == 'ManeuvaTab') {
+            return acc1 + t.items.reduce(function(acc2, item) {
+                return acc2 + (item.act || 0);
+            });
+        } else {
+            return acc1;
+        }
+    }) + 6;
+    output += '最大行動値：' + acts + '\r\n';
     output += '\r\n';
 
     output += '■ 記憶のカケラ' + '\r\n';
