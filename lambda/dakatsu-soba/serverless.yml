@@ -1,0 +1,42 @@
+service: dakatsu-soba
+frameworkVersion: '2 || 3'
+
+custom:
+  datastoreBucket: "dakatsu-soba-sheets"
+
+provider:
+  name: aws
+  region: ap-northeast-1
+  runtime: nodejs14.x
+  lambdaHashingVersion: '20201221'
+  httpApi:
+    cors: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:* # TODO: 最小権限に絞る
+          Resource:
+            - arn:aws:s3:::${self:custom.datastoreBucket}
+            - arn:aws:s3:::${self:custom.datastoreBucket}/*
+functions:
+  get:
+    handler: handler.get
+    events:
+      - httpApi:
+          path: /{id}
+          method: get
+  save:
+    handler: handler.save
+    events:
+      - httpApi:
+          path: /save
+          method: post
+  output:
+    handler: handler.output
+    events:
+      - httpApi:
+          path: /output
+          method: post
+
