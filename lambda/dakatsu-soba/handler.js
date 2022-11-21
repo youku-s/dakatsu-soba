@@ -67,9 +67,9 @@ export const save = async (event) => {
   }
   await s3.putObject({
     Bucket: BUCKET,
-    Key: event.uuid,
+    Key: charactor.uuid,
     Body: JSON.stringify(charactor)
-  });
+  }).promise();
   delete charactor.password;
   return {
     "isBase64Encoded": false,
